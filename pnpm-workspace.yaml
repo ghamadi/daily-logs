@@ -1,0 +1,10 @@
+packages:
+  - db
+  - web
+  - utils
+onlyBuiltDependencies:
+  - '@tailwindcss/oxide'
+  - bcrypt
+  - esbuild
+  - sharp
+  - unrs-resolver

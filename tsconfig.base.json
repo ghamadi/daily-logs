@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@web/*": ["web/src/*"],
+      "@db/*": ["db/src/*"],
+      "@utils/*": ["utils/*"]
+    }
+  }
+}

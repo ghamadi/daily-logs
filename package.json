@@ -1,0 +1,41 @@
+{
+  "name": "daily-logs",
+  "version": "0.0.1",
+  "description": "daily-logs: A platform for tracking what matters in your life.",
+  "scripts": {
+    "start:web": "pnpm -C web start",
+    "dev:web": "pnpm -C web dev",
+    "add:web": "pnpm add --filter @daily-logs/web",
+    "add:db": "pnpm add --filter @daily-logs/db",
+    "add:utils": "pnpm add --filter @daily-logs/utils",
+    "remove:web": "pnpm remove --filter @daily-logs/web",
+    "remove:db": "pnpm remove --filter @daily-logs/db",
+    "remove:utils": "pnpm remove --filter @daily-logs/utils",
+    "build": "pnpm -r build",
+    "format": "prettier . --write --ignore-unknown",
+    "format:check": "prettier . --check --ignore-unknown",
+    "lint:js": "pnpm -r lint:js",
+    "lint:ts": "pnpm -r lint:ts",
+    "lint": "pnpm -r lint",
+    "clean-install": "rm -rf node_modules db/node_modules web/node_modules && pnpm install",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.3",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
+    "@typescript-eslint/parser": "^8.54.0",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "^16.1.6",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "prettier": "^3.8.1",
+    "prettier-plugin-tailwindcss": "^0.7.2"
+  },
+  "keywords": [],
+  "author": "Ghaleb Hamadi",
+  "license": "ISC",
+  "packageManager": "pnpm@10.11.0",
+  "engines": {
+    "node": "^22"
+  }
+}
