@@ -1,0 +1,31 @@
+{
+  "name": "@daily-logs/db",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Database schemas and migration scripts for the project",
+  "scripts": {
+    "generate:main:dev": "drizzle-kit generate --config src/main-db/drizzle.config.dev.ts",
+    "generate:auth:dev": "drizzle-kit generate --config src/users-db/drizzle.config.dev.ts",
+    "generate:dev": "pnpm generate:main:dev ; pnpm generate:auth:dev",
+    "migrate:main:dev": "drizzle-kit migrate --config src/main-db/drizzle.config.dev.ts",
+    "migrate:auth:dev": "drizzle-kit migrate --config src/users-db/drizzle.config.dev.ts",
+    "migrate:dev": "pnpm migrate:main:dev ; pnpm migrate:auth:dev",
+    "lint:js": "eslint ./src --ext .ts",
+    "lint:ts": "tsc --noEmit",
+    "lint": "pnpm run lint:js && pnpm run lint:ts",
+    "test-connection": "node --env-file=.env --import tsx src/test-connection.ts"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.1",
+    "pg": "^8.18.0",
+    "postgres": "^3.4.8",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.3.15",
+    "@types/pg": "^8.16.0",
+    "drizzle-kit": "^0.31.9",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

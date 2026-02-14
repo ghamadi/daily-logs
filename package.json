@@ -7,6 +7,7 @@
     "dev:web": "pnpm -C web dev",
     "add:web": "pnpm add --filter @daily-logs/web",
     "add:db": "pnpm add --filter @daily-logs/db",
+    "db:test-connection": "pnpm -C db test-connection",
     "add:utils": "pnpm add --filter @daily-logs/utils",
     "remove:web": "pnpm remove --filter @daily-logs/web",
     "remove:db": "pnpm remove --filter @daily-logs/db",
@@ -34,8 +35,5 @@
   "keywords": [],
   "author": "Ghaleb Hamadi",
   "license": "ISC",
-  "packageManager": "pnpm@10.11.0",
-  "engines": {
-    "node": "^22"
-  }
+  "packageManager": "pnpm@10.11.0"
 }
