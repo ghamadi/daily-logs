@@ -8,6 +8,10 @@
     "add:web": "pnpm add --filter @daily-logs/web",
     "add:db": "pnpm add --filter @daily-logs/db",
     "db:test-connection": "pnpm -C db test-connection",
+    "db:migrate": "pnpm -C db migrate",
+    "db:generate": "pnpm -C db generate",
+    "db:studio": "pnpm -C db studio",
+    "db:local:up": "docker-compose up -d",
     "add:utils": "pnpm add --filter @daily-logs/utils",
     "remove:web": "pnpm remove --filter @daily-logs/web",
     "remove:db": "pnpm remove --filter @daily-logs/db",
@@ -23,6 +27,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
+    "@types/node": "^20.19.30",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
     "@typescript-eslint/parser": "^8.54.0",
     "eslint": "^9.39.2",

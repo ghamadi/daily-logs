@@ -29,6 +29,33 @@ const eslintConfig = [
       ],
     },
   },
+  {
+    files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
+    ignores: ['db/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@db/utils',
+              message: 'Do not import db/utils outside the db package.',
+            },
+            {
+              name: '@daily-logs/db/utils',
+              message: 'Do not import db/utils outside the db package.',
+            },
+          ],
+          patterns: [
+            {
+              group: ['**/db/src/utils', '**/db/src/utils.ts'],
+              message: 'Do not import db/utils outside the db package.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];
 
 export default eslintConfig;
