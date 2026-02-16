@@ -1,9 +1,8 @@
 import { sql } from 'drizzle-orm';
-import { pgTable, uuid, bigint, smallint, varchar, timestamp, index, check } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, smallint, varchar, timestamp, index, check } from 'drizzle-orm/pg-core';
 
 import { EventStatus, EventType } from './enums';
 import { sqlEnumValues } from '../utils';
-import { MessagesTable } from './messages-table';
 import { UsersTable } from './users-table';
 import { WorkspacesTable } from './workspaces-table';
 
@@ -19,10 +18,9 @@ export const EventsTable = pgTable(
     workspaceId: uuid('workspace_id')
       .notNull()
       .references(() => WorkspacesTable.id, { onDelete: 'cascade' }),
-    userId: uuid('user_id').references(() => UsersTable.id, { onDelete: 'set null' }),
-    messageId: bigint('message_id', { mode: 'number' }).references(() => MessagesTable.id, {
-      onDelete: 'set null',
-    }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => UsersTable.id, { onDelete: 'cascade' }),
     type: smallint('type').$type<EventType>().notNull().default(EventType.Note),
     status: smallint('status').$type<EventStatus>().notNull().default(EventStatus.Confirmed),
     happenedAt: timestamp('happened_at', { withTimezone: true }).notNull(),
@@ -38,6 +36,5 @@ export const EventsTable = pgTable(
     index('events_workspace_id_happened_at_idx').on(t.workspaceId, t.happenedAt),
     index('events_workspace_id_type_happened_at_idx').on(t.workspaceId, t.type, t.happenedAt),
     index('events_workspace_id_status_happened_at_idx').on(t.workspaceId, t.status, t.happenedAt),
-    index('events_message_id_idx').on(t.messageId),
   ],
 );

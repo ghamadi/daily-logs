@@ -4,6 +4,7 @@
     "paths": {
       "@web/*": ["web/src/*"],
       "@db/*": ["db/src/*"],
+      "@domain/*": ["domain/src/*"],
       "@utils/*": ["utils/*"]
     }
   }
