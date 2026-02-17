@@ -3,9 +3,8 @@ import { EventStatus } from '@db/schema/enums';
 import { AccessDeniedError } from '../../shared/errors/access-denied-error';
 import { EntityNotFoundError } from '../../shared/errors/entity-not-found-error';
 import { InvalidInputError } from '../../shared/errors/invalid-input-error';
-import { WorkspaceMembersRepository } from '../../workspaces/repositories/workspace-members-repository';
 import { Event } from '../entities/event';
-import { EventData } from '../entities/event-data-record';
+
 import {
   CreateEventRepoInput,
   EventsRepository,
@@ -14,33 +13,30 @@ import {
 } from '../repositories/events-repository';
 import { isActionable } from '../value-objects/event-type';
 import { randomUUID } from 'crypto';
+import { WorkspacesRepository } from '@domain/workspaces/repositories/workspaces-repository';
 
 export type CreateEventInput = Omit<CreateEventRepoInput, 'createdAt' | 'updatedAt' | 'userId' | 'workspaceId'>;
 export type UpdateEventInput = Partial<Omit<UpdateEventRepoInput, 'createdAt' | 'updatedAt' | 'id'>>;
 
-type EventWithData = Omit<Event, 'data'> & { data: EventData };
-
 export class EventsService {
   constructor(
     private readonly eventsRepo: EventsRepository,
-    private readonly membersRepo: WorkspaceMembersRepository,
+    private readonly membersRepo: WorkspacesRepository,
   ) {}
 
-  async findEventById(id: string, options?: { includeData?: boolean }): Promise<Event | null> {
-    return this.eventsRepo.findById(id, options);
+  async findEventById(id: string): Promise<Event | null> {
+    return this.eventsRepo.findById(id);
   }
 
-  async getEventById(props: { id: string; principalId: string } & { includeData?: false }): Promise<Event>;
-  async getEventById(props: { id: string; principalId: string } & { includeData: true }): Promise<EventWithData>;
-  async getEventById(props: { id: string; principalId: string } & { includeData?: boolean }) {
-    const { id, principalId, includeData } = props;
-    const event = await this.findEventById(id, { includeData });
+  async getEventById(props: { id: string; principalId: string }) {
+    const { id, principalId } = props;
+    const event = await this.findEventById(id);
     if (!event) {
       throw EntityNotFoundError.create({ entity: 'Event', identifier: id });
     }
     await this.requireMembership(event.workspaceId, principalId);
 
-    return { ...event, data: event.data ?? {} } as Event | EventWithData;
+    return event;
   }
 
   async getEventsByWorkspace(props: { workspaceId: string; principalId: string } & FindEventsOptions) {
@@ -88,16 +84,10 @@ export class EventsService {
     return this.updateEventHelper({ event, principalId, input: { status: EventStatus.Rejected } });
   }
 
-  async getEventData(props: { id: string; principalId: string }) {
-    const { id, principalId } = props;
-    const event = await this.getEventById({ id, principalId, includeData: true });
-    return event.data;
-  }
-
   // ── helpers ──────────────────────────────────────────────
 
   private async requireMembership(workspaceId: string, userId: string): Promise<void> {
-    const member = await this.membersRepo.getMember({ workspaceId, userId });
+    const member = await this.membersRepo.getMember({ workspaceId, memberId: userId });
     if (!member) {
       throw new AccessDeniedError('User is not a member of this workspace');
     }

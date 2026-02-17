@@ -38,3 +38,5 @@ export const EventsTable = pgTable(
     index('events_workspace_id_status_happened_at_idx').on(t.workspaceId, t.status, t.happenedAt),
   ],
 );
+
+export type DbEvent = typeof EventsTable.$inferSelect;

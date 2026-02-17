@@ -17,9 +17,6 @@ export * from './workspaces/services/workspaces-service';
 
 // Events
 export * from './events/entities/event';
-export * from './events/entities/message';
 export * from './events/value-objects/event-type';
 export * from './events/repositories/events-repository';
-export * from './events/repositories/event-data-repository';
-export * from './events/repositories/messages-repository';
 export * from './events/services/events-service';

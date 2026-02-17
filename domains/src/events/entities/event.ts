@@ -1,4 +1,4 @@
-import { EventStatus, EventType } from '@db/schema/enums';
+import { EventStatus, EventType } from '@db-exports/enums';
 
 // TODO: Make this a discriminated union of possible data types
 export type EventData = Record<string, unknown>;

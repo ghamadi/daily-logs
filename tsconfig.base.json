@@ -4,8 +4,12 @@
     "paths": {
       "@web/*": ["web/src/*"],
       "@db/*": ["db/src/*"],
-      "@domain/*": ["domain/src/*"],
-      "@utils/*": ["utils/*"]
+      "@domains/*": ["domains/src/*"],
+      "@utils/*": ["utils/src/*"],
+      "@web-exports/*": ["web/exports/*"],
+      "@db-exports/*": ["db/exports/*"],
+      "@domains-exports/*": ["domains/exports/*"],
+      "@utils-exports/*": ["utils/exports/*"]
     }
   }
 }

@@ -20,3 +20,5 @@ export const WorkspacesTable = pgTable(
   },
   (t) => [index('workspaces_owner_user_id_idx').on(t.ownerUserId), index('workspaces_name_idx').on(t.name)],
 );
+
+export type DbWorkspace = typeof WorkspacesTable.$inferSelect;
