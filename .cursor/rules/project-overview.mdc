@@ -155,7 +155,10 @@ Monorepo root contains:
 │       │
 │       ├── app/
 │       │   ├── api/
-│       │   │   └── ... (all API routes)
+│       │   │   └── <resource>/
+│       │   │       ├── <method>.ts       # The method handler for the <resource> (POST, PUT, DELETE, GET, etc.)
+│       │   │       └── route.ts          # The route handler for the <resource> (exports the method handlers for the <resource>)
+│       │   │
 │       │   ├── (protected)/
 │       │   │   ├── ... (all protected sub-layouts and pages)
 │       │   │   ├── layout.tsx
