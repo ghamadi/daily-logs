@@ -1,5 +1,5 @@
 import { Workspace, WorkspaceProps } from '../entities/workspace';
-import { WorkspaceRole } from '@db/schema/enums';
+import { WorkspaceRole } from '@db-exports/enums';
 
 export type CreateWorkspaceRepoInput = WorkspaceProps;
 export type UpdateWorkspaceRepoInput = Partial<
@@ -17,7 +17,7 @@ export interface WorkspaceMember {
   updatedAt: Date;
 }
 
-export interface WorkspacesRepository {
+export interface IWorkspacesRepository {
   findById(id: string): Promise<Workspace | null>;
   createWorkspaceWithOwner(input: CreateWorkspaceRepoInput): Promise<Workspace>;
   updateById(id: string, input: UpdateWorkspaceRepoInput): Promise<Workspace>;

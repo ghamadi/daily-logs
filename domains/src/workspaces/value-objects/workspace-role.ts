@@ -1,4 +1,4 @@
-import { WorkspaceRole } from '@db/schema/enums';
+import { WorkspaceRole } from '@db-exports/enums';
 
 export { WorkspaceRole };
 

@@ -1,4 +1,4 @@
-import { EventStatus } from '@db/schema/enums';
+import { EventStatus } from '@db-exports/enums';
 
 import { AccessDeniedError } from '../../shared/errors/access-denied-error';
 import { EntityNotFoundError } from '../../shared/errors/entity-not-found-error';
@@ -13,7 +13,7 @@ import {
 } from '../repositories/events-repository';
 import { isActionable } from '../value-objects/event-type';
 import { randomUUID } from 'crypto';
-import { WorkspacesRepository } from '@domain/workspaces/repositories/workspaces-repository';
+import { IWorkspacesRepository } from '@domains-exports/workspaces';
 
 export type CreateEventInput = Omit<CreateEventRepoInput, 'createdAt' | 'updatedAt' | 'userId' | 'workspaceId'>;
 export type UpdateEventInput = Partial<Omit<UpdateEventRepoInput, 'createdAt' | 'updatedAt' | 'id'>>;
@@ -21,7 +21,7 @@ export type UpdateEventInput = Partial<Omit<UpdateEventRepoInput, 'createdAt' | 
 export class EventsService {
   constructor(
     private readonly eventsRepo: EventsRepository,
-    private readonly membersRepo: WorkspacesRepository,
+    private readonly membersRepo: IWorkspacesRepository,
   ) {}
 
   async findEventById(id: string): Promise<Event | null> {

@@ -1,4 +1,4 @@
-import { EventStatus, EventType } from '@db/schema/enums';
+import { EventStatus, EventType } from '@db-exports/enums';
 
 export { EventType, EventStatus };
 

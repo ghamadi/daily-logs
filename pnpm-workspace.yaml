@@ -1,6 +1,6 @@
 packages:
   - db
-  - domain
+  - domains
   - web
   - utils
 onlyBuiltDependencies:

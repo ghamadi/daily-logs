@@ -8,7 +8,7 @@ import {
   CreateWorkspaceRepoInput,
   UpdateWorkspaceRepoInput,
   WorkspaceMember,
-  WorkspacesRepository,
+  IWorkspacesRepository,
 } from '../repositories/workspaces-repository';
 import { hasAdminAccess, isOwner, WorkspaceRole } from '../value-objects/workspace-role';
 
@@ -18,7 +18,7 @@ export type CreateWorkspaceInput = Omit<CreateWorkspaceRepoInput, 'createdAt' | 
 export type UpdateWorkspaceInput = Omit<UpdateWorkspaceRepoInput, 'updatedAt'>;
 
 export class WorkspacesService {
-  constructor(private readonly workspacesRepo: WorkspacesRepository) {}
+  constructor(private readonly workspacesRepo: IWorkspacesRepository) {}
 
   findWorkspaceById(id: string): Promise<Workspace | null> {
     return this.workspacesRepo.findById(id);
