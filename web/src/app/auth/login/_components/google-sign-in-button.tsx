@@ -24,13 +24,7 @@ function GoogleSignInButton() {
   };
 
   return (
-    <Button
-      variant="default"
-      type="button"
-      disabled={isLoading}
-      className="gap-4 normal-case"
-      onClick={handleGoogleSignIn}
-    >
+    <Button variant="default" disabled={isLoading} className="gap-4 normal-case" onClick={handleGoogleSignIn}>
       <SimpleGoogleLogoIcon className="size-4" />
       Google Sign In
     </Button>
