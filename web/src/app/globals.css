@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 :root {
-  --radius: 0.65rem;
+  --radius: 0.5rem;
   --background: hsl(0 0% 100%);
   --foreground: hsl(20 14.3% 4.1%);
   --card: hsl(0 0% 100%);
@@ -21,7 +21,6 @@
   --border: hsl(20 5.9% 90%);
   --input: hsl(20 5.9% 90%);
   --ring: hsl(24.6 95% 53.1%);
-  --radius: hsl(0.95rem);
   --chart-1: hsl(12 76% 61%);
   --chart-2: hsl(173 58% 39%);
   --chart-3: hsl(197 37% 24%);
@@ -70,7 +69,6 @@
   --color-popover-foreground: var(--popover-foreground);
 
   --color-primary: var(--primary);
-  --color-primary-dark: var(--primary-dark);
   --color-primary-foreground: var(--primary-foreground);
 
   --color-secondary: var(--secondary);
@@ -82,7 +80,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
 
-  --color-danger: var(--danger);
+  --color-destructive: var(--destructive);
 
   --color-border: var(--border);
   --color-input: var(--input);
@@ -93,18 +91,7 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-
-  --color-navigation-background: var(--navigation);
-  --color-navigation-border: var(--navigation-border);
-
   --radius: var(--radius);
-
-  --sidebar-collapsed-width: 56px;
-  --sidebar-expanded-width: 260px;
-
-  --color-navigation-background: var(--navigation);
-  --color-navigation-border: var(--navigation-border);
-  --color-navigation-foreground: var(--navigation-foreground);
 }
 
 @layer base {

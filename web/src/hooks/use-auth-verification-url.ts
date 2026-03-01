@@ -1,3 +1,4 @@
+import { isValidPath } from '@web/lib/utils';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -27,8 +28,11 @@ export function useAuthVerificationUrl() {
       // The previous pathname that the user was trying to access without being logged in
       const originalPath = searchParams.get('redirect');
 
-      if (originalPath) {
-        url.searchParams.set('redirect', originalPath);
+      // Prevent redirecting outside the app
+      const redirectPath = originalPath && isValidPath(originalPath) ? originalPath : '';
+
+      if (redirectPath) {
+        url.searchParams.set('redirect', redirectPath);
       }
 
       return url.toString();

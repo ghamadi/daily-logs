@@ -187,4 +187,3 @@ Monorepo root contains:
 - React rules should always be followed.
 - Files are named in kebab-case.
 - Code shared between packages should be exported by the package's `exports/*` directory.
--

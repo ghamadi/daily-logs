@@ -14,17 +14,29 @@ function GoogleSignInButton() {
   const { verificationUrl } = useAuthVerificationUrl();
 
   const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: verificationUrl,
-      },
-    });
+    try {
+      setIsLoading(true);
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: verificationUrl,
+        },
+      });
+    } catch (error) {
+      // TODO: Show a toast error message
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <Button variant="default" disabled={isLoading} className="gap-4 normal-case" onClick={handleGoogleSignIn}>
+    <Button
+      variant="default"
+      disabled={isLoading}
+      className="gap-4 rounded normal-case"
+      onClick={handleGoogleSignIn}
+    >
       <SimpleGoogleLogoIcon className="size-4" />
       Google Sign In
     </Button>

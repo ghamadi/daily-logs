@@ -18,3 +18,8 @@ export function composeCompoundComponent<TWrapper extends object, TUnits extends
   const CompoundComponent = Object.assign(wrapper, units);
   return CompoundComponent as TWrapper & TUnits;
 }
+
+export function isValidPath(path: string) {
+  const VALID_PATH_RE = /^\/(?!\/)(?!.*\\)(?:[^\/?#\s]+(?:\/[^\/?#\s]+)*)?\/?(?:\?[^#\s]*)?(?:#[^\s]*)?$/;
+  return VALID_PATH_RE.test(path.trimStart());
+}
