@@ -1,13 +1,13 @@
 import { EntityNotFoundError } from '../../shared/errors/entity-not-found-error';
 import { InvalidInputError } from '../../shared/errors/invalid-input-error';
 import { User } from '../entities/user';
-import { CreateUserRepoInput, UpdateUserRepoInput, UsersRepository } from '../repositories/users-repository';
+import { CreateUserRepoInput, UpdateUserRepoInput, IUsersRepository } from '../repositories/users-repository';
 
 export type CreateUserInput = CreateUserRepoInput;
 export type UpdateUserInput = UpdateUserRepoInput;
 
 export class UsersService {
-  constructor(private readonly usersRepo: UsersRepository) {}
+  constructor(private readonly usersRepo: IUsersRepository) {}
 
   findUserById(id: string): Promise<User | null> {
     return this.usersRepo.findById(id);

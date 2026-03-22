@@ -9,14 +9,14 @@ import type {
   CreateUserRepoInput,
   LinkAuthIdentityRepoInput,
   UpdateUserRepoInput,
-  UsersRepository,
+  IUsersRepository,
 } from '@domains/users/repositories/users-repository';
 import { requireRecord } from '../../shared/require-record';
 import { assertNotNullish } from '@utils/ts-utils';
 
 type QueryExecutor = Database | Transaction;
 
-export class DrizzleUsersRepository implements UsersRepository {
+export class DrizzleUsersRepository implements IUsersRepository {
   constructor(private readonly db: Database) {}
 
   async findById(id: string): Promise<User | null> {

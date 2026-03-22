@@ -14,7 +14,7 @@ export type LinkAuthIdentityRepoInput = AuthIdentityLookup & { userId: DbAuthIde
 
 export type CreateUserWithAuthIdentityRepoInput = CreateUserRepoInput & AuthIdentityLookup;
 
-export interface UsersRepository {
+export interface IUsersRepository {
   findById(id: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
   findByAuthIdentity(input: AuthIdentityLookup): Promise<User | null>;
