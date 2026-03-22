@@ -1,7 +1,5 @@
 import { setTimeout as sleep } from 'node:timers/promises';
-
 import { sql } from 'drizzle-orm';
-
 import { createDb } from '@db/client/create-db';
 
 const DEFAULT_TEST_DATABASE_URL = 'postgresql://postgres:postgres@localhost:5443/daily_logs_test';
@@ -45,7 +43,9 @@ export async function resetTestDatabase(): Promise<void> {
   const { db } = getTestDatabase();
 
   await db.execute(
-    sql.raw('TRUNCATE TABLE "events", "workspace_users", "workspaces", "users" RESTART IDENTITY CASCADE;'),
+    sql.raw(
+      'TRUNCATE TABLE "auth_identities", "events", "workspace_users", "workspaces", "users" RESTART IDENTITY CASCADE;',
+    ),
   );
 }
 

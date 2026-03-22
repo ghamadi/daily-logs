@@ -1,13 +1,19 @@
 import { relations } from 'drizzle-orm';
 
+import { AuthIdentitiesTable } from './auth-identities-table';
 import { EventsTable } from './events-table';
 import { UsersTable } from './users-table';
 import { WorkspaceUsersTable } from './workspace-users-table';
 import { WorkspacesTable } from './workspaces-table';
 
 export const UsersRelations = relations(UsersTable, ({ many }) => ({
+  authIdentities: many(AuthIdentitiesTable),
   workspaceUsers: many(WorkspaceUsersTable),
   events: many(EventsTable),
+}));
+
+export const AuthIdentitiesRelations = relations(AuthIdentitiesTable, ({ one }) => ({
+  user: one(UsersTable, { fields: [AuthIdentitiesTable.userId], references: [UsersTable.id] }),
 }));
 
 export const WorkspacesRelations = relations(WorkspacesTable, ({ many, one }) => ({

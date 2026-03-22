@@ -1,14 +1,16 @@
 import { randomUUID } from 'node:crypto';
 
-import { EventsTable, UsersTable, WorkspaceUsersTable, WorkspacesTable } from '@db/schema';
+import { AuthIdentitiesTable, EventsTable, UsersTable, WorkspaceUsersTable, WorkspacesTable } from '@db/schema';
 import { EventSource } from '@domains/events/value-objects/event-source';
 import { EventStatus } from '@domains/events/value-objects/event-status';
 import { EventType } from '@domains/events/value-objects/event-type';
+import { AuthProvider } from '@domains/users/value-objects/auth-provider';
 import { WorkspaceRole } from '@domains/workspaces/value-objects/workspace-role';
 
 import { getTestDatabase } from './test-database';
 
 type NewUser = typeof UsersTable.$inferInsert;
+type NewAuthIdentity = typeof AuthIdentitiesTable.$inferInsert;
 type NewWorkspace = typeof WorkspacesTable.$inferInsert;
 type NewWorkspaceMember = typeof WorkspaceUsersTable.$inferInsert;
 type NewEvent = typeof EventsTable.$inferInsert;
@@ -34,6 +36,29 @@ export async function insertUser(overrides: Partial<NewUser> = {}) {
   }
 
   return user;
+}
+
+export async function insertAuthIdentity(overrides: Partial<NewAuthIdentity> = {}) {
+  const { db } = getTestDatabase();
+  const now = new Date();
+
+  const [authIdentity] = await db
+    .insert(AuthIdentitiesTable)
+    .values({
+      id: overrides.id ?? randomUUID(),
+      userId: overrides.userId ?? randomUUID(),
+      provider: overrides.provider ?? AuthProvider.Supabase,
+      providerUserId: overrides.providerUserId ?? `provider-user-${randomUUID()}`,
+      createdAt: overrides.createdAt ?? now,
+      updatedAt: overrides.updatedAt ?? now,
+    })
+    .returning();
+
+  if (!authIdentity) {
+    throw new Error('Failed to insert test auth identity.');
+  }
+
+  return authIdentity;
 }
 
 export async function insertWorkspace(overrides: Partial<NewWorkspace> = {}) {

@@ -1,11 +1,10 @@
-import { randomUUID } from 'crypto';
 import { EntityNotFoundError } from '../../shared/errors/entity-not-found-error';
 import { InvalidInputError } from '../../shared/errors/invalid-input-error';
 import { User } from '../entities/user';
 import { CreateUserRepoInput, UpdateUserRepoInput, UsersRepository } from '../repositories/users-repository';
 
-export type CreateUserInput = Omit<CreateUserRepoInput, 'createdAt' | 'updatedAt' | 'id'> & { id?: string };
-export type UpdateUserInput = Omit<UpdateUserRepoInput, 'createdAt' | 'updatedAt'>;
+export type CreateUserInput = CreateUserRepoInput;
+export type UpdateUserInput = UpdateUserRepoInput;
 
 export class UsersService {
   constructor(private readonly usersRepo: UsersRepository) {}
@@ -35,29 +34,18 @@ export class UsersService {
   }
 
   async createUser(input: CreateUserInput): Promise<User> {
-    const [existingEmail, existingId] = await Promise.all([
-      this.findUserByEmail(input.email),
-      input.id && this.usersRepo.findById(input.id),
-    ]);
+    const existingEmail = await this.findUserByEmail(input.email);
 
     if (existingEmail) {
       throw InvalidInputError.create({ field: 'email', reason: 'Email is already in use' });
     }
 
-    if (existingId) {
-      throw InvalidInputError.create({ field: 'id', reason: 'User ID is already in use' });
-    }
-
-    const now = new Date();
-    const { id = randomUUID(), ...rest } = input;
-
-    return this.usersRepo.create({ id, ...rest, createdAt: now, updatedAt: now });
+    return this.usersRepo.create(input);
   }
 
   async updateUser(id: string, input: UpdateUserInput): Promise<User> {
     await this.getUserById(id);
-    const now = new Date();
-    return this.usersRepo.updateById(id, { ...input, updatedAt: now });
+    return this.usersRepo.updateById(id, { ...input });
   }
 
   async deactivateUser(id: string): Promise<User> {
