@@ -1,10 +1,7 @@
-import { EventStatus, EventType } from '@db-exports/enums';
+import { Enum } from '@domains/shared/ts-utils';
 
-export { EventType, EventStatus };
-
-/**
- * Returns true if the status can still be acted upon (confirmed or rejected).
- */
-export function isActionable(status: EventStatus): boolean {
-  return status === EventStatus.Proposed;
-}
+export const EventType = {
+  Unknown: 0,
+  Note: 1,
+} as const;
+export type EventType = Enum<typeof EventType>;

@@ -1,26 +1,23 @@
-import { EventStatus } from '@db-exports/enums';
-
+import { randomUUID } from 'crypto';
+import { Event } from '../entities/event';
 import { AccessDeniedError } from '../../shared/errors/access-denied-error';
 import { EntityNotFoundError } from '../../shared/errors/entity-not-found-error';
 import { InvalidInputError } from '../../shared/errors/invalid-input-error';
-import { Event } from '../entities/event';
-
+import { EventStatus, isActionable } from '../value-objects/event-status';
+import { IWorkspacesRepository } from '../../workspaces/repositories/workspaces-repository';
 import {
   CreateEventRepoInput,
-  EventsRepository,
   FindEventsOptions,
   UpdateEventRepoInput,
+  IEventsRepository,
 } from '../repositories/events-repository';
-import { isActionable } from '../value-objects/event-type';
-import { randomUUID } from 'crypto';
-import { IWorkspacesRepository } from '@domains-exports/workspaces';
 
 export type CreateEventInput = Omit<CreateEventRepoInput, 'createdAt' | 'updatedAt' | 'userId' | 'workspaceId'>;
 export type UpdateEventInput = Partial<Omit<UpdateEventRepoInput, 'createdAt' | 'updatedAt' | 'id'>>;
 
 export class EventsService {
   constructor(
-    private readonly eventsRepo: EventsRepository,
+    private readonly eventsRepo: IEventsRepository,
     private readonly membersRepo: IWorkspacesRepository,
   ) {}
 

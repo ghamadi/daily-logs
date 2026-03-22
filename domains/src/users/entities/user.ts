@@ -1,11 +1,6 @@
-export interface UserProps {
-  id: string;
-  email: string;
-  displayName?: string;
-  isActive?: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import type { DbUser } from '@db/schema';
+
+export type UserProps = DbUser;
 
 export class User {
   readonly id: string;

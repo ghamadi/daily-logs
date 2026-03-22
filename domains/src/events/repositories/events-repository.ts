@@ -12,7 +12,7 @@ export interface FindEventsOptions {
   offset?: number;
 }
 
-export interface EventsRepository {
+export interface IEventsRepository {
   findById(id: string): Promise<Event | null>;
   findByWorkspace(workspaceId: string, options?: FindEventsOptions): Promise<Event[]>;
   create(input: CreateEventRepoInput): Promise<Event>;

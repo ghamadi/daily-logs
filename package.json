@@ -12,6 +12,7 @@
     "db:generate": "pnpm -C db generate",
     "db:studio": "pnpm -C db studio",
     "db:local:up": "docker-compose up -d",
+    "db:local:reset": "docker-compose down -v && pnpm db:local:up && pnpm db:generate && pnpm db:migrate",
     "add:domain": "pnpm add --filter @daily-logs/domain",
     "add:utils": "pnpm add --filter @daily-logs/utils",
     "remove:web": "pnpm remove --filter @daily-logs/web",

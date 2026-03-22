@@ -30,22 +30,8 @@ const eslintConfig = defineConfig([
         {
           patterns: [
             {
-              group: ['@mobile-exports/*', '**/mobile/exports/*'],
+              group: ['@mobile/*', '**/mobile/src/*'],
               message: 'The web package must not import from mobile.',
-            },
-            {
-              group: [
-                '@db/*',
-                '**/db/src/*',
-                '@mobile/*',
-                '**/mobile/src/*',
-                '@domains/*',
-                '**/domains/src/*',
-                '@utils/*',
-                '**/utils/src/*',
-              ],
-              message:
-                "You can only import from the 'exports' folder of a package. Import from '@<pkg>-exports/*'.",
             },
           ],
         },

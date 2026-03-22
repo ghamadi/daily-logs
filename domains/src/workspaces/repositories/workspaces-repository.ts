@@ -1,5 +1,5 @@
+import { WorkspaceRole } from '@domains/workspaces/value-objects/workspace-role';
 import { Workspace, WorkspaceProps } from '../entities/workspace';
-import { WorkspaceRole } from '@db-exports/enums';
 
 export type CreateWorkspaceRepoInput = WorkspaceProps;
 export type UpdateWorkspaceRepoInput = Partial<

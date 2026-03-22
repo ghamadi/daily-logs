@@ -1,10 +1,9 @@
 import { sql } from 'drizzle-orm';
 import { pgTable, uuid, smallint, timestamp, uniqueIndex, index, check } from 'drizzle-orm/pg-core';
-
-import { WorkspaceRole } from './enums';
 import { sqlEnumValues } from '../utils';
 import { UsersTable } from './users-table';
 import { WorkspacesTable } from './workspaces-table';
+import { WorkspaceRole } from '@domains/workspaces/value-objects/workspace-role';
 
 /**
  * Workspace memberships

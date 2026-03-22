@@ -1,6 +1,12 @@
-import { WorkspaceRole } from '@db-exports/enums';
+import { Enum } from '@domains/shared/ts-utils';
 
-export { WorkspaceRole };
+export const WorkspaceRole = {
+  Unknown: 0,
+  Member: 1,
+  Admin: 2,
+  Owner: 3,
+} as const;
+export type WorkspaceRole = Enum<typeof WorkspaceRole>;
 
 export function isAdmin(role: WorkspaceRole): boolean {
   return role === WorkspaceRole.Admin;

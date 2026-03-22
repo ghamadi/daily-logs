@@ -5,19 +5,16 @@ import parser from '@typescript-eslint/parser';
 const codeFiles = ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'];
 const packageFiles = (pkg) => codeFiles.map((file) => `${pkg}/${file}`);
 
-const fromSrcFolderOf = (...packages) => packages.map((pkg) => [`@${pkg}/*`, `**/${pkg}/src/*`]).flat();
-
-const fromExportsFolderOf = (...packages) =>
-  packages.map((pkg) => [`@${pkg}-exports/*`, `**/${pkg}/exports/*`]).flat();
+const fromPackage = (...packages) => packages.map((pkg) => [`@${pkg}/*`, `**/${pkg}/src/*`]).flat();
 
 export const noRestrictedImports = [
   /**
    * Inter-package dependency rules:
    *
-   * - `domains` may only import types and enums from `db`. Nothing else from `db` and no other packages.
-   * - `web` may import from `domains` and `db` (for repository implementations).
+   * - `domains` may only import types from `db`. Nothing else from `db`.
+   * - `web` may import from `domains` and `db`.
    * - `mobile` may only import from `web` for API response types (`mobile` should never hit the database directly).
-   * - `db` may not import any other packages.
+   * - `db` may not import from `web` or `mobile`.
    * - `utils` may not import any other packages.
    */
   {
@@ -28,13 +25,8 @@ export const noRestrictedImports = [
         {
           patterns: [
             {
-              group: fromExportsFolderOf('web', 'mobile', 'domains'),
-              message: 'The db package must not import from web, mobile, or domain.',
-            },
-            {
-              group: fromSrcFolderOf('web', 'mobile', 'domains', 'utils'),
-              message:
-                "You can only import from the 'exports' folder of a package. Import from '@<pkg>-exports/*'.",
+              group: fromPackage('web', 'mobile'),
+              message: 'The db package must not import from web or mobile.',
             },
           ],
         },
@@ -49,18 +41,13 @@ export const noRestrictedImports = [
         {
           patterns: [
             {
-              group: fromExportsFolderOf('web', 'mobile'),
+              group: fromPackage('web', 'mobile'),
               message: 'The domain package must not import from web or mobile.',
             },
             {
-              group: [...fromExportsFolderOf('db'), '!@db-exports/enums'],
+              group: fromPackage('db'),
               allowTypeImports: true,
-              message: 'The domain package may only import types and enums from the db package.',
-            },
-            {
-              group: fromSrcFolderOf('web', 'mobile', 'db', 'utils'),
-              message:
-                "You can only import from the 'exports' folder of a package. Import from '@<pkg>-exports/*'.",
+              message: 'The domain package may only import types from the db package.',
             },
           ],
         },
@@ -75,13 +62,8 @@ export const noRestrictedImports = [
         {
           patterns: [
             {
-              group: fromExportsFolderOf('db', 'domains'),
-              message: 'The mobile package must not import from db or domain.',
-            },
-            {
-              group: fromSrcFolderOf('db', 'domains', 'web', 'utils'),
-              message:
-                "You can only import from the 'exports' folder of a package. Import from '@<pkg>-exports/*'.",
+              group: fromPackage('db', 'domains', 'web'),
+              message: 'The mobile package must not import from db, domains, or web.',
             },
           ],
         },

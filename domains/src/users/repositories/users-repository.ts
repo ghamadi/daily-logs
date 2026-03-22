@@ -1,4 +1,4 @@
-import { User, UserProps } from '../entities/user';
+import { User, type UserProps } from '../entities/user';
 
 export type CreateUserRepoInput = UserProps;
 export type UpdateUserRepoInput = Omit<Partial<CreateUserRepoInput>, 'id' | 'createdAt'> & { updatedAt: Date };
