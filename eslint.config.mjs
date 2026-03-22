@@ -87,6 +87,22 @@ export const noRestrictedImports = [
       ],
     },
   },
+  {
+    files: packageFiles('utils'),
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: fromPackage('db', 'domains', 'infrastructure', 'mobile', 'web'),
+              message: 'The utils package must not import from other packages.',
+            },
+          ],
+        },
+      ],
+    },
+  },
   // The web package's 'no-restricted-imports' rules are defined in the `web/eslint.config.mjs` file.
 ];
 

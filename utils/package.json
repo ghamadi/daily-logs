@@ -1,17 +1,12 @@
 {
-  "name": "@daily-logs/domain",
+  "name": "@daily-logs/utils",
   "version": "0.0.1",
   "private": true,
-  "description": "Domain layer: entities, repository interfaces, and services",
+  "description": "Shared utilities for TypeScript and runtime helpers",
   "scripts": {
     "lint:js": "eslint ./src --ext .ts",
     "lint:ts": "tsc --noEmit",
     "lint": "pnpm run lint:js && pnpm run lint:ts"
-  },
-  "dependencies": {
-    "@daily-logs/db": "workspace:*",
-    "@daily-logs/utils": "workspace:*",
-    "zod": "^4.3.6"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

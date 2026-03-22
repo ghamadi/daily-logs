@@ -1,4 +1,4 @@
-import { Enum } from '@domains/shared/ts-utils';
+import { Enum } from '@utils/ts-utils';
 
 export const WorkspaceRole = {
   Unknown: 0,

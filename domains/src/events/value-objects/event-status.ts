@@ -1,4 +1,4 @@
-import { Enum } from '@domains/shared/ts-utils';
+import { Enum } from '@utils/ts-utils';
 
 export const EventStatus = {
   Unknown: 0,

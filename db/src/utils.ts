@@ -1,4 +1,5 @@
 import { sql } from 'drizzle-orm';
+import { getObjectValues } from '@utils/ts-utils';
 
 /**
  * Utility function to convert an enum to a SQL enum values string.
@@ -12,7 +13,7 @@ import { sql } from 'drizzle-orm';
  */
 export function sqlEnumValues(enumLike: Record<string, string | number>) {
   return sql.raw(
-    Object.values(enumLike)
+    getObjectValues(enumLike)
       .map((value) => (typeof value === 'number' ? `${value}` : `'${value.replace(/'/g, "''")}'`))
       .join(', '),
   );
