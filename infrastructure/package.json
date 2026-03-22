@@ -1,0 +1,21 @@
+{
+  "name": "@daily-logs/infrastructure",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Infrastructure layer: database wiring and repository implementations",
+  "scripts": {
+    "lint:js": "eslint ./src ./test vitest.config.ts --ext .ts",
+    "lint:ts": "tsc --noEmit",
+    "lint": "pnpm run lint:js && pnpm run lint:ts",
+    "test": "vitest run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts"
+  },
+  "dependencies": {
+    "@daily-logs/db": "workspace:*",
+    "@daily-logs/domain": "workspace:*",
+    "drizzle-orm": "^0.45.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

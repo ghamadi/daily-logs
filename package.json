@@ -7,6 +7,12 @@
     "dev:web": "pnpm -C web dev",
     "add:web": "pnpm add --filter @daily-logs/web",
     "add:db": "pnpm add --filter @daily-logs/db",
+    "add:infrastructure": "pnpm add --filter @daily-logs/infrastructure",
+    "db:test:up": "docker compose -f docker-compose.test.yml up -d",
+    "db:test:down": "docker compose -f docker-compose.test.yml down -v",
+    "db:test:wait": "pnpm -C db exec tsx ../infrastructure/test/scripts/wait-for-db.ts",
+    "db:test:migrate": "DATABASE_URL=${TEST_DATABASE_URL:-postgresql://postgres:postgres@localhost:5443/daily_logs_test} pnpm -C db migrate",
+    "db:test:prepare": "pnpm db:test:up && pnpm db:test:wait && pnpm db:test:migrate",
     "db:test-connection": "pnpm -C db test-connection",
     "db:migrate": "pnpm -C db migrate",
     "db:generate": "pnpm -C db generate",
@@ -17,6 +23,7 @@
     "add:utils": "pnpm add --filter @daily-logs/utils",
     "remove:web": "pnpm remove --filter @daily-logs/web",
     "remove:db": "pnpm remove --filter @daily-logs/db",
+    "remove:infrastructure": "pnpm remove --filter @daily-logs/infrastructure",
     "remove:domain": "pnpm remove --filter @daily-logs/domain",
     "remove:utils": "pnpm remove --filter @daily-logs/utils",
     "build": "pnpm -r build",
@@ -26,7 +33,8 @@
     "lint:ts": "pnpm -r lint:ts",
     "lint": "pnpm -r lint",
     "clean-install": "rm -rf node_modules db/node_modules web/node_modules && pnpm install",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test:infrastructure": "pnpm db:test:prepare && pnpm -C infrastructure test",
+    "test": "pnpm test:infrastructure"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
@@ -38,7 +46,8 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react-hooks": "^7.0.1",
     "prettier": "^3.8.1",
-    "prettier-plugin-tailwindcss": "^0.7.2"
+    "prettier-plugin-tailwindcss": "^0.7.2",
+    "vitest": "^3.2.4"
   },
   "keywords": [],
   "author": "Ghaleb Hamadi",

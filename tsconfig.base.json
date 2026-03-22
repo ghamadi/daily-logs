@@ -5,6 +5,7 @@
       "@web/*": ["web/src/*"],
       "@db/*": ["db/src/*"],
       "@domains/*": ["domains/src/*"],
+      "@infrastructure/*": ["infrastructure/src/*"],
       "@utils/*": ["utils/src/*"]
     }
   }

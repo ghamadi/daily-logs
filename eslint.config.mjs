@@ -12,9 +12,10 @@ export const noRestrictedImports = [
    * Inter-package dependency rules:
    *
    * - `domains` may only import types from `db`. Nothing else from `db`.
-   * - `web` may import from `domains` and `db`.
+   * - `infrastructure` may import from `db` and `domains`, but not from `web` or `mobile`.
+   * - `web` may import from `domains`, `infrastructure`, and `db`.
    * - `mobile` may only import from `web` for API response types (`mobile` should never hit the database directly).
-   * - `db` may not import from `web` or `mobile`.
+   * - `db` may not import from `web`, `mobile`, or `infrastructure`.
    * - `utils` may not import any other packages.
    */
   {
@@ -25,8 +26,24 @@ export const noRestrictedImports = [
         {
           patterns: [
             {
+              group: fromPackage('web', 'mobile', 'infrastructure'),
+              message: 'The db package must not import from web, mobile, or infrastructure.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: packageFiles('infrastructure'),
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
               group: fromPackage('web', 'mobile'),
-              message: 'The db package must not import from web or mobile.',
+              message: 'The infrastructure package must not import from web or mobile.',
             },
           ],
         },
@@ -41,8 +58,8 @@ export const noRestrictedImports = [
         {
           patterns: [
             {
-              group: fromPackage('web', 'mobile'),
-              message: 'The domain package must not import from web or mobile.',
+              group: fromPackage('web', 'mobile', 'infrastructure'),
+              message: 'The domain package must not import from web, mobile, or infrastructure.',
             },
             {
               group: fromPackage('db'),
@@ -62,8 +79,8 @@ export const noRestrictedImports = [
         {
           patterns: [
             {
-              group: fromPackage('db', 'domains', 'web'),
-              message: 'The mobile package must not import from db, domains, or web.',
+              group: fromPackage('db', 'domains', 'infrastructure', 'web'),
+              message: 'The mobile package must not import from db, domains, infrastructure, or web.',
             },
           ],
         },

@@ -84,7 +84,7 @@ export class EventsService {
   // ── helpers ──────────────────────────────────────────────
 
   private async requireMembership(workspaceId: string, userId: string): Promise<void> {
-    const member = await this.membersRepo.getMember({ workspaceId, memberId: userId });
+    const member = await this.membersRepo.findMember({ workspaceId, memberId: userId });
     if (!member) {
       throw new AccessDeniedError('User is not a member of this workspace');
     }
