@@ -17,9 +17,12 @@ export async function getAuthenticatedPrincipal(): Promise<User> {
     throw new ApiErrors.Unauthorized('Could not authenticate user.');
   }
 
-  const { id, email } = data.user;
+  const { id, email, email_confirmed_at } = data.user;
   if (!email) {
     throw new ApiErrors.Unauthorized('Could not authenticate user. No email found.');
+  }
+  if (!email_confirmed_at) {
+    throw new ApiErrors.Unauthorized('Could not authenticate user. Email is not verified.');
   }
 
   const linkedUser = await ensureLinkedUser({
