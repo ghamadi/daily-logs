@@ -1,9 +1,9 @@
 import { EntityNotFoundError } from '../../shared/errors/entity-not-found-error';
 import { InvalidInputError } from '../../shared/errors/invalid-input-error';
 import { User } from '../entities/user';
-import { CreateUserRepoInput, UpdateUserRepoInput, IUsersRepository } from '../repositories/users-repository';
+import { CreateUserInput, UpdateUserRepoInput, IUsersRepository } from '../repositories/users-repository';
 
-export type CreateUserInput = CreateUserRepoInput;
+export type CreateUserInput = CreateUserInput;
 export type UpdateUserInput = UpdateUserRepoInput;
 
 export class UsersService {

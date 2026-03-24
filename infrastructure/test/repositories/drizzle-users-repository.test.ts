@@ -1,7 +1,7 @@
 import { AuthProvider } from '@domains/users/value-objects/auth-provider';
 import { DrizzleUsersRepository } from '@infrastructure/repositories/users/drizzle-users-repository';
 
-import { insertAuthIdentity, insertUser } from '../helpers/seed-data';
+import { insertUser } from '../helpers/seed-data';
 import { getTestDatabase } from '../helpers/test-database';
 
 const UUID_REGEXP = /^[0-9a-f-]{36}$/;
@@ -14,6 +14,8 @@ describe('DrizzleUsersRepository', () => {
       email: 'owner@example.com',
       displayName: 'Owner',
       isActive: true,
+      provider: AuthProvider.Supabase,
+      providerUserId: 'supabase-owner',
     });
 
     const foundById = await repository.findById(created.id);
@@ -31,6 +33,8 @@ describe('DrizzleUsersRepository', () => {
       email: 'member@example.com',
       displayName: 'Member',
       isActive: true,
+      provider: AuthProvider.Supabase,
+      providerUserId: 'supabase-member',
     });
 
     const updated = await repository.updateById(created.id, {
@@ -46,10 +50,40 @@ describe('DrizzleUsersRepository', () => {
     expect(reloaded?.isActive).toBe(false);
   });
 
-  it('creates users with auth identities and finds them by provider identity', async () => {
+  it('optionally requires an auth identity when finding by email', async () => {
     const repository = new DrizzleUsersRepository(getTestDatabase().db);
 
-    const created = await repository.createWithAuthIdentity({
+    const linkedUser = await repository.create({
+      email: 'linked@example.com',
+      displayName: 'Linked User',
+      isActive: true,
+      provider: AuthProvider.Supabase,
+      providerUserId: 'supabase-linked',
+    });
+
+    await insertUser({
+      email: 'unlinked@example.com',
+      displayName: 'Unlinked User',
+      isActive: true,
+    });
+
+    const foundLinkedUser = await repository.findByEmail('linked@example.com', {
+      provider: AuthProvider.Supabase,
+      providerUserId: 'supabase-linked',
+    });
+    const foundUnlinkedUser = await repository.findByEmail('unlinked@example.com', {
+      provider: AuthProvider.Supabase,
+      providerUserId: 'supabase-unlinked',
+    });
+
+    expect(foundLinkedUser?.id).toBe(linkedUser.id);
+    expect(foundUnlinkedUser).toBeNull();
+  });
+
+  it('creates users with auth identities and finds them by matching email and provider identity', async () => {
+    const repository = new DrizzleUsersRepository(getTestDatabase().db);
+
+    const created = await repository.create({
       email: 'auth-user@example.com',
       displayName: 'Auth User',
       isActive: true,
@@ -57,7 +91,7 @@ describe('DrizzleUsersRepository', () => {
       providerUserId: 'supabase-user-1',
     });
 
-    const found = await repository.findByAuthIdentity({
+    const found = await repository.findByEmail('auth-user@example.com', {
       provider: AuthProvider.Supabase,
       providerUserId: 'supabase-user-1',
     });
@@ -67,39 +101,62 @@ describe('DrizzleUsersRepository', () => {
     expect(found?.email).toBe('auth-user@example.com');
   });
 
-  it('links auth identities to existing users', async () => {
+  it('does not return unlinked users when finding by email with provider identity', async () => {
     const repository = new DrizzleUsersRepository(getTestDatabase().db);
     const user = await insertUser({ email: 'existing-user@example.com' });
 
-    await repository.linkAuthIdentity({
-      userId: user.id,
+    const found = await repository.findByEmail('existing-user@example.com', {
       provider: AuthProvider.Supabase,
       providerUserId: 'supabase-existing-user',
     });
 
-    const found = await repository.findByAuthIdentity({
+    expect(user.email).toBe('existing-user@example.com');
+    expect(found).toBeNull();
+  });
+
+  it('does not return a user when the provider identity belongs to a different user', async () => {
+    const repository = new DrizzleUsersRepository(getTestDatabase().db);
+
+    const linkedUser = await repository.create({
+      email: 'linked-user@example.com',
+      displayName: 'Linked User',
+      isActive: true,
       provider: AuthProvider.Supabase,
-      providerUserId: 'supabase-existing-user',
+      providerUserId: 'supabase-linked-user',
     });
 
-    expect(found?.id).toBe(user.id);
-    expect(found?.email).toBe('existing-user@example.com');
+    const otherUser = await repository.create({
+      email: 'other-user@example.com',
+      displayName: 'Other User',
+      isActive: true,
+      provider: AuthProvider.Supabase,
+      providerUserId: 'supabase-other-user',
+    });
+
+    const found = await repository.findByEmail(linkedUser.email, {
+      provider: AuthProvider.Supabase,
+      providerUserId: 'supabase-other-user',
+    });
+
+    expect(otherUser.id).not.toBe(linkedUser.id);
+    expect(found).toBeNull();
   });
 
   it('enforces provider identity uniqueness', async () => {
     const repository = new DrizzleUsersRepository(getTestDatabase().db);
-    const firstUser = await insertUser({ email: 'first-auth@example.com' });
-    const secondUser = await insertUser({ email: 'second-auth@example.com' });
-
-    await insertAuthIdentity({
-      userId: firstUser.id,
+    await repository.create({
+      email: 'first-auth@example.com',
+      displayName: 'First Auth User',
+      isActive: true,
       provider: AuthProvider.Supabase,
       providerUserId: 'supabase-duplicate',
     });
 
     await expect(
-      repository.linkAuthIdentity({
-        userId: secondUser.id,
+      repository.create({
+        email: 'second-auth@example.com',
+        displayName: 'Second Auth User',
+        isActive: true,
         provider: AuthProvider.Supabase,
         providerUserId: 'supabase-duplicate',
       }),
@@ -112,11 +169,19 @@ describe('DrizzleUsersRepository', () => {
       email: 'delete-me@example.com',
       displayName: 'Delete Me',
       isActive: true,
+      provider: AuthProvider.Supabase,
+      providerUserId: 'supabase-delete-me',
     });
 
     await repository.deleteById(created.id);
 
     await expect(repository.findById(created.id)).resolves.toBeNull();
     await expect(repository.findByEmail('delete-me@example.com')).resolves.toBeNull();
+    await expect(
+      repository.findByEmail('delete-me@example.com', {
+        provider: AuthProvider.Supabase,
+        providerUserId: 'supabase-delete-me',
+      }),
+    ).resolves.toBeNull();
   });
 });

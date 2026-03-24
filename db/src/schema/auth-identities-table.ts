@@ -18,7 +18,7 @@ export const AuthIdentitiesTable = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
-    uniqueIndex('auth_identities_provider_provider_user_id_uq').on(t.provider, t.providerUserId),
+    uniqueIndex('auth_identities_provider_provider_user_id_uq').on(t.userId, t.provider, t.providerUserId),
     index('auth_identities_user_id_idx').on(t.userId),
   ],
 );
