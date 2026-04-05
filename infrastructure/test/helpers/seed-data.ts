@@ -3,7 +3,6 @@ import { randomUUID } from 'node:crypto';
 import { AuthIdentitiesTable, EventsTable, UsersTable, WorkspaceUsersTable, WorkspacesTable } from '@db/schema';
 import { EventSource } from '@domains/events/value-objects/event-source';
 import { EventStatus } from '@domains/events/value-objects/event-status';
-import { EventType } from '@domains/events/value-objects/event-type';
 import { AuthProvider } from '@domains/users/value-objects/auth-provider';
 import { WorkspaceRole } from '@domains/workspaces/value-objects/workspace-role';
 
@@ -93,7 +92,7 @@ export async function insertWorkspaceMember(overrides: Partial<NewWorkspaceMembe
       id: overrides.id ?? randomUUID(),
       workspaceId: overrides.workspaceId ?? randomUUID(),
       userId: overrides.userId ?? randomUUID(),
-      role: overrides.role ?? WorkspaceRole.Member,
+      role: overrides.role ?? WorkspaceRole.MEMBER,
       createdAt: overrides.createdAt ?? now,
       updatedAt: overrides.updatedAt ?? now,
     })
@@ -116,11 +115,10 @@ export async function insertEvent(overrides: Partial<NewEvent> = {}) {
       id: overrides.id ?? randomUUID(),
       workspaceId: overrides.workspaceId ?? randomUUID(),
       userId: overrides.userId ?? randomUUID(),
-      type: overrides.type ?? EventType.Note,
-      status: overrides.status ?? EventStatus.Confirmed,
+      status: overrides.status ?? EventStatus.CONFIRMED,
       happenedAt: overrides.happenedAt ?? now,
       summary: overrides.summary ?? 'Test event',
-      source: overrides.source ?? EventSource.User,
+      source: overrides.source ?? EventSource.USER,
       createdAt: overrides.createdAt ?? now,
       updatedAt: overrides.updatedAt ?? now,
     })

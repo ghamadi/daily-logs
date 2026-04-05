@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import { Event } from '../entities/event';
-import { EventStatus, isActionable } from '../value-objects/event-status';
+import { EventStatus } from '../value-objects/event-status';
 import { IWorkspacesRepository } from '../../workspaces/repositories/workspaces-repository';
 import {
   CreateEventRepoInput,
@@ -67,25 +67,25 @@ export class EventsService {
   async confirmEvent(props: { id: string; principalId: string }): Promise<Event> {
     const { id, principalId } = props;
     const event = await this.getEventById({ id, principalId });
-    if (!isActionable(event.status)) {
+    if (event.status !== EventStatus.PROPOSED) {
       throw DomainErrors.InvalidInput.create({
         field: 'status',
         reason: 'Only proposed events can be confirmed',
       });
     }
-    return this.updateEventHelper({ event, principalId, input: { status: EventStatus.Confirmed } });
+    return this.updateEventHelper({ event, principalId, input: { status: EventStatus.CONFIRMED } });
   }
 
   async rejectEvent(props: { id: string; principalId: string }): Promise<Event> {
     const { id, principalId } = props;
     const event = await this.getEventById({ id, principalId });
-    if (!isActionable(event.status)) {
+    if (event.status !== EventStatus.PROPOSED) {
       throw DomainErrors.InvalidInput.create({
         field: 'status',
         reason: 'Only proposed events can be rejected',
       });
     }
-    return this.updateEventHelper({ event, principalId, input: { status: EventStatus.Rejected } });
+    return this.updateEventHelper({ event, principalId, input: { status: EventStatus.REJECTED } });
   }
 
   // ── helpers ──────────────────────────────────────────────

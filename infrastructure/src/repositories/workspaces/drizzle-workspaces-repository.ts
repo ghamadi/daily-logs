@@ -42,7 +42,7 @@ export class DrizzleWorkspacesRepository implements IWorkspacesRepository {
       await tx.insert(WorkspaceUsersTable).values({
         workspaceId: workspaceRow.id,
         userId: workspaceRow.ownerUserId,
-        role: WorkspaceRole.Owner,
+        role: WorkspaceRole.OWNER,
         createdAt: workspaceRow.createdAt,
         updatedAt: workspaceRow.updatedAt,
       });
@@ -92,7 +92,10 @@ export class DrizzleWorkspacesRepository implements IWorkspacesRepository {
   async getMember(params: { workspaceId: string; memberId: string }): Promise<WorkspaceMember> {
     const member = await this.findMember(params);
 
-    return requireRecord(member, `Workspace member "${params.memberId}" not found in workspace "${params.workspaceId}".`);
+    return requireRecord(
+      member,
+      `Workspace member "${params.memberId}" not found in workspace "${params.workspaceId}".`,
+    );
   }
 
   async getOwner(params: { workspaceId: string }): Promise<WorkspaceMember> {
@@ -102,7 +105,7 @@ export class DrizzleWorkspacesRepository implements IWorkspacesRepository {
       .where(
         and(
           eq(WorkspaceUsersTable.workspaceId, params.workspaceId),
-          eq(WorkspaceUsersTable.role, WorkspaceRole.Owner),
+          eq(WorkspaceUsersTable.role, WorkspaceRole.OWNER),
         ),
       )
       .limit(1);
@@ -112,7 +115,11 @@ export class DrizzleWorkspacesRepository implements IWorkspacesRepository {
     return toWorkspaceMember(row);
   }
 
-  async addMember(params: { workspaceId: string; memberId: string; role: WorkspaceRole }): Promise<WorkspaceMember> {
+  async addMember(params: {
+    workspaceId: string;
+    memberId: string;
+    role: WorkspaceRole;
+  }): Promise<WorkspaceMember> {
     const rows = await this.db
       .insert(WorkspaceUsersTable)
       .values({
@@ -122,12 +129,19 @@ export class DrizzleWorkspacesRepository implements IWorkspacesRepository {
       })
       .returning();
 
-    const row = requireRecord(rows[0], `Failed to add member "${params.memberId}" to workspace "${params.workspaceId}".`);
+    const row = requireRecord(
+      rows[0],
+      `Failed to add member "${params.memberId}" to workspace "${params.workspaceId}".`,
+    );
 
     return toWorkspaceMember(row);
   }
 
-  async updateRole(params: { workspaceId: string; memberId: string; role: WorkspaceRole }): Promise<WorkspaceMember> {
+  async updateRole(params: {
+    workspaceId: string;
+    memberId: string;
+    role: WorkspaceRole;
+  }): Promise<WorkspaceMember> {
     const rows = await this.db
       .update(WorkspaceUsersTable)
       .set({
@@ -142,7 +156,10 @@ export class DrizzleWorkspacesRepository implements IWorkspacesRepository {
       )
       .returning();
 
-    const row = requireRecord(rows[0], `Failed to update member "${params.memberId}" in workspace "${params.workspaceId}".`);
+    const row = requireRecord(
+      rows[0],
+      `Failed to update member "${params.memberId}" in workspace "${params.workspaceId}".`,
+    );
 
     return toWorkspaceMember(row);
   }

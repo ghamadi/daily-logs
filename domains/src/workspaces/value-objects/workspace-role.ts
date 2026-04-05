@@ -1,21 +1,21 @@
+import { type DbWorkspaceUserRole } from '@db/schema';
 import { Enum } from '@utils/ts-utils';
 
 export const WorkspaceRole = {
-  Unknown: 0,
-  Member: 1,
-  Admin: 2,
-  Owner: 3,
-} as const;
+  MEMBER: 'member',
+  ADMIN: 'admin',
+  OWNER: 'owner',
+} as const satisfies Record<string, DbWorkspaceUserRole>;
 export type WorkspaceRole = Enum<typeof WorkspaceRole>;
 
 export function isAdmin(role: WorkspaceRole): boolean {
-  return role === WorkspaceRole.Admin;
+  return role === WorkspaceRole.ADMIN;
 }
 
 export function isOwner(role: WorkspaceRole): boolean {
-  return role === WorkspaceRole.Owner;
+  return role === WorkspaceRole.OWNER;
 }
 
 export function hasAdminAccess(role: WorkspaceRole): boolean {
-  return role === WorkspaceRole.Admin || role === WorkspaceRole.Owner;
+  return role === WorkspaceRole.ADMIN || role === WorkspaceRole.OWNER;
 }

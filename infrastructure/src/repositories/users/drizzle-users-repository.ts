@@ -3,7 +3,7 @@ import type { Database } from '@db/client/create-db';
 import { AuthIdentitiesTable, UsersTable } from '@db/schema';
 import { User } from '@domains/users/entities/user';
 import type {
-  CreateUserInput,
+  CreateUserRepoInput,
   UpdateUserRepoInput,
   IUsersRepository,
   FindByEmailOptions,
@@ -41,7 +41,7 @@ export class DrizzleUsersRepository implements IUsersRepository {
     return row && new User(row.user);
   }
 
-  async create(input: CreateUserInput) {
+  async create(input: CreateUserRepoInput) {
     return this.db.transaction(async (tx) => {
       const { provider, providerUserId, ...userInput } = input;
       const [userRow] = await tx.insert(UsersTable).values(userInput).returning();

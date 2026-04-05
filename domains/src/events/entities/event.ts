@@ -1,6 +1,5 @@
 import type { DbEvent } from '@db/schema';
 import { EventStatus } from '@domains/events/value-objects/event-status';
-import { EventType } from '@domains/events/value-objects/event-type';
 import { EventSource } from '@domains/events/value-objects/event-source';
 
 export type EventProps = DbEvent;
@@ -9,7 +8,6 @@ export class Event {
   readonly id: string;
   readonly workspaceId: string;
   readonly userId: string;
-  readonly type: EventType;
   readonly status: EventStatus;
   readonly source: EventSource;
   readonly happenedAt: Date;
@@ -21,7 +19,6 @@ export class Event {
     this.id = props.id;
     this.workspaceId = props.workspaceId;
     this.userId = props.userId;
-    this.type = props.type;
     this.status = props.status;
     this.happenedAt = props.happenedAt;
     this.summary = props.summary;
@@ -31,14 +28,14 @@ export class Event {
   }
 
   get isProposed(): boolean {
-    return this.status === EventStatus.Proposed;
+    return this.status === EventStatus.PROPOSED;
   }
 
   get isConfirmed(): boolean {
-    return this.status === EventStatus.Confirmed;
+    return this.status === EventStatus.CONFIRMED;
   }
 
   get isRejected(): boolean {
-    return this.status === EventStatus.Rejected;
+    return this.status === EventStatus.REJECTED;
   }
 }

@@ -3,7 +3,6 @@ import { randomUUID } from 'node:crypto';
 import { DrizzleEventsRepository } from '@infrastructure/repositories/events/drizzle-events-repository';
 import { EventSource } from '@domains/events/value-objects/event-source';
 import { EventStatus } from '@domains/events/value-objects/event-status';
-import { EventType } from '@domains/events/value-objects/event-type';
 import { WorkspaceRole } from '@domains/workspaces/value-objects/workspace-role';
 
 import { getTestDatabase } from '../helpers/test-database';
@@ -14,15 +13,14 @@ describe('DrizzleEventsRepository', () => {
     const repository = new DrizzleEventsRepository(getTestDatabase().db);
     const owner = await insertUser({ email: 'owner@example.com' });
     const workspace = await insertWorkspace({ ownerUserId: owner.id, name: 'Events' });
-    await insertWorkspaceMember({ workspaceId: workspace.id, userId: owner.id, role: WorkspaceRole.Owner });
+    await insertWorkspaceMember({ workspaceId: workspace.id, userId: owner.id, role: WorkspaceRole.OWNER });
 
     const event = await repository.create({
       id: randomUUID(),
       workspaceId: workspace.id,
       userId: owner.id,
-      type: EventType.Note,
-      status: EventStatus.Proposed,
-      source: EventSource.User,
+      status: EventStatus.PROPOSED,
+      source: EventSource.USER,
       happenedAt: new Date('2026-03-22T16:00:00.000Z'),
       summary: 'Draft note',
       createdAt: new Date('2026-03-22T16:00:00.000Z'),
@@ -32,7 +30,7 @@ describe('DrizzleEventsRepository', () => {
     const found = await repository.findById(event.id);
 
     expect(found?.id).toBe(event.id);
-    expect(found?.status).toBe(EventStatus.Proposed);
+    expect(found?.status).toBe(EventStatus.PROPOSED);
     expect(found?.summary).toBe('Draft note');
   });
 
@@ -40,7 +38,7 @@ describe('DrizzleEventsRepository', () => {
     const repository = new DrizzleEventsRepository(getTestDatabase().db);
     const owner = await insertUser({ email: 'owner@example.com' });
     const workspace = await insertWorkspace({ ownerUserId: owner.id, name: 'Timeline' });
-    await insertWorkspaceMember({ workspaceId: workspace.id, userId: owner.id, role: WorkspaceRole.Owner });
+    await insertWorkspaceMember({ workspaceId: workspace.id, userId: owner.id, role: WorkspaceRole.OWNER });
 
     await insertEvent({
       workspaceId: workspace.id,
@@ -78,24 +76,24 @@ describe('DrizzleEventsRepository', () => {
     const repository = new DrizzleEventsRepository(getTestDatabase().db);
     const owner = await insertUser({ email: 'owner@example.com' });
     const workspace = await insertWorkspace({ ownerUserId: owner.id, name: 'Updates' });
-    await insertWorkspaceMember({ workspaceId: workspace.id, userId: owner.id, role: WorkspaceRole.Owner });
+    await insertWorkspaceMember({ workspaceId: workspace.id, userId: owner.id, role: WorkspaceRole.OWNER });
 
     const event = await insertEvent({
       workspaceId: workspace.id,
       userId: owner.id,
       summary: 'Needs update',
-      status: EventStatus.Proposed,
+      status: EventStatus.PROPOSED,
       happenedAt: new Date('2026-03-22T17:00:00.000Z'),
     });
 
     const updated = await repository.updateById(event.id, {
       summary: 'Updated note',
-      status: EventStatus.Confirmed,
+      status: EventStatus.CONFIRMED,
       updatedAt: new Date('2026-03-22T17:05:00.000Z'),
     });
 
     expect(updated.summary).toBe('Updated note');
-    expect(updated.status).toBe(EventStatus.Confirmed);
+    expect(updated.status).toBe(EventStatus.CONFIRMED);
 
     await repository.deleteById(event.id);
 

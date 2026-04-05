@@ -97,7 +97,7 @@ export class WorkspacesService {
     memberId: string;
     role?: WorkspaceRole;
   }): Promise<WorkspaceMember> {
-    const { workspaceId, principalId, memberId, role = WorkspaceRole.Member } = props;
+    const { workspaceId, principalId, memberId, role = WorkspaceRole.MEMBER } = props;
     await this.requireAdminAccess(workspaceId, principalId);
     this.assertRoleCanBeManaged({ newRole: role });
 
@@ -159,7 +159,7 @@ export class WorkspacesService {
       });
     }
 
-    if (currentRole === WorkspaceRole.Owner) {
+    if (currentRole === WorkspaceRole.OWNER) {
       throw InvalidInputError.create({ field: 'role', reason: 'Workspace owner role cannot be changed.' });
     }
   }

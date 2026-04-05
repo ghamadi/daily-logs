@@ -1,9 +1,8 @@
-import { sql } from 'drizzle-orm';
-import { pgTable, uuid, smallint, timestamp, uniqueIndex, index, check } from 'drizzle-orm/pg-core';
-import { sqlEnumValues } from '../utils';
+import { pgTable, uuid, timestamp, uniqueIndex, index, pgEnum } from 'drizzle-orm/pg-core';
 import { UsersTable } from './users-table';
 import { WorkspacesTable } from './workspaces-table';
-import { WorkspaceRole } from '@domains/workspaces/value-objects/workspace-role';
+
+export const workspaceUsersRoleEnum = pgEnum('role', ['owner', 'admin', 'member']);
 
 /**
  * Workspace memberships
@@ -19,15 +18,15 @@ export const WorkspaceUsersTable = pgTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => UsersTable.id, { onDelete: 'cascade' }),
-    role: smallint('role').$type<WorkspaceRole>().notNull().default(WorkspaceRole.Member),
+    role: workspaceUsersRoleEnum().notNull().default('member'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
-    check('workspace_users_role_chk', sql`${t.role} in (${sqlEnumValues(WorkspaceRole)})`),
     uniqueIndex('workspace_users_workspace_id_user_id_uq').on(t.workspaceId, t.userId),
     index('workspace_users_user_id_idx').on(t.userId),
   ],
 );
 
 export type DbWorkspaceUser = typeof WorkspaceUsersTable.$inferSelect;
+export type DbWorkspaceUserRole = DbWorkspaceUser['role'];

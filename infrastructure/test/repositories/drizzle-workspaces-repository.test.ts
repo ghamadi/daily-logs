@@ -26,7 +26,7 @@ describe('DrizzleWorkspacesRepository', () => {
 
     expect(workspace.ownerId).toBe(owner.id);
     expect(ownerMember.userId).toBe(owner.id);
-    expect(ownerMember.role).toBe(WorkspaceRole.Owner);
+    expect(ownerMember.role).toBe(WorkspaceRole.OWNER);
     expect(members).toHaveLength(1);
     expect(members[0]?.userId).toBe(owner.id);
   });
@@ -47,20 +47,20 @@ describe('DrizzleWorkspacesRepository', () => {
     const added = await repository.addMember({
       workspaceId: workspace.id,
       memberId: member.id,
-      role: WorkspaceRole.Admin,
+      role: WorkspaceRole.ADMIN,
     });
 
     const updated = await repository.updateRole({
       workspaceId: workspace.id,
       memberId: member.id,
-      role: WorkspaceRole.Member,
+      role: WorkspaceRole.MEMBER,
     });
 
     const found = await repository.findMember({ workspaceId: workspace.id, memberId: member.id });
 
-    expect(added.role).toBe(WorkspaceRole.Admin);
-    expect(updated.role).toBe(WorkspaceRole.Member);
-    expect(found?.role).toBe(WorkspaceRole.Member);
+    expect(added.role).toBe(WorkspaceRole.ADMIN);
+    expect(updated.role).toBe(WorkspaceRole.MEMBER);
+    expect(found?.role).toBe(WorkspaceRole.MEMBER);
   });
 
   it('removes members and deletes workspaces', async () => {
@@ -79,7 +79,7 @@ describe('DrizzleWorkspacesRepository', () => {
     await repository.addMember({
       workspaceId: workspace.id,
       memberId: member.id,
-      role: WorkspaceRole.Member,
+      role: WorkspaceRole.MEMBER,
     });
 
     await repository.removeMember({ workspaceId: workspace.id, memberId: member.id });
