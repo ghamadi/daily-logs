@@ -59,6 +59,12 @@ export function logError(error: unknown) {
   console.error('[Unknown Error]', String(error));
 }
 
+export function translateAccessDeniedToNotFound(error: unknown, message: string): never {
+  if (error instanceof DomainErrors.AccessDeniedError || error instanceof DomainErrors.NotFoundError) {
+    throw new DomainErrors.NotFoundError(message);
+  }
+  throw error;
+}
 // ============================================
 // Internal Helper Functions
 // ============================================

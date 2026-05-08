@@ -1,14 +1,13 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { WorkspacesService } from '@domains/workspaces/services/workspaces-service';
 import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
 import { getAuthenticatedPrincipal } from '@web/lib/utils/api/auth';
-import { withApiErrorHandler } from '@web/lib/utils/api/errors';
+import { translateAccessDeniedToNotFound, withApiErrorHandler } from '@web/lib/utils/api/errors';
 import { parseJsonBody } from '@web/lib/utils/api/request';
 import { ApiResponse, toApiResponse } from '@web/lib/utils/api/response';
-import { DomainErrors } from '@domains/lib/errors';
 import { Workspace } from '@domains/workspaces/entities/workspace';
 
 // ========================================================
@@ -30,12 +29,9 @@ export const GET = withApiErrorHandler(
 
     const service = new WorkspacesService(new DrizzleWorkspacesRepository(getDb()));
 
-    const workspace = await service.getWorkspaceById({ id, principalId: principal.id }).catch((error) => {
-      if (error instanceof DomainErrors.AccessDeniedError) {
-        throw new DomainErrors.NotFoundError('Workspace not found', { id });
-      }
-      throw error;
-    });
+    const workspace = await service
+      .getWorkspaceById({ id, principalId: principal.id })
+      .catch((error) => translateAccessDeniedToNotFound(error, `Could not find workspace with id "${id}".`));
 
     return toApiResponse(workspace);
   },
@@ -51,7 +47,12 @@ const PATCHParamsSchema = z.object({
 
 const PATCHBodySchema = z
   .object({
-    name: z.string().trim().min(1, 'Name is required.').max(160, 'Name must be 160 characters or fewer.').optional(),
+    name: z
+      .string()
+      .trim()
+      .min(1, 'Name is required.')
+      .max(160, 'Name must be 160 characters or fewer.')
+      .optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: 'At least one field must be provided to update.',
@@ -71,13 +72,31 @@ export const PATCH = withApiErrorHandler(
 
     const workspace = await service
       .updateWorkspace({ id, principalId: principal.id, input: updates })
-      .catch((error) => {
-        if (error instanceof DomainErrors.AccessDeniedError) {
-          throw new DomainErrors.NotFoundError('Workspace not found', { id });
-        }
-        throw error;
-      });
+      .catch((error) => translateAccessDeniedToNotFound(error, `Could not update workspace with id "${id}".`));
 
     return toApiResponse(workspace);
+  },
+);
+
+// ========================================================
+// DELETE /api/workspaces/[id]
+// ========================================================
+
+const DELETEParamsSchema = z.object({
+  id: z.uuid('Workspace id must be a valid UUID.'),
+});
+
+export const DELETE = withApiErrorHandler(
+  async (_request: NextRequest, context: RouteContext<'/api/workspaces/[id]'>) => {
+    const { id } = DELETEParamsSchema.parse(await context.params);
+    const principal = await getAuthenticatedPrincipal();
+
+    const service = new WorkspacesService(new DrizzleWorkspacesRepository(getDb()));
+
+    await service
+      .deleteWorkspace({ id, principalId: principal.id })
+      .catch((error) => translateAccessDeniedToNotFound(error, `Could not find workspace with id "${id}".`));
+
+    return new NextResponse(null, { status: 204 });
   },
 );
