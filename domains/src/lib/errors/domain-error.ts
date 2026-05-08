@@ -7,4 +7,12 @@ export abstract class DomainError extends Error {
     this.name = this.constructor.name;
     this.info = info;
   }
+
+  toJSON() {
+    return {
+      code: this.code,
+      message: this.message,
+      info: this.info,
+    };
+  }
 }

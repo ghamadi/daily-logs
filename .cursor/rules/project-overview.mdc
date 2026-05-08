@@ -52,7 +52,7 @@ Monorepo root contains:
 - All input validation should be done in the `web/` package using Zod. API routes are responsible for parsing and validating the request body.
 - All business logic should be done in the services of the `domains/` package.
 - All database operations should be done in the repositories (defined in the `domains/` package and implemented in the `web/` package).
-- All domains should throw a `DomainError` instance for expected errors (defined in the `domains/shared/errors` directory).
+- All domains should throw a `DomainError` instance for expected errors (defined in the `domains/lib/errors` directory).
 - All API routes should throw `ApiError` instances for expected errors (defined in the `web/lib/errors` directory).
 - All API routes should be wrapped with an error-handling higher-order function that converts `DomainError` and unexpected errors to `ApiError` instances, and returns the appropriate API response.
 - Domain services assume the input is valid and according to the expected format.

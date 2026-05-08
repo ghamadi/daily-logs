@@ -1,7 +1,7 @@
 import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleUsersRepository } from '@infrastructure/repositories/users/drizzle-users-repository';
 import { createServerClient } from '@web/lib/supabase/server';
-import { ApiErrors } from '@web/lib/errors/api-errors';
+import { ApiErrors } from '@web/lib/errors';
 import { User } from '@domains/users/entities/user';
 import { AuthProvider } from '@domains/users/value-objects/auth-provider';
 
@@ -15,16 +15,16 @@ export async function getAuthenticatedPrincipal(): Promise<User> {
   const { data, error } = await supabase.auth.getUser();
 
   if (error) {
-    throw new ApiErrors.Unauthorized('Could not authenticate user.');
+    throw new ApiErrors.UnauthorizedError('Could not authenticate user.');
   }
 
   const { email, email_confirmed_at, id: supabaseUserId } = data.user;
   if (!email) {
-    throw new ApiErrors.Unauthorized('Could not authenticate user. No email found.');
+    throw new ApiErrors.UnauthorizedError('Could not authenticate user. No email found.');
   }
 
   if (!email_confirmed_at) {
-    throw new ApiErrors.Unauthorized('Could not authenticate user. Email is not verified.');
+    throw new ApiErrors.UnauthorizedError('Could not authenticate user. Email is not verified.');
   }
 
   const usersRepository = new DrizzleUsersRepository(getDb());
@@ -35,7 +35,7 @@ export async function getAuthenticatedPrincipal(): Promise<User> {
   });
 
   if (!user) {
-    throw new ApiErrors.Unauthorized('Could not authenticate user. Invalid email or auth identity.');
+    throw new ApiErrors.UnauthorizedError('Could not authenticate user. Invalid email or auth identity.');
   }
 
   return user;

@@ -1,8 +1,4 @@
 import { randomUUID } from 'crypto';
-
-import { AccessDeniedError } from '../../shared/errors/access-denied-error';
-import { EntityNotFoundError } from '../../shared/errors/entity-not-found-error';
-import { InvalidInputError } from '../../shared/errors/invalid-input-error';
 import { Workspace } from '../entities/workspace';
 import {
   CreateWorkspaceRepoInput,
@@ -11,6 +7,7 @@ import {
   IWorkspacesRepository,
 } from '../repositories/workspaces-repository';
 import { hasAdminAccess, isOwner, WorkspaceRole } from '../value-objects/workspace-role';
+import { DomainErrors } from '@domains/lib/errors';
 
 export type CreateWorkspaceInput = Omit<CreateWorkspaceRepoInput, 'createdAt' | 'updatedAt' | 'id'> & {
   id?: string;
@@ -28,7 +25,7 @@ export class WorkspacesService {
     const { id, principalId } = props;
     const workspace = await this.findWorkspaceById(id);
     if (!workspace) {
-      throw EntityNotFoundError.create({ entity: 'Workspace', identifier: id });
+      throw new DomainErrors.NotFoundError('Workspace not found', { id });
     }
     await this.requireMembership(id, principalId);
     return workspace;
@@ -38,7 +35,7 @@ export class WorkspacesService {
     if (input.id) {
       const existingWorkspace = await this.findWorkspaceById(input.id);
       if (existingWorkspace) {
-        throw InvalidInputError.create({ field: 'id', reason: 'Workspace ID is already in use' });
+        throw new DomainErrors.InvalidInputError('Workspace with this ID already exists', { id: input.id });
       }
     }
 
@@ -60,7 +57,7 @@ export class WorkspacesService {
     const { id, principalId, input } = props;
     const workspace = await this.getWorkspaceById({ id, principalId });
     if (!workspace.isOwnedBy(principalId)) {
-      throw new AccessDeniedError('Only workspace owner can update workspace settings');
+      throw new DomainErrors.AccessDeniedError('Only workspace owner can update workspace settings');
     }
 
     return this.workspacesRepo.updateById(id, { ...input, updatedAt: new Date() });
@@ -70,7 +67,7 @@ export class WorkspacesService {
     const { id, principalId } = props;
     const workspace = await this.getWorkspaceById({ id, principalId });
     if (!workspace.isOwnedBy(principalId)) {
-      throw new AccessDeniedError('Only workspace owner can delete this workspace');
+      throw new DomainErrors.AccessDeniedError('Only workspace owner can delete this workspace');
     }
     await this.workspacesRepo.deleteById(id);
   }
@@ -103,10 +100,7 @@ export class WorkspacesService {
 
     const existingMember = await this.workspacesRepo.findMember({ workspaceId, memberId });
     if (existingMember) {
-      throw InvalidInputError.create({
-        field: 'memberId',
-        reason: 'User is already a member of this workspace',
-      });
+      throw new DomainErrors.InvalidInputError('User is already a member of this workspace');
     }
 
     return await this.workspacesRepo.addMember({ workspaceId, memberId, role });
@@ -135,7 +129,7 @@ export class WorkspacesService {
 
     const member = await this.getMemberOrThrow({ workspaceId, memberId });
     if (isOwner(member.role)) {
-      throw InvalidInputError.create({ field: 'memberId', reason: 'Workspace owner cannot be removed' });
+      throw new DomainErrors.InvalidInputError('Workspace owner cannot be removed');
     }
 
     await this.workspacesRepo.removeMember({ workspaceId, memberId });
@@ -145,7 +139,7 @@ export class WorkspacesService {
     const { workspaceId, principalId } = props;
     const member = await this.requireMembership(workspaceId, principalId);
     if (isOwner(member.role)) {
-      throw InvalidInputError.create({ field: 'principalId', reason: 'Workspace owner cannot leave workspace' });
+      throw new DomainErrors.InvalidInputError('Workspace owner cannot leave workspace');
     }
 
     await this.workspacesRepo.removeMember({ workspaceId, memberId: principalId });
@@ -156,21 +150,18 @@ export class WorkspacesService {
   private assertRoleCanBeManaged(props: { currentRole?: WorkspaceRole; newRole: WorkspaceRole }): void {
     const { currentRole, newRole } = props;
     if (isOwner(newRole)) {
-      throw InvalidInputError.create({
-        field: 'role',
-        reason: 'Owner role cannot be assigned through member management.',
-      });
+      throw new DomainErrors.InvalidInputError('Owner role cannot be assigned through member management.');
     }
 
     if (currentRole === WorkspaceRole.OWNER) {
-      throw InvalidInputError.create({ field: 'role', reason: 'Workspace owner role cannot be changed.' });
+      throw new DomainErrors.InvalidInputError('Workspace owner role cannot be changed.');
     }
   }
 
   private async requireMembership(workspaceId: string, memberId: string): Promise<WorkspaceMember> {
     const member = await this.workspacesRepo.findMember({ workspaceId, memberId });
     if (!member) {
-      throw new AccessDeniedError('User is not a member of this workspace');
+      throw new DomainErrors.AccessDeniedError('User is not a member of this workspace');
     }
     return member;
   }
@@ -178,7 +169,7 @@ export class WorkspacesService {
   private async requireAdminAccess(workspaceId: string, memberId: string): Promise<WorkspaceMember> {
     const member = await this.requireMembership(workspaceId, memberId);
     if (!hasAdminAccess(member.role)) {
-      throw new AccessDeniedError('User does not have admin access in this workspace');
+      throw new DomainErrors.AccessDeniedError('User does not have admin access in this workspace');
     }
     return member;
   }
@@ -187,7 +178,7 @@ export class WorkspacesService {
     const { workspaceId, memberId } = props;
     const member = await this.workspacesRepo.findMember({ workspaceId, memberId });
     if (!member) {
-      throw EntityNotFoundError.create({ entity: 'Workspace member', identifier: memberId });
+      throw new DomainErrors.NotFoundError('Workspace member not found', { memberId });
     }
     return member;
   }

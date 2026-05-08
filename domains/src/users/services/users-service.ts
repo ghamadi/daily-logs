@@ -1,5 +1,4 @@
-import { EntityNotFoundError } from '../../shared/errors/entity-not-found-error';
-import { InvalidInputError } from '../../shared/errors/invalid-input-error';
+import { DomainErrors } from '@domains/lib/errors';
 import { User } from '../entities/user';
 import { CreateUserRepoInput, UpdateUserRepoInput, IUsersRepository } from '../repositories/users-repository';
 
@@ -20,7 +19,7 @@ export class UsersService {
   async getUserById(id: string): Promise<User> {
     const user = await this.findUserById(id);
     if (!user) {
-      throw EntityNotFoundError.create({ entity: 'User', identifier: id });
+      throw new DomainErrors.NotFoundError('User not found', { id });
     }
     return user;
   }
@@ -28,7 +27,7 @@ export class UsersService {
   async getUserByEmail(email: string): Promise<User> {
     const user = await this.findUserByEmail(email);
     if (!user) {
-      throw EntityNotFoundError.create({ entity: 'User', identifier: email });
+      throw new DomainErrors.NotFoundError('User not found', { email });
     }
     return user;
   }
@@ -37,7 +36,7 @@ export class UsersService {
     const existingEmail = await this.findUserByEmail(input.email);
 
     if (existingEmail) {
-      throw InvalidInputError.create({ field: 'email', reason: 'Email is already in use' });
+      throw new DomainErrors.InvalidInputError('Email is already in use', { email: input.email });
     }
 
     return this.usersRepo.create(input);
