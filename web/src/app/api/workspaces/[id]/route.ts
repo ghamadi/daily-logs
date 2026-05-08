@@ -6,6 +6,7 @@ import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
 import { getAuthenticatedPrincipal } from '@web/lib/utils/api/auth';
 import { withApiErrorHandler } from '@web/lib/utils/api/errors';
+import { parseJsonBody } from '@web/lib/utils/api/request';
 import { ApiResponse, toApiResponse } from '@web/lib/utils/api/response';
 import { DomainErrors } from '@domains/lib/errors';
 import { Workspace } from '@domains/workspaces/entities/workspace';
@@ -35,6 +36,47 @@ export const GET = withApiErrorHandler(
       }
       throw error;
     });
+
+    return toApiResponse(workspace);
+  },
+);
+
+// ========================================================
+// PATCH /api/workspaces/[id]
+// ========================================================
+
+const PATCHParamsSchema = z.object({
+  id: z.uuid('Workspace id must be a valid UUID.'),
+});
+
+const PATCHBodySchema = z
+  .object({
+    name: z.string().trim().min(1, 'Name is required.').max(160, 'Name must be 160 characters or fewer.').optional(),
+  })
+  .refine((data) => Object.keys(data).length > 0, {
+    message: 'At least one field must be provided to update.',
+  });
+
+export type UpdateWorkspaceRequestBody = z.infer<typeof PATCHBodySchema>;
+
+export type UpdateWorkspaceResponseBody = ApiResponse<Workspace>;
+
+export const PATCH = withApiErrorHandler(
+  async (request: NextRequest, context: RouteContext<'/api/workspaces/[id]'>) => {
+    const { id } = PATCHParamsSchema.parse(await context.params);
+    const principal = await getAuthenticatedPrincipal();
+    const updates = await parseJsonBody(request, PATCHBodySchema);
+
+    const service = new WorkspacesService(new DrizzleWorkspacesRepository(getDb()));
+
+    const workspace = await service
+      .updateWorkspace({ id, principalId: principal.id, input: updates })
+      .catch((error) => {
+        if (error instanceof DomainErrors.AccessDeniedError) {
+          throw new DomainErrors.NotFoundError('Workspace not found', { id });
+        }
+        throw error;
+      });
 
     return toApiResponse(workspace);
   },
