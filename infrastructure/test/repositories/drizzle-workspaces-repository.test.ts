@@ -25,10 +25,10 @@ describe('DrizzleWorkspacesRepository', () => {
     const members = await repository.listMembers(workspace.id);
 
     expect(workspace.ownerId).toBe(owner.id);
-    expect(workspaceOwner.userId).toBe(owner.id);
+    expect(workspaceOwner.user.id).toBe(owner.id);
     expect(workspaceOwner.role).toBe(WorkspaceRole.OWNER);
     expect(members).toHaveLength(1);
-    expect(members[0]?.userId).toBe(owner.id);
+    expect(members[0]?.user.id).toBe(owner.id);
   });
 
   it('adds members and updates their roles', async () => {

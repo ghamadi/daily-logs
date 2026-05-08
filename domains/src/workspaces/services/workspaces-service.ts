@@ -126,7 +126,10 @@ export class WorkspacesService {
 
   async leaveWorkspace(props: { workspaceId: string; principalId: string }) {
     const { workspaceId, principalId } = props;
-    const member = await this.requireMembership(workspaceId, principalId);
+    const member = await this.workspacesRepo.findMember({ workspaceId, memberId: principalId });
+    if (!member) {
+      throw new DomainErrors.AccessDeniedError('User is not a member of this workspace');
+    }
     if (isOwner(member.role)) {
       throw new DomainErrors.InvalidInputError('Workspace owner cannot leave workspace');
     }
@@ -147,16 +150,18 @@ export class WorkspacesService {
     }
   }
 
-  private async requireMembership(workspaceId: string, memberId: string) {
+  private async requireMembership(workspaceId: string, memberId: string): Promise<void> {
+    const isMember = await this.workspacesRepo.isMember({ workspaceId, memberId });
+    if (!isMember) {
+      throw new DomainErrors.AccessDeniedError('User is not a member of this workspace');
+    }
+  }
+
+  private async requireAdminAccess(workspaceId: string, memberId: string) {
     const member = await this.workspacesRepo.findMember({ workspaceId, memberId });
     if (!member) {
       throw new DomainErrors.AccessDeniedError('User is not a member of this workspace');
     }
-    return member;
-  }
-
-  private async requireAdminAccess(workspaceId: string, memberId: string) {
-    const member = await this.requireMembership(workspaceId, memberId);
     if (!hasAdminAccess(member.role)) {
       throw new DomainErrors.AccessDeniedError('User does not have admin access in this workspace');
     }
