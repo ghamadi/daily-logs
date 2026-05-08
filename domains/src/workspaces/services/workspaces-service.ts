@@ -103,10 +103,13 @@ export class WorkspacesService {
 
     const existingMember = await this.workspacesRepo.findMember({ workspaceId, memberId });
     if (existingMember) {
-      throw InvalidInputError.create({ field: 'memberId', reason: 'User is already a member of this workspace' });
+      throw InvalidInputError.create({
+        field: 'memberId',
+        reason: 'User is already a member of this workspace',
+      });
     }
 
-    return this.workspacesRepo.addMember({ workspaceId, memberId, role });
+    return await this.workspacesRepo.addMember({ workspaceId, memberId, role });
   }
 
   async updateMemberRole(props: {
