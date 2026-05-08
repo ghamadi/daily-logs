@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
-export type ApiResponse<TData, TParams extends Record<string, unknown> = Record<string, unknown>> = {
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export type ApiResponse<TData, TParams extends Record<string, unknown> = {}> = {
   data: TData;
 } & TParams;
 
