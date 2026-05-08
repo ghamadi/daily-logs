@@ -8,8 +8,7 @@ import type {
   IEventsRepository,
   UpdateEventRepoInput,
 } from '@domains/events/repositories/events-repository';
-
-import { requireRecord } from '../../shared/require-record';
+import { assertNotNullish } from '@utils/assertions';
 
 export class DrizzleEventsRepository implements IEventsRepository {
   constructor(private readonly db: Database) {}
@@ -47,15 +46,15 @@ export class DrizzleEventsRepository implements IEventsRepository {
   }
 
   async create(input: CreateEventRepoInput) {
-    const rows = await this.db.insert(EventsTable).values(input).returning();
-    const row = requireRecord(rows[0], `Failed to create event "${input.id}".`);
+    const [row] = await this.db.insert(EventsTable).values(input).returning();
+    assertNotNullish(row, `Failed to create event "${input.id}".`);
 
     return new Event(row);
   }
 
   async updateById(id: string, input: UpdateEventRepoInput) {
-    const rows = await this.db.update(EventsTable).set(input).where(eq(EventsTable.id, id)).returning();
-    const row = requireRecord(rows[0], `Failed to update event "${id}".`);
+    const [row] = await this.db.update(EventsTable).set(input).where(eq(EventsTable.id, id)).returning();
+    assertNotNullish(row, `Failed to update event "${id}".`);
 
     return new Event(row);
   }

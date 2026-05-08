@@ -1,9 +1,7 @@
 import { randomUUID } from 'crypto';
-import { Workspace } from '../entities/workspace';
 import {
   CreateWorkspaceRepoInput,
   UpdateWorkspaceRepoInput,
-  WorkspaceMember,
   IWorkspacesRepository,
 } from '../repositories/workspaces-repository';
 import { hasAdminAccess, isOwner, WorkspaceRole } from '../value-objects/workspace-role';
@@ -17,11 +15,15 @@ export type UpdateWorkspaceInput = Omit<UpdateWorkspaceRepoInput, 'updatedAt'>;
 export class WorkspacesService {
   constructor(private readonly workspacesRepo: IWorkspacesRepository) {}
 
-  findWorkspaceById(id: string): Promise<Workspace | null> {
+  findWorkspaceById(id: string) {
     return this.workspacesRepo.findById(id);
   }
 
-  async getWorkspaceById(props: { id: string; principalId: string }): Promise<Workspace> {
+  listWorkspacesForUser(userId: string) {
+    return this.workspacesRepo.listForUser(userId);
+  }
+
+  async getWorkspaceById(props: { id: string; principalId: string }) {
     const { id, principalId } = props;
     const workspace = await this.findWorkspaceById(id);
     if (!workspace) {
@@ -31,7 +33,7 @@ export class WorkspacesService {
     return workspace;
   }
 
-  async createWorkspaceWithOwner(input: CreateWorkspaceInput): Promise<Workspace> {
+  async createWorkspaceWithOwner(input: CreateWorkspaceInput) {
     if (input.id) {
       const existingWorkspace = await this.findWorkspaceById(input.id);
       if (existingWorkspace) {
@@ -49,11 +51,7 @@ export class WorkspacesService {
     });
   }
 
-  async updateWorkspace(props: {
-    id: string;
-    principalId: string;
-    input: UpdateWorkspaceInput;
-  }): Promise<Workspace> {
+  async updateWorkspace(props: { id: string; principalId: string; input: UpdateWorkspaceInput }) {
     const { id, principalId, input } = props;
     const workspace = await this.getWorkspaceById({ id, principalId });
     if (!workspace.isOwnedBy(principalId)) {
@@ -63,7 +61,7 @@ export class WorkspacesService {
     return this.workspacesRepo.updateById(id, { ...input, updatedAt: new Date() });
   }
 
-  async deleteWorkspace(props: { id: string; principalId: string }): Promise<void> {
+  async deleteWorkspace(props: { id: string; principalId: string }) {
     const { id, principalId } = props;
     const workspace = await this.getWorkspaceById({ id, principalId });
     if (!workspace.isOwnedBy(principalId)) {
@@ -72,28 +70,19 @@ export class WorkspacesService {
     await this.workspacesRepo.deleteById(id);
   }
 
-  async listMembers(props: { workspaceId: string; principalId: string }): Promise<WorkspaceMember[]> {
+  async listMembers(props: { workspaceId: string; principalId: string }) {
     const { workspaceId, principalId } = props;
     await this.requireMembership(workspaceId, principalId);
     return this.workspacesRepo.listMembers(workspaceId);
   }
 
-  async getMember(props: {
-    workspaceId: string;
-    principalId: string;
-    memberId: string;
-  }): Promise<WorkspaceMember> {
+  async getMember(props: { workspaceId: string; principalId: string; memberId: string }) {
     const { workspaceId, principalId, memberId } = props;
     await this.requireMembership(workspaceId, principalId);
     return this.getMemberOrThrow({ workspaceId, memberId });
   }
 
-  async addMember(props: {
-    workspaceId: string;
-    principalId: string;
-    memberId: string;
-    role?: WorkspaceRole;
-  }): Promise<WorkspaceMember> {
+  async addMember(props: { workspaceId: string; principalId: string; memberId: string; role?: WorkspaceRole }) {
     const { workspaceId, principalId, memberId, role = WorkspaceRole.MEMBER } = props;
     await this.requireAdminAccess(workspaceId, principalId);
     this.assertRoleCanBeManaged({ newRole: role });
@@ -111,7 +100,7 @@ export class WorkspacesService {
     principalId: string;
     memberId: string;
     role: WorkspaceRole;
-  }): Promise<WorkspaceMember> {
+  }) {
     const { workspaceId, principalId, memberId, role } = props;
     const [member] = await Promise.all([
       this.getMemberOrThrow({ workspaceId, memberId }),
@@ -123,7 +112,7 @@ export class WorkspacesService {
     return this.workspacesRepo.updateRole({ workspaceId, memberId, role });
   }
 
-  async removeMember(props: { workspaceId: string; principalId: string; memberId: string }): Promise<void> {
+  async removeMember(props: { workspaceId: string; principalId: string; memberId: string }) {
     const { workspaceId, principalId, memberId } = props;
     await this.requireAdminAccess(workspaceId, principalId);
 
@@ -135,7 +124,7 @@ export class WorkspacesService {
     await this.workspacesRepo.removeMember({ workspaceId, memberId });
   }
 
-  async leaveWorkspace(props: { workspaceId: string; principalId: string }): Promise<void> {
+  async leaveWorkspace(props: { workspaceId: string; principalId: string }) {
     const { workspaceId, principalId } = props;
     const member = await this.requireMembership(workspaceId, principalId);
     if (isOwner(member.role)) {
@@ -158,7 +147,7 @@ export class WorkspacesService {
     }
   }
 
-  private async requireMembership(workspaceId: string, memberId: string): Promise<WorkspaceMember> {
+  private async requireMembership(workspaceId: string, memberId: string) {
     const member = await this.workspacesRepo.findMember({ workspaceId, memberId });
     if (!member) {
       throw new DomainErrors.AccessDeniedError('User is not a member of this workspace');
@@ -166,7 +155,7 @@ export class WorkspacesService {
     return member;
   }
 
-  private async requireAdminAccess(workspaceId: string, memberId: string): Promise<WorkspaceMember> {
+  private async requireAdminAccess(workspaceId: string, memberId: string) {
     const member = await this.requireMembership(workspaceId, memberId);
     if (!hasAdminAccess(member.role)) {
       throw new DomainErrors.AccessDeniedError('User does not have admin access in this workspace');
@@ -174,7 +163,7 @@ export class WorkspacesService {
     return member;
   }
 
-  private async getMemberOrThrow(props: { workspaceId: string; memberId: string }): Promise<WorkspaceMember> {
+  private async getMemberOrThrow(props: { workspaceId: string; memberId: string }) {
     const { workspaceId, memberId } = props;
     const member = await this.workspacesRepo.findMember({ workspaceId, memberId });
     if (!member) {

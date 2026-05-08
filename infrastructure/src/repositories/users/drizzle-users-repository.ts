@@ -8,8 +8,7 @@ import type {
   IUsersRepository,
   FindByEmailOptions,
 } from '@domains/users/repositories/users-repository';
-import { requireRecord } from '../../shared/require-record';
-import { assertNotNullish } from '@utils/ts-utils';
+import { assertNotNullish } from '@utils/assertions';
 
 export class DrizzleUsersRepository implements IUsersRepository {
   constructor(private readonly db: Database) {}
@@ -59,12 +58,13 @@ export class DrizzleUsersRepository implements IUsersRepository {
   }
 
   async updateById(id: string, input: UpdateUserRepoInput) {
-    const rows = await this.db
+    const [row] = await this.db
       .update(UsersTable)
       .set({ ...input, updatedAt: new Date() })
       .where(eq(UsersTable.id, id))
       .returning();
-    const row = requireRecord(rows[0], `Failed to update user "${id}".`);
+
+    assertNotNullish(row, `Failed to update user "${id}".`);
 
     return new User(row);
   }

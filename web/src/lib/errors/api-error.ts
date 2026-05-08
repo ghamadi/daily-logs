@@ -10,10 +10,7 @@ export class ApiError extends Error {
   readonly info?: Record<string, unknown>;
   readonly headers?: Record<string, string>;
 
-  constructor(
-    message: string,
-    { status, info, name, headers }: ApiErrorOptions = {},
-  ) {
+  constructor(message: string, { status, info, name, headers }: ApiErrorOptions = {}) {
     super(message);
     this.name = name ?? 'ApiError';
     this.status = status ?? 500;
@@ -30,9 +27,7 @@ export class ApiError extends Error {
     };
   }
 
-  static fromJSON(
-    json: ReturnType<typeof ApiError.prototype.toJSON>,
-  ): ApiError {
+  static fromJSON(json: ReturnType<typeof ApiError.prototype.toJSON>): ApiError {
     if (!isApiErrorJson(json)) {
       return new ApiError('Unknown API error.', {
         status: 500,
@@ -51,9 +46,7 @@ export class ApiError extends Error {
 /**
  * Helper function to check if a JSON object is a valid ApiError JSON.
  */
-function isApiErrorJson(
-  json: unknown,
-): json is ReturnType<typeof ApiError.prototype.toJSON> {
+function isApiErrorJson(json: unknown): json is ReturnType<typeof ApiError.prototype.toJSON> {
   return (
     typeof json === 'object' &&
     json !== null &&

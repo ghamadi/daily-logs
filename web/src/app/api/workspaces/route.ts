@@ -34,3 +34,18 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
 
   return toApiResponse(workspace, { responseInit: { status: 201 } });
 });
+
+// ========================================================
+// GET /api/workspaces
+// ========================================================
+
+export type ListWorkspacesResponseBody = ApiResponse<Workspace[]>;
+
+export const GET = withApiErrorHandler(async () => {
+  const principal = await getAuthenticatedPrincipal();
+
+  const service = new WorkspacesService(new DrizzleWorkspacesRepository(getDb()));
+  const workspaces = await service.listWorkspacesForUser(principal.id);
+
+  return toApiResponse(workspaces);
+});

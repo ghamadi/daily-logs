@@ -21,12 +21,12 @@ describe('DrizzleWorkspacesRepository', () => {
       updatedAt,
     });
 
-    const ownerMember = await repository.getOwner({ workspaceId: workspace.id });
+    const workspaceOwner = await repository.getOwner({ workspaceId: workspace.id });
     const members = await repository.listMembers(workspace.id);
 
     expect(workspace.ownerId).toBe(owner.id);
-    expect(ownerMember.userId).toBe(owner.id);
-    expect(ownerMember.role).toBe(WorkspaceRole.OWNER);
+    expect(workspaceOwner.userId).toBe(owner.id);
+    expect(workspaceOwner.role).toBe(WorkspaceRole.OWNER);
     expect(members).toHaveLength(1);
     expect(members[0]?.userId).toBe(owner.id);
   });
