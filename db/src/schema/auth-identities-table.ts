@@ -4,6 +4,8 @@ import { UsersTable } from './users-table';
 
 /**
  * Auth identities
+ *
+ * This table links the internal user id to the external auth provider id (e.g., Supabase Auth)
  */
 export const AuthIdentitiesTable = pgTable(
   'auth_identities',

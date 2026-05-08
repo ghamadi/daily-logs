@@ -2,7 +2,7 @@ import { pgTable, uuid, timestamp, uniqueIndex, index, pgEnum } from 'drizzle-or
 import { UsersTable } from './users-table';
 import { WorkspacesTable } from './workspaces-table';
 
-export const workspaceUsersRoleEnum = pgEnum('role', ['owner', 'admin', 'member']);
+export const WORKSPACE_USER_ROLES = ['owner', 'admin', 'member'] as const;
 
 /**
  * Workspace memberships
@@ -18,7 +18,7 @@ export const WorkspaceUsersTable = pgTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => UsersTable.id, { onDelete: 'cascade' }),
-    role: workspaceUsersRoleEnum().notNull().default('member'),
+    role: pgEnum('role', WORKSPACE_USER_ROLES)().notNull().default('member'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

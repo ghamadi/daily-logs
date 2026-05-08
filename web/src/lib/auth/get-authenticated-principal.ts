@@ -7,7 +7,8 @@ import { AuthProvider } from '@domains/users/value-objects/auth-provider';
 
 /**
  * Resolve the current authenticated Supabase user into a domain principal.
- * This utility is intended for server components and Node.js route handlers, not middleware/proxy code.
+ * This utility is intended for server components and Node.js route handlers,
+ * not Edge runtime code such as proxy/middleware or edge route handlers.
  */
 export async function getAuthenticatedPrincipal(): Promise<User> {
   const supabase = await createServerClient();
@@ -17,7 +18,7 @@ export async function getAuthenticatedPrincipal(): Promise<User> {
     throw new ApiErrors.Unauthorized('Could not authenticate user.');
   }
 
-  const { email, email_confirmed_at } = data.user;
+  const { email, email_confirmed_at, id: supabaseUserId } = data.user;
   if (!email) {
     throw new ApiErrors.Unauthorized('Could not authenticate user. No email found.');
   }
@@ -26,13 +27,11 @@ export async function getAuthenticatedPrincipal(): Promise<User> {
     throw new ApiErrors.Unauthorized('Could not authenticate user. Email is not verified.');
   }
 
-  const { db } = getDb();
-  const usersRepository = new DrizzleUsersRepository(db);
+  const usersRepository = new DrizzleUsersRepository(getDb());
 
-  // Only get the user if they have a Supabase auth identity.
   const user = await usersRepository.findByEmail(email, {
     provider: AuthProvider.Supabase,
-    providerUserId: data.user.id,
+    providerUserId: supabaseUserId,
   });
 
   if (!user) {

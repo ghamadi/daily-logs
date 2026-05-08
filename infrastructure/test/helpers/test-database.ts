@@ -2,7 +2,7 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { sql } from 'drizzle-orm';
 import { createDb } from '@db/client/create-db';
 
-const DEFAULT_TEST_DATABASE_URL = 'postgresql://postgres:postgres@localhost:5443/daily_logs_test';
+const DEFAULT_TEST_DATABASE_URL = 'postgresql://postgres:postgres@localhost:5443/test_db';
 
 let dbContext: ReturnType<typeof createDb> | undefined;
 

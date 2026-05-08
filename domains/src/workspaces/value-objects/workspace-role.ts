@@ -6,6 +6,7 @@ export const WorkspaceRole = {
   ADMIN: 'admin',
   OWNER: 'owner',
 } as const satisfies Record<string, DbWorkspaceUserRole>;
+
 export type WorkspaceRole = Enum<typeof WorkspaceRole>;
 
 export function isAdmin(role: WorkspaceRole): boolean {
