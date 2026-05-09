@@ -15,6 +15,12 @@ export type CreateChatInput = {
 
 export type UpdateChatInput = UpdateChatRepoInput;
 
+type ChatScopedActionParams = {
+  chatId: string;
+  workspaceId: string;
+  principalId: string;
+};
+
 export class ChatsService {
   constructor(
     private readonly chatsRepo: IChatRepository,
@@ -40,36 +46,36 @@ export class ChatsService {
     return this.chatsRepo.listOwnerChats({ workspaceId, ownerUserId: principalId });
   }
 
-  async getChatById(props: { chatId: string; principalId: string }) {
-    return this.requireOwnedChat(props.chatId, props.principalId);
+  async getChatById(props: ChatScopedActionParams) {
+    return this.requireOwnedChat(props);
   }
 
-  async updateChat(props: { chatId: string; principalId: string; input: UpdateChatInput }) {
-    const { chatId, principalId, input } = props;
-    await this.requireOwnedChat(chatId, principalId);
+  async updateChat(props: ChatScopedActionParams & { input: UpdateChatInput }) {
+    const { chatId, workspaceId, principalId, input } = props;
+    await this.requireOwnedChat({ chatId, workspaceId, principalId });
 
     return this.chatsRepo.updateChat(chatId, input);
   }
 
-  async archiveChat(props: { chatId: string; principalId: string }) {
-    const { chatId, principalId } = props;
-    await this.requireOwnedChat(chatId, principalId);
+  async archiveChat(props: ChatScopedActionParams) {
+    const { chatId, workspaceId, principalId } = props;
+    await this.requireOwnedChat({ chatId, workspaceId, principalId });
 
     await this.chatsRepo.archiveChat(chatId);
   }
 
-  async loadChatMessages(props: { chatId: string; principalId: string }) {
-    const { chatId, principalId } = props;
-    await this.requireOwnedChat(chatId, principalId);
+  async loadChatMessages(props: ChatScopedActionParams) {
+    const { chatId, workspaceId, principalId } = props;
+    await this.requireOwnedChat({ chatId, workspaceId, principalId });
 
     return this.chatsRepo.loadMessages(chatId);
   }
 
-  async appendMessages(props: { chatId: string; principalId: string; messages: AppendMessageInput[] }) {
-    const { chatId, principalId, messages } = props;
-    await this.requireOwnedChat(chatId, principalId);
+  async appendMessages(props: ChatScopedActionParams & { messages: AppendMessageInput[] }) {
+    const { chatId, workspaceId, principalId, messages } = props;
+    await this.requireOwnedChat({ chatId, workspaceId, principalId });
 
-    await this.chatsRepo.appendMessages({ chatId: chatId, messages });
+    await this.chatsRepo.appendMessages({ chatId, messages });
   }
 
   // ── helpers ──────────────────────────────────────────────
@@ -81,13 +87,17 @@ export class ChatsService {
     }
   }
 
-  private async requireOwnedChat(chatId: string, principalId: string) {
+  private async requireOwnedChat(props: ChatScopedActionParams) {
+    const { chatId, workspaceId, principalId } = props;
     const chat = await this.chatsRepo.findChatById(chatId);
-    if (!chat) {
+
+    // A chat in a different workspace is treated as not-found here so we never
+    // confirm cross-workspace existence to a caller who shouldn't know.
+    if (!chat || chat.workspaceId !== workspaceId) {
       throw new DomainErrors.NotFoundError('Chat not found', { id: chatId });
     }
 
-    await this.assertWorkspaceMembership(chat.workspaceId, principalId);
+    await this.assertWorkspaceMembership(workspaceId, principalId);
 
     if (!chat.isOwnedBy(principalId)) {
       throw new DomainErrors.AccessDeniedError('Only the chat owner can access this chat');

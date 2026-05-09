@@ -11,11 +11,11 @@ import { ApiResponse, toApiResponse } from '@web/lib/utils/api/response';
 import { Workspace } from '@domains/workspaces/entities/workspace';
 
 // ========================================================
-// GET /api/workspaces/[id]
+// GET /api/workspaces/[workspaceId]
 // ========================================================
 
 const GETParamsSchema = z.object({
-  id: z.uuid('Workspace id must be a valid UUID.'),
+  workspaceId: z.uuid('Workspace id must be a valid UUID.'),
 });
 
 export type GetWorkspaceByIdRequestParams = z.infer<typeof GETParamsSchema>;
@@ -23,16 +23,19 @@ export type GetWorkspaceByIdRequestParams = z.infer<typeof GETParamsSchema>;
 export type GetWorkspaceByIdResponseBody = ApiResponse<Workspace>;
 
 export const GET = withApiErrorHandler(
-  async (_request: NextRequest, context: RouteContext<'/api/workspaces/[id]'>) => {
-    const { id } = GETParamsSchema.parse(await context.params);
+  async (_request: NextRequest, context: RouteContext<'/api/workspaces/[workspaceId]'>) => {
+    const { workspaceId } = GETParamsSchema.parse(await context.params);
     const principal = await getAuthenticatedPrincipal();
 
     const service = new WorkspacesService(new DrizzleWorkspacesRepository(getDb()));
 
     const workspace = await service
-      .getWorkspaceById({ id, principalId: principal.id })
+      .getWorkspaceById({ id: workspaceId, principalId: principal.id })
       .catch((error) =>
-        translateAccessDeniedToNotFound(error, `Could not find workspace with id "${id}".`),
+        translateAccessDeniedToNotFound(
+          error,
+          `Could not find workspace with id "${workspaceId}".`,
+        ),
       );
 
     return toApiResponse(workspace);
@@ -40,11 +43,11 @@ export const GET = withApiErrorHandler(
 );
 
 // ========================================================
-// PATCH /api/workspaces/[id]
+// PATCH /api/workspaces/[workspaceId]
 // ========================================================
 
 const PATCHParamsSchema = z.object({
-  id: z.uuid('Workspace id must be a valid UUID.'),
+  workspaceId: z.uuid('Workspace id must be a valid UUID.'),
 });
 
 const PATCHBodySchema = z
@@ -65,17 +68,20 @@ export type UpdateWorkspaceRequestBody = z.infer<typeof PATCHBodySchema>;
 export type UpdateWorkspaceResponseBody = ApiResponse<Workspace>;
 
 export const PATCH = withApiErrorHandler(
-  async (request: NextRequest, context: RouteContext<'/api/workspaces/[id]'>) => {
-    const { id } = PATCHParamsSchema.parse(await context.params);
+  async (request: NextRequest, context: RouteContext<'/api/workspaces/[workspaceId]'>) => {
+    const { workspaceId } = PATCHParamsSchema.parse(await context.params);
     const principal = await getAuthenticatedPrincipal();
     const updates = await parseJsonBody(request, PATCHBodySchema);
 
     const service = new WorkspacesService(new DrizzleWorkspacesRepository(getDb()));
 
     const workspace = await service
-      .updateWorkspace({ id, principalId: principal.id, input: updates })
+      .updateWorkspace({ id: workspaceId, principalId: principal.id, input: updates })
       .catch((error) =>
-        translateAccessDeniedToNotFound(error, `Could not update workspace with id "${id}".`),
+        translateAccessDeniedToNotFound(
+          error,
+          `Could not update workspace with id "${workspaceId}".`,
+        ),
       );
 
     return toApiResponse(workspace);
@@ -83,24 +89,27 @@ export const PATCH = withApiErrorHandler(
 );
 
 // ========================================================
-// DELETE /api/workspaces/[id]
+// DELETE /api/workspaces/[workspaceId]
 // ========================================================
 
 const DELETEParamsSchema = z.object({
-  id: z.uuid('Workspace id must be a valid UUID.'),
+  workspaceId: z.uuid('Workspace id must be a valid UUID.'),
 });
 
 export const DELETE = withApiErrorHandler(
-  async (_request: NextRequest, context: RouteContext<'/api/workspaces/[id]'>) => {
-    const { id } = DELETEParamsSchema.parse(await context.params);
+  async (_request: NextRequest, context: RouteContext<'/api/workspaces/[workspaceId]'>) => {
+    const { workspaceId } = DELETEParamsSchema.parse(await context.params);
     const principal = await getAuthenticatedPrincipal();
 
     const service = new WorkspacesService(new DrizzleWorkspacesRepository(getDb()));
 
     await service
-      .deleteWorkspace({ id, principalId: principal.id })
+      .deleteWorkspace({ id: workspaceId, principalId: principal.id })
       .catch((error) =>
-        translateAccessDeniedToNotFound(error, `Could not find workspace with id "${id}".`),
+        translateAccessDeniedToNotFound(
+          error,
+          `Could not find workspace with id "${workspaceId}".`,
+        ),
       );
 
     return new NextResponse(null, { status: 204 });

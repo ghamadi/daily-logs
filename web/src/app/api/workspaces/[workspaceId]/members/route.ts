@@ -12,11 +12,11 @@ import { parseJsonBody } from '@web/lib/utils/api/request';
 import { ApiResponse, toApiResponse } from '@web/lib/utils/api/response';
 
 // ========================================================
-// GET /api/workspaces/[id]/members
+// GET /api/workspaces/[workspaceId]/members
 // ========================================================
 
 const GETParamsSchema = z.object({
-  id: z.uuid('Workspace id must be a valid UUID.'),
+  workspaceId: z.uuid('Workspace id must be a valid UUID.'),
 });
 
 export type ListWorkspaceMembersRequestParams = z.infer<typeof GETParamsSchema>;
@@ -24,16 +24,22 @@ export type ListWorkspaceMembersRequestParams = z.infer<typeof GETParamsSchema>;
 export type ListWorkspaceMembersResponseBody = ApiResponse<WorkspaceMember[]>;
 
 export const GET = withApiErrorHandler(
-  async (_request: NextRequest, context: RouteContext<'/api/workspaces/[id]/members'>) => {
-    const { id } = GETParamsSchema.parse(await context.params);
+  async (
+    _request: NextRequest,
+    context: RouteContext<'/api/workspaces/[workspaceId]/members'>,
+  ) => {
+    const { workspaceId } = GETParamsSchema.parse(await context.params);
     const principal = await getAuthenticatedPrincipal();
 
     const service = new WorkspacesService(new DrizzleWorkspacesRepository(getDb()));
 
     const members = await service
-      .listMembers({ workspaceId: id, principalId: principal.id })
+      .listMembers({ workspaceId, principalId: principal.id })
       .catch((error) =>
-        translateAccessDeniedToNotFound(error, `Could not find workspace with id "${id}".`),
+        translateAccessDeniedToNotFound(
+          error,
+          `Could not find workspace with id "${workspaceId}".`,
+        ),
       );
 
     return toApiResponse(members);
@@ -41,11 +47,11 @@ export const GET = withApiErrorHandler(
 );
 
 // ========================================================
-// POST /api/workspaces/[id]/members
+// POST /api/workspaces/[workspaceId]/members
 // ========================================================
 
 const POSTParamsSchema = z.object({
-  id: z.uuid('Workspace id must be a valid UUID.'),
+  workspaceId: z.uuid('Workspace id must be a valid UUID.'),
 });
 
 // Owner role is intentionally excluded — ownership cannot be assigned through member management.
@@ -63,17 +69,23 @@ export type AddWorkspaceMemberRequestBody = z.infer<typeof POSTBodySchema>;
 export type AddWorkspaceMemberResponseBody = ApiResponse<WorkspaceMember>;
 
 export const POST = withApiErrorHandler(
-  async (request: NextRequest, context: RouteContext<'/api/workspaces/[id]/members'>) => {
-    const { id } = POSTParamsSchema.parse(await context.params);
+  async (
+    request: NextRequest,
+    context: RouteContext<'/api/workspaces/[workspaceId]/members'>,
+  ) => {
+    const { workspaceId } = POSTParamsSchema.parse(await context.params);
     const principal = await getAuthenticatedPrincipal();
     const { memberId, role } = await parseJsonBody(request, POSTBodySchema);
 
     const service = new WorkspacesService(new DrizzleWorkspacesRepository(getDb()));
 
     const member = await service
-      .addMember({ workspaceId: id, principalId: principal.id, memberId, role })
+      .addMember({ workspaceId, principalId: principal.id, memberId, role })
       .catch((error) =>
-        translateAccessDeniedToNotFound(error, `Could not find workspace with id "${id}".`),
+        translateAccessDeniedToNotFound(
+          error,
+          `Could not find workspace with id "${workspaceId}".`,
+        ),
       );
 
     return toApiResponse(member, { responseInit: { status: 201 } });
