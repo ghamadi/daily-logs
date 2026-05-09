@@ -29,7 +29,15 @@ export interface IWorkspacesRepository {
   findMember(params: { workspaceId: string; memberId: string }): Promise<WorkspaceMember | null>;
   isMember(params: { workspaceId: string; memberId: string }): Promise<boolean>;
   getOwner(params: { workspaceId: string }): Promise<WorkspaceMember>;
-  addMember(params: { workspaceId: string; memberId: string; role: WorkspaceRole }): Promise<WorkspaceMember>;
-  updateRole(params: { workspaceId: string; memberId: string; role: WorkspaceRole }): Promise<WorkspaceMember>;
+  addMember(params: {
+    workspaceId: string;
+    memberId: string;
+    role: WorkspaceRole;
+  }): Promise<WorkspaceMember>;
+  updateRole(params: {
+    workspaceId: string;
+    memberId: string;
+    role: WorkspaceRole;
+  }): Promise<WorkspaceMember>;
   removeMember(params: { workspaceId: string; memberId: string }): Promise<void>;
 }

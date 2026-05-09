@@ -17,7 +17,9 @@ export function toApiResponse<TData, TParams extends Record<string, unknown>>(
   const { params, responseInit } = options ?? {};
 
   if (params && 'data' in params) {
-    throw new Error('`data` cannot be in the `params` object. We reserve the `data` key for the main payload.');
+    throw new Error(
+      '`data` cannot be in the `params` object. We reserve the `data` key for the main payload.',
+    );
   }
 
   return NextResponse.json({ data, ...params } satisfies ApiResponse<TData>, responseInit);

@@ -31,7 +31,9 @@ export const GET = withApiErrorHandler(
 
     const workspace = await service
       .getWorkspaceById({ id, principalId: principal.id })
-      .catch((error) => translateAccessDeniedToNotFound(error, `Could not find workspace with id "${id}".`));
+      .catch((error) =>
+        translateAccessDeniedToNotFound(error, `Could not find workspace with id "${id}".`),
+      );
 
     return toApiResponse(workspace);
   },
@@ -72,7 +74,9 @@ export const PATCH = withApiErrorHandler(
 
     const workspace = await service
       .updateWorkspace({ id, principalId: principal.id, input: updates })
-      .catch((error) => translateAccessDeniedToNotFound(error, `Could not update workspace with id "${id}".`));
+      .catch((error) =>
+        translateAccessDeniedToNotFound(error, `Could not update workspace with id "${id}".`),
+      );
 
     return toApiResponse(workspace);
   },
@@ -95,7 +99,9 @@ export const DELETE = withApiErrorHandler(
 
     await service
       .deleteWorkspace({ id, principalId: principal.id })
-      .catch((error) => translateAccessDeniedToNotFound(error, `Could not find workspace with id "${id}".`));
+      .catch((error) =>
+        translateAccessDeniedToNotFound(error, `Could not find workspace with id "${id}".`),
+      );
 
     return new NextResponse(null, { status: 204 });
   },

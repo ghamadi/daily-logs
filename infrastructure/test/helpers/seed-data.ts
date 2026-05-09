@@ -1,6 +1,12 @@
 import { randomUUID } from 'node:crypto';
 
-import { AuthIdentitiesTable, EventsTable, UsersTable, WorkspaceUsersTable, WorkspacesTable } from '@db/schema';
+import {
+  AuthIdentitiesTable,
+  EventsTable,
+  UsersTable,
+  WorkspaceUsersTable,
+  WorkspacesTable,
+} from '@db/schema';
 import { EventSource } from '@domains/events/value-objects/event-source';
 import { EventStatus } from '@domains/events/value-objects/event-status';
 import { AuthProvider } from '@domains/users/value-objects/auth-provider';

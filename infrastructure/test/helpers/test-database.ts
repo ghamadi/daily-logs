@@ -15,7 +15,10 @@ export function getTestDatabase(): ReturnType<typeof createDb> {
   return dbContext;
 }
 
-export async function waitForTestDatabase(props?: { retries?: number; delayMs?: number }): Promise<void> {
+export async function waitForTestDatabase(props?: {
+  retries?: number;
+  delayMs?: number;
+}): Promise<void> {
   const retries = props?.retries ?? 30;
   const delayMs = props?.delayMs ?? 1_000;
 
@@ -36,7 +39,9 @@ export async function waitForTestDatabase(props?: { retries?: number; delayMs?: 
     }
   }
 
-  throw new Error(`Unable to connect to the test database at ${getTestDatabaseUrl()}.`, { cause: lastError });
+  throw new Error(`Unable to connect to the test database at ${getTestDatabaseUrl()}.`, {
+    cause: lastError,
+  });
 }
 
 export async function resetTestDatabase(): Promise<void> {

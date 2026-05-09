@@ -23,11 +23,17 @@ export const WorkspacesRelations = relations(WorkspacesTable, ({ many, one }) =>
 }));
 
 export const WorkspaceUsersRelations = relations(WorkspaceUsersTable, ({ one }) => ({
-  workspace: one(WorkspacesTable, { fields: [WorkspaceUsersTable.workspaceId], references: [WorkspacesTable.id] }),
+  workspace: one(WorkspacesTable, {
+    fields: [WorkspaceUsersTable.workspaceId],
+    references: [WorkspacesTable.id],
+  }),
   user: one(UsersTable, { fields: [WorkspaceUsersTable.userId], references: [UsersTable.id] }),
 }));
 
 export const EventsRelations = relations(EventsTable, ({ one }) => ({
-  workspace: one(WorkspacesTable, { fields: [EventsTable.workspaceId], references: [WorkspacesTable.id] }),
+  workspace: one(WorkspacesTable, {
+    fields: [EventsTable.workspaceId],
+    references: [WorkspacesTable.id],
+  }),
   user: one(UsersTable, { fields: [EventsTable.userId], references: [UsersTable.id] }),
 }));

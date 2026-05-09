@@ -10,7 +10,10 @@ import {
 } from '../repositories/events-repository';
 import { DomainErrors } from '@domains/lib/errors';
 
-export type CreateEventInput = Omit<CreateEventRepoInput, 'createdAt' | 'updatedAt' | 'userId' | 'workspaceId'>;
+export type CreateEventInput = Omit<
+  CreateEventRepoInput,
+  'createdAt' | 'updatedAt' | 'userId' | 'workspaceId'
+>;
 export type UpdateEventInput = Partial<Omit<UpdateEventRepoInput, 'createdAt' | 'updatedAt' | 'id'>>;
 
 export class EventsService {
@@ -57,7 +60,11 @@ export class EventsService {
     });
   }
 
-  async updateEvent(props: { id: string; principalId: string; input: UpdateEventInput }): Promise<Event> {
+  async updateEvent(props: {
+    id: string;
+    principalId: string;
+    input: UpdateEventInput;
+  }): Promise<Event> {
     const { id, principalId, input } = props;
     const event = await this.getEventById({ id, principalId });
     return this.updateEventHelper({ event, principalId, input });

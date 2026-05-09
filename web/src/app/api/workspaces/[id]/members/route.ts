@@ -32,7 +32,9 @@ export const GET = withApiErrorHandler(
 
     const members = await service
       .listMembers({ workspaceId: id, principalId: principal.id })
-      .catch((error) => translateAccessDeniedToNotFound(error, `Could not find workspace with id "${id}".`));
+      .catch((error) =>
+        translateAccessDeniedToNotFound(error, `Could not find workspace with id "${id}".`),
+      );
 
     return toApiResponse(members);
   },
@@ -70,7 +72,9 @@ export const POST = withApiErrorHandler(
 
     const member = await service
       .addMember({ workspaceId: id, principalId: principal.id, memberId, role })
-      .catch((error) => translateAccessDeniedToNotFound(error, `Could not find workspace with id "${id}".`));
+      .catch((error) =>
+        translateAccessDeniedToNotFound(error, `Could not find workspace with id "${id}".`),
+      );
 
     return toApiResponse(member, { responseInit: { status: 201 } });
   },

@@ -1,6 +1,10 @@
 import { DomainErrors } from '@domains/lib/errors';
 import { User } from '../entities/user';
-import { CreateUserRepoInput, UpdateUserRepoInput, IUsersRepository } from '../repositories/users-repository';
+import {
+  CreateUserRepoInput,
+  UpdateUserRepoInput,
+  IUsersRepository,
+} from '../repositories/users-repository';
 
 export type CreateUserInput = CreateUserRepoInput;
 export type UpdateUserInput = UpdateUserRepoInput;

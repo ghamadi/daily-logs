@@ -37,7 +37,9 @@ export class WorkspacesService {
     if (input.id) {
       const existingWorkspace = await this.findWorkspaceById(input.id);
       if (existingWorkspace) {
-        throw new DomainErrors.InvalidInputError('Workspace with this ID already exists', { id: input.id });
+        throw new DomainErrors.InvalidInputError('Workspace with this ID already exists', {
+          id: input.id,
+        });
       }
     }
 
@@ -82,7 +84,12 @@ export class WorkspacesService {
     return this.getMemberOrThrow({ workspaceId, memberId });
   }
 
-  async addMember(props: { workspaceId: string; principalId: string; memberId: string; role?: WorkspaceRole }) {
+  async addMember(props: {
+    workspaceId: string;
+    principalId: string;
+    memberId: string;
+    role?: WorkspaceRole;
+  }) {
     const { workspaceId, principalId, memberId, role = WorkspaceRole.MEMBER } = props;
     await this.requireAdminAccess(workspaceId, principalId);
     this.assertRoleCanBeManaged({ newRole: role });
@@ -142,7 +149,9 @@ export class WorkspacesService {
   private assertRoleCanBeManaged(props: { currentRole?: WorkspaceRole; newRole: WorkspaceRole }): void {
     const { currentRole, newRole } = props;
     if (isOwner(newRole)) {
-      throw new DomainErrors.InvalidInputError('Owner role cannot be assigned through member management.');
+      throw new DomainErrors.InvalidInputError(
+        'Owner role cannot be assigned through member management.',
+      );
     }
 
     if (currentRole === WorkspaceRole.OWNER) {

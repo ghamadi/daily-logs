@@ -35,7 +35,9 @@ export async function getAuthenticatedPrincipal(): Promise<User> {
   });
 
   if (!user) {
-    throw new ApiErrors.UnauthorizedError('Could not authenticate user. Invalid email or auth identity.');
+    throw new ApiErrors.UnauthorizedError(
+      'Could not authenticate user. Invalid email or auth identity.',
+    );
   }
 
   return user;

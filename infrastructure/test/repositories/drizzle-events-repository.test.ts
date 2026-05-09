@@ -13,7 +13,11 @@ describe('DrizzleEventsRepository', () => {
     const repository = new DrizzleEventsRepository(getTestDatabase().db);
     const owner = await insertUser({ email: 'owner@example.com' });
     const workspace = await insertWorkspace({ ownerUserId: owner.id, name: 'Events' });
-    await insertWorkspaceMember({ workspaceId: workspace.id, userId: owner.id, role: WorkspaceRole.OWNER });
+    await insertWorkspaceMember({
+      workspaceId: workspace.id,
+      userId: owner.id,
+      role: WorkspaceRole.OWNER,
+    });
 
     const event = await repository.create({
       id: randomUUID(),
@@ -38,7 +42,11 @@ describe('DrizzleEventsRepository', () => {
     const repository = new DrizzleEventsRepository(getTestDatabase().db);
     const owner = await insertUser({ email: 'owner@example.com' });
     const workspace = await insertWorkspace({ ownerUserId: owner.id, name: 'Timeline' });
-    await insertWorkspaceMember({ workspaceId: workspace.id, userId: owner.id, role: WorkspaceRole.OWNER });
+    await insertWorkspaceMember({
+      workspaceId: workspace.id,
+      userId: owner.id,
+      role: WorkspaceRole.OWNER,
+    });
 
     await insertEvent({
       workspaceId: workspace.id,
@@ -76,7 +84,11 @@ describe('DrizzleEventsRepository', () => {
     const repository = new DrizzleEventsRepository(getTestDatabase().db);
     const owner = await insertUser({ email: 'owner@example.com' });
     const workspace = await insertWorkspace({ ownerUserId: owner.id, name: 'Updates' });
-    await insertWorkspaceMember({ workspaceId: workspace.id, userId: owner.id, role: WorkspaceRole.OWNER });
+    await insertWorkspaceMember({
+      workspaceId: workspace.id,
+      userId: owner.id,
+      role: WorkspaceRole.OWNER,
+    });
 
     const event = await insertEvent({
       workspaceId: workspace.id,

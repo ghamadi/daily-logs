@@ -84,7 +84,9 @@ describe('DrizzleWorkspacesRepository', () => {
 
     await repository.removeMember({ workspaceId: workspace.id, memberId: member.id });
 
-    await expect(repository.findMember({ workspaceId: workspace.id, memberId: member.id })).resolves.toBeNull();
+    await expect(
+      repository.findMember({ workspaceId: workspace.id, memberId: member.id }),
+    ).resolves.toBeNull();
 
     await repository.deleteById(workspace.id);
 

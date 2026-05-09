@@ -14,9 +14,11 @@ type ApiRequestHandler<TArgs extends unknown[], TResult> = (...args: TArgs) => T
  * All errors thrown inside the wrapped function will be converted to ApiError,
  * and returned as a JSON response with the appropriate status code.
  */
-export function withApiErrorHandler<TArgs extends unknown[], TResult, TResponse extends TResult | NextResponse>(
-  fn: ApiRequestHandler<TArgs, TResponse>,
-) {
+export function withApiErrorHandler<
+  TArgs extends unknown[],
+  TResult,
+  TResponse extends TResult | NextResponse,
+>(fn: ApiRequestHandler<TArgs, TResponse>) {
   return (async (...args: TArgs) => {
     try {
       return await fn(...args);

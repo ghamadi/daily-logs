@@ -1,7 +1,13 @@
 import { and, asc, eq, getTableColumns } from 'drizzle-orm';
 
 import type { Database, Transaction } from '@db/client/create-db';
-import { UsersTable, WorkspaceUsersTable, WorkspacesTable, type DbUser, type DbWorkspaceUser } from '@db/schema';
+import {
+  UsersTable,
+  WorkspaceUsersTable,
+  WorkspacesTable,
+  type DbUser,
+  type DbWorkspaceUser,
+} from '@db/schema';
 import { User } from '@domains/users/entities/user';
 import { Workspace } from '@domains/workspaces/entities/workspace';
 import type {
@@ -54,7 +60,11 @@ export class DrizzleWorkspacesRepository implements IWorkspacesRepository {
   }
 
   async updateById(id: string, input: UpdateWorkspaceRepoInput): Promise<Workspace> {
-    const [row] = await this.db.update(WorkspacesTable).set(input).where(eq(WorkspacesTable.id, id)).returning();
+    const [row] = await this.db
+      .update(WorkspacesTable)
+      .set(input)
+      .where(eq(WorkspacesTable.id, id))
+      .returning();
     assertNotNullish(row, `Failed to update workspace "${id}".`);
 
     return new Workspace(row);
@@ -127,7 +137,10 @@ export class DrizzleWorkspacesRepository implements IWorkspacesRepository {
 
     assertNotNullish(row, `Workspace "${params.workspaceId}" was not found.`);
     assertNotNullish(row.member, `Unexpected error: workspace "${params.workspaceId}" has no owner.`);
-    assertNotNullish(row.user, `Unexpected error: owner user is missing for workspace "${params.workspaceId}".`);
+    assertNotNullish(
+      row.user,
+      `Unexpected error: owner user is missing for workspace "${params.workspaceId}".`,
+    );
 
     return toWorkspaceMember({ member: row.member, user: row.user });
   }
