@@ -15,7 +15,8 @@ export const noRestrictedImports = [
    * - `infrastructure` may import from `db` and `domains`, but not from `web` or `mobile`.
    * - `web` may import from `domains`, `infrastructure`, and `db`.
    * - `mobile` may only import from `web` for API response types (`mobile` should never hit the database directly).
-   * - `db` may not import from `web`, `mobile`, or `infrastructure`.
+   * - `db` may only import types from `web`, `mobile`, or `infrastructure` (e.g. to type a `jsonb` column).
+   *   Value imports from those packages are forbidden.
    * - `utils` may not import any other packages.
    */
   {
@@ -27,7 +28,8 @@ export const noRestrictedImports = [
           patterns: [
             {
               group: fromPackage('web', 'mobile', 'infrastructure'),
-              message: 'The db package must not import from web, mobile, or infrastructure.',
+              allowTypeImports: true,
+              message: 'The db package may only import types from web, mobile, or infrastructure.',
             },
           ],
         },
