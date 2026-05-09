@@ -24,10 +24,7 @@ export type ListWorkspaceMembersRequestParams = z.infer<typeof GETParamsSchema>;
 export type ListWorkspaceMembersResponseBody = ApiResponse<WorkspaceMember[]>;
 
 export const GET = withApiErrorHandler(
-  async (
-    _request: NextRequest,
-    context: RouteContext<'/api/workspaces/[workspaceId]/members'>,
-  ) => {
+  async (_request: NextRequest, context: RouteContext<'/api/workspaces/[workspaceId]/members'>) => {
     const { workspaceId } = GETParamsSchema.parse(await context.params);
     const principal = await getAuthenticatedPrincipal();
 
@@ -36,10 +33,7 @@ export const GET = withApiErrorHandler(
     const members = await service
       .listMembers({ workspaceId, principalId: principal.id })
       .catch((error) =>
-        translateAccessDeniedToNotFound(
-          error,
-          `Could not find workspace with id "${workspaceId}".`,
-        ),
+        translateAccessDeniedToNotFound(error, `Could not find workspace with id "${workspaceId}".`),
       );
 
     return toApiResponse(members);
@@ -69,10 +63,7 @@ export type AddWorkspaceMemberRequestBody = z.infer<typeof POSTBodySchema>;
 export type AddWorkspaceMemberResponseBody = ApiResponse<WorkspaceMember>;
 
 export const POST = withApiErrorHandler(
-  async (
-    request: NextRequest,
-    context: RouteContext<'/api/workspaces/[workspaceId]/members'>,
-  ) => {
+  async (request: NextRequest, context: RouteContext<'/api/workspaces/[workspaceId]/members'>) => {
     const { workspaceId } = POSTParamsSchema.parse(await context.params);
     const principal = await getAuthenticatedPrincipal();
     const { memberId, role } = await parseJsonBody(request, POSTBodySchema);
@@ -82,10 +73,7 @@ export const POST = withApiErrorHandler(
     const member = await service
       .addMember({ workspaceId, principalId: principal.id, memberId, role })
       .catch((error) =>
-        translateAccessDeniedToNotFound(
-          error,
-          `Could not find workspace with id "${workspaceId}".`,
-        ),
+        translateAccessDeniedToNotFound(error, `Could not find workspace with id "${workspaceId}".`),
       );
 
     return toApiResponse(member, { responseInit: { status: 201 } });

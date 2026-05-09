@@ -13,9 +13,9 @@
 - **Step 1 — Workspace API Routes**: ✅ done (single-owner scope; member management subroutes deferred).
 - **Step 2 — Chat Persistence**: ✅ done.
 - **Step 3 — Chat API + AI SDK v6**: ✅ done.
-- **Step 4 — Minimal AI Elements UI**: ⏳ not started. **Pick up here.**
+- **Step 4 — Minimal AI Elements UI**: ✅ done. The plan is complete; remaining work lives under "Deferred to a Later Pass" below.
 
-A fresh agent should read this whole document plus `.cursor/rules/project-overview.mdc` (project intent, monorepo structure, API URL conventions in section 6), then jump to **Step 4**.
+A fresh agent landing here should read this whole document plus `.cursor/rules/project-overview.mdc` (project intent, monorepo structure, API URL conventions in section 6) before picking from the deferred list or starting a new feature.
 
 ## Key Design Decisions (decided; do not relitigate)
 
@@ -58,7 +58,7 @@ These decisions came out of discussion during steps 1–3. They constrain how St
 
 - The client must use `DefaultChatTransport({ prepareSendMessagesRequest: ({ messages }) => ({ body: { message: messages.at(-1) } }) })`. The server expects `{ message: UIMessage }` and rebuilds history from the DB. A client sending the default `{ id, messages }` shape gets a 400.
 - `result.consumeStream()` is called (not awaited) before returning so `onFinish` always fires, including on client disconnect.
-- Assistant message ids come from a module-scoped `createIdGenerator({ prefix: 'msg_', size: 16 })` so persisted ids fit in `varchar(64)` and are stable across retries.
+- Assistant message ids come from a module-scoped `createIdGenerator({ prefix: 'msg', size: 16 })` so persisted ids fit in `varchar(64)` and are stable across retries.
 
 ## Implementation Steps
 
@@ -132,84 +132,39 @@ Chat library (`web/src/lib/chat/`):
 
 Cross-package: `eslint.config.mjs` was updated to allow `import type` from `web` into `db` and `domains` (the persisted `UIMessage` type lives in `web/src/lib/chat/types.ts` and is referenced as a type from the db schema and the chat repo interface).
 
-### 4. Minimal AI Elements UI — ⏳ remaining work
+### 4. Minimal AI Elements UI — ✅ done
 
-Goal: a thin protected UI that lets the developer manually exercise the streaming chat end-to-end. No UI tests; no theming polish; no member management. Single-owner workspaces only.
+Thin protected UI to exercise the streaming chat end-to-end. No UI tests; no theming polish; no member management. Single-owner workspaces only. AI Elements components were intentionally **not** pulled in — a small in-house switch over `UIMessage.parts` was enough for the demo and avoided an extra dep.
 
-#### Functional scope
+Pages (all under `web/src/app/(protected)/`):
 
-- Pick (or auto-create) a workspace.
-- List the principal's non-archived chats in that workspace.
-- Open a chat, see persisted history, send a new message, watch the assistant stream back, see tool calls and tool results render inline, watch persistence (reload the page → same messages).
-- Trigger the dummy `getWorkspaceContext` tool (e.g. by asking *"what workspace am I in?"*).
+- `layout.tsx` → minimal app chrome (header with home link) and the `#dialog-root` portal target the existing `Dialog` component expects.
+- `page.tsx` → `redirect('/workspaces')` so `/` is a single jumping-off point.
+- `workspaces/page.tsx` → server component listing the principal's workspaces via `WorkspacesService.listWorkspacesForUser`. Empty state + a `CreateWorkspaceDialog` trigger.
+- `workspaces/_components/create-workspace-dialog.tsx` → client component using the existing `Dialog` primitive; `POST /api/workspaces` then `router.refresh()`.
+- `workspaces/[workspaceId]/page.tsx` → loads the workspace + non-archived chats in parallel through the services, with `DomainErrors.{NotFoundError,AccessDeniedError}` translated to Next's `notFound()` so the URL never confirms cross-workspace existence (mirroring the API privacy translation).
+- `workspaces/[workspaceId]/_components/new-chat-button.tsx` → `POST /api/workspaces/[workspaceId]/chats` with empty body, then `router.push` to the new chat.
+- `workspaces/[workspaceId]/chats/[chatId]/page.tsx` → loads chat metadata + history through `ChatsService.getChatById` / `loadChatMessages`, hands `payload`s as `initialMessages` to the client thread.
 
-#### Files to add (suggested layout — adjust if cleaner emerges)
+Read paths are intentionally service-direct rather than HTTP-fetched from the API. The auth/membership/ownership guards live in the service layer (`ChatsService.requireOwnedChat` etc.), so calling services directly avoids cookie-forwarding ceremony without weakening the contract. The deeper privacy translation (`AccessDenied → 404`) is done in each page via a local `handleAsNotFound` helper.
 
-```
-web/src/app/(protected)/
-├── workspaces/
-│   ├── page.tsx                            # workspaces list / picker
-│   └── [workspaceId]/
-│       ├── page.tsx                        # chats list for the workspace
-│       └── chats/
-│           └── [chatId]/
-│               └── page.tsx                # the chat thread itself
+Write paths go through the API (`fetch` from client components) so the API contracts stay exercised end-to-end.
 
-web/src/lib/chat/
-├── transport.ts                            # createChatTransport(workspaceId, chatId)
-└── components/                             # AI Elements components or thin wrappers
-    ├── chat-thread.tsx
-    └── message-composer.tsx
-```
+Chat library (`web/src/lib/chat/`):
 
-The `(protected)` segment already exists and is gated by the existing Supabase middleware (`web/src/middleware.ts`). New pages inherit that gating.
+- `transport.ts` → `createChatTransport({ workspaceId, chatId })` returns a `DefaultChatTransport<ChatMessagePayload>` with the contract-mandatory `prepareSendMessagesRequest: ({ messages }) => ({ body: { message: messages.at(-1) } })`. Without this override the server returns 400.
+- `components/chat-thread.tsx` → single client component combining the message list and composer:
+  - `useChat<ChatMessagePayload>({ id: chatId, transport, messages: initialMessages })` from `@ai-sdk/react`.
+  - Renders one bubble per message; walks `message.parts` and switches on `part.type` for `text`, `reasoning`, `step-start` (skipped), and tool parts (via `isToolUIPart` + `getToolName` from `'ai'`). Each tool part shows its name, current state, and pretty-printed input/output (or `errorText` on `'output-error'`).
+  - Composer: `<textarea>` + send button. Enter sends, Shift+Enter inserts a newline. While `status` is `'submitted' | 'streaming'` the send button swaps for a stop button bound to `useChat().stop`. Errors surface in a dismissible banner driven by `error` / `clearError`.
 
-#### Client wiring
-
-- **Transport**: `DefaultChatTransport({ api, prepareSendMessagesRequest })` — the `prepareSendMessagesRequest` override is *required* by the server contract:
-
-```ts
-new DefaultChatTransport<ChatMessagePayload>({
-  api: `/api/workspaces/${workspaceId}/chats/${chatId}/messages`,
-  prepareSendMessagesRequest: ({ messages }) => ({ body: { message: messages.at(-1) } }),
-});
-```
-
-- **Hook**: `useChat<ChatMessagePayload>({ id: chatId, transport, messages: initialMessages })` from `@ai-sdk/react`.
-- **Initial history hydration**: server-side fetch of `GET /api/workspaces/[workspaceId]/chats/[chatId]/messages` in the page's loader, mapped from `ChatMessage[]` to `UIMessage[]` (extract `payload`), passed to `useChat` as `initialMessages`. Avoids a client-side flash.
-- **Send**: bind a textarea to `sendMessage(text)`; the SDK constructs a `UIMessage` with a client-generated id and the transport's `prepareSendMessagesRequest` reduces it to `{ message }` on the wire.
-
-#### Rendering UIMessage parts
-
-- Walk `message.parts` and switch on `part.type`:
-  - `'text'` → render `part.text` (Markdown if you bring a renderer).
-  - `'reasoning'` → optional collapsed block.
-  - Tool-invocation parts: in v6 these are typed as `tool-${name}` (e.g. `tool-getWorkspaceContext`). Each part carries a `state` (`'input-streaming' | 'input-available' | 'output-available' | 'output-error'`) plus the input/output payloads. Render a small "called X with Y → Z" affordance.
-  - `'step-start'` separators between steps of the tool loop are optional to render.
-- The Vercel AI Elements components ship a higher-level renderer for these. Investigate and use them where they pay off; otherwise a switch is fine for the demo.
-
-#### Calls to existing API routes (already implemented)
-
-- Create chat: `POST /api/workspaces/[workspaceId]/chats` with optional `{ title }`.
-- List chats: `GET /api/workspaces/[workspaceId]/chats`.
-- Load history: `GET /api/workspaces/[workspaceId]/chats/[chatId]/messages` returns `ApiResponse<ChatMessage[]>` (each message's `payload` is the `UIMessage`).
-- Update title: `PATCH /api/workspaces/[workspaceId]/chats/[chatId]` with `{ title }`.
-- Archive: `DELETE /api/workspaces/[workspaceId]/chats/[chatId]`.
-- Stream message: `POST /api/workspaces/[workspaceId]/chats/[chatId]/messages` (handled by `useChat`'s transport — do not call directly).
-
-#### Out of scope for Step 4
-
-- UI tests.
-- New tools beyond `getWorkspaceContext`.
-- Member management UI (deferred — see "Deferred" below).
-- Theming, accessibility polish, mobile responsiveness beyond the existing default layout.
-- Error-state UX beyond surfacing the SDK's default error chunks.
+Manual verification flow: log in → `/workspaces` (auto-redirect) → create workspace → create chat → send "what workspace am I in?" → assistant calls `getWorkspaceContext`, the call + result render inline, response streams back → reload the chat page → history is intact (rehydrated from `chat_messages.payload`).
 
 ## Final Validation (this pass)
 
 - `pnpm lint`
 - `pnpm format:check`
-- Manual smoke through the protected UI: create workspace, create chat, send message, reload to confirm persistence, ask *"what workspace am I in?"* to trigger the `getWorkspaceContext` tool and confirm the rendered tool call + result.
+- Manual smoke through the protected UI: create workspace, create chat, send message, reload to confirm persistence, ask _"what workspace am I in?"_ to trigger the `getWorkspaceContext` tool and confirm the rendered tool call + result.
 
 ## Deferred to a Later Pass
 
@@ -221,7 +176,9 @@ new DefaultChatTransport<ChatMessagePayload>({
 - **Chat cleanup on workspace-membership removal.** Decision: when a member is removed from a workspace, do **not** touch their chats — they simply become inaccessible via the chat APIs (see `ChatsService.requireOwnedChat`). FK cascades already handle the strong signals (user deleted → chats deleted; workspace deleted → chats deleted), so the only remaining concern is long-term storage of chats whose owner is no longer a workspace member. We'll address that, if needed, with a background job (e.g. archive/hard-delete after N days of orphaned-by-membership state) once we actually have data and a real cleanup story.
 - **Repository-managed timestamps elsewhere.** Currently only `DrizzleChatRepository` follows the "service can't pass `createdAt`/`updatedAt`" convention. Other repos still allow them. Worth aligning when next touching those files; not worth a dedicated pass.
 - **Stable client-side message ids.** `useChat` generates user-message ids client-side with the SDK default. If we ever need cross-device replay or stricter idempotency, set `generateId` on the `useChat`/`DefaultChatTransport` configuration and document the contract.
-- **Richer chat UI.** Markdown rendering, code blocks, copy-to-clipboard, abort button, message editing, regenerate, etc.
+- **Richer chat UI.** Markdown rendering, code blocks, copy-to-clipboard, message editing, regenerate, smarter "stick to bottom" scroll, message-level error retry, etc. (A stop button is already wired against `useChat().stop`.)
+- **In-app workspace / chat management UI.** No rename / archive / delete affordances in the UI yet — the user can only create. The corresponding API routes (`PATCH` / `DELETE` on workspaces and chats) already exist; they just have no UI surface. Member management UI is also pending.
+- **Pagination.** Workspaces list, chats list, and chat history are all loaded in full per page. Fine for the demo; needs cursoring once we have real volume.
 
 ## Assumptions
 

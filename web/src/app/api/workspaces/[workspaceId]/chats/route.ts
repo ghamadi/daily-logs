@@ -45,10 +45,7 @@ export const POST = withApiErrorHandler(
     const chat = await service
       .createChat({ workspaceId, principalId: principal.id, title })
       .catch((error) =>
-        translateAccessDeniedToNotFound(
-          error,
-          `Could not find workspace with id "${workspaceId}".`,
-        ),
+        translateAccessDeniedToNotFound(error, `Could not find workspace with id "${workspaceId}".`),
       );
 
     return toApiResponse(chat, { responseInit: { status: 201 } });
@@ -77,10 +74,7 @@ export const GET = withApiErrorHandler(
     const chats = await service
       .listChats({ workspaceId, principalId: principal.id })
       .catch((error) =>
-        translateAccessDeniedToNotFound(
-          error,
-          `Could not find workspace with id "${workspaceId}".`,
-        ),
+        translateAccessDeniedToNotFound(error, `Could not find workspace with id "${workspaceId}".`),
       );
 
     return toApiResponse(chats);

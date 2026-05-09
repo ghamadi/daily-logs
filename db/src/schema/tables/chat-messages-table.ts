@@ -8,7 +8,7 @@ export const chatMessageRoleEnum = pgEnum('chat_message_role', CHAT_MESSAGE_ROLE
 
 /**
  * Chat messages
- * - `id` is supplied by the AI SDK v6 message-id generator (`msg_<16-char-id>`),
+ * - `id` is supplied by the AI SDK v6 message-id generator (`msg<16-char-id>`),
  *   so the column is a varchar rather than a UUID.
  * - `payload` stores the raw AI SDK v6 `UIMessage` JSON. We type it via a shared
  *   alias from `@web` (type-only import) so downstream consumers get full inference

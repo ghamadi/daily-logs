@@ -91,10 +91,15 @@ function DialogContent(props: DialogContentProps) {
 
   const { container, ...portalProps } = portal ?? {};
 
-  const dialogContainer = useMemo(
-    () => container ?? document.getElementById('dialog-root'),
-    [container],
-  );
+  const dialogContainer = useMemo(() => {
+    if (container) {
+      return container;
+    }
+    if (typeof document !== 'undefined') {
+      return document.getElementById('dialog-root');
+    }
+    return null;
+  }, [container]);
 
   return (
     <DialogPortal container={dialogContainer} {...portalProps}>

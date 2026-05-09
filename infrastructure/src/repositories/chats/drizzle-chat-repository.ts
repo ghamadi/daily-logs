@@ -32,10 +32,7 @@ export class DrizzleChatRepository implements IChatRepository {
     return row && new ChatSession(row);
   }
 
-  async listOwnerChats(params: {
-    workspaceId: string;
-    ownerUserId: string;
-  }): Promise<ChatSession[]> {
+  async listOwnerChats(params: { workspaceId: string; ownerUserId: string }): Promise<ChatSession[]> {
     const rows = await this.db
       .select()
       .from(ChatSessionsTable)

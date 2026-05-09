@@ -1,12 +1,12 @@
 import { DomainErrors } from '@domains/lib/errors';
 import { User } from '../entities/user';
 import {
-  CreateUserRepoInput,
+  UpsertUserRepoInput,
   UpdateUserRepoInput,
   IUsersRepository,
 } from '../repositories/users-repository';
 
-export type CreateUserInput = CreateUserRepoInput;
+export type CreateUserInput = UpsertUserRepoInput;
 export type UpdateUserInput = UpdateUserRepoInput;
 
 export class UsersService {
@@ -36,7 +36,7 @@ export class UsersService {
     return user;
   }
 
-  async createUser(input: CreateUserRepoInput): Promise<User> {
+  async createUser(input: UpsertUserRepoInput): Promise<User> {
     const existingEmail = await this.findUserByEmail(input.email);
 
     if (existingEmail) {

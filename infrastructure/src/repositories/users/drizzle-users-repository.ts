@@ -3,7 +3,7 @@ import type { Database } from '@db/client/create-db';
 import { AuthIdentitiesTable, UsersTable } from '@db/schema';
 import { User } from '@domains/users/entities/user';
 import type {
-  CreateUserRepoInput,
+  UpsertUserRepoInput,
   UpdateUserRepoInput,
   IUsersRepository,
   FindByEmailOptions,
@@ -40,18 +40,34 @@ export class DrizzleUsersRepository implements IUsersRepository {
     return row && new User(row.user);
   }
 
-  async create(input: CreateUserRepoInput) {
+  async getOrCreateUser(input: UpsertUserRepoInput) {
     return this.db.transaction(async (tx) => {
       const { provider, providerUserId, ...userInput } = input;
-      const [userRow] = await tx.insert(UsersTable).values(userInput).returning();
+      const [userRow] = await tx
+        .insert(UsersTable)
+        .values(userInput)
+        .onConflictDoUpdate({
+          target: [UsersTable.email],
+          set: {
+            // no-op update since the email is the same
+            // we only update for `returning()` to return the user record
+            email: userInput.email,
+          },
+        })
+        .returning();
 
-      assertNotNullish(userRow, `Failed to create user "${userInput.email}".`);
+      assertNotNullish(userRow, `Failed to upsert user "${userInput.email}".`);
 
-      await tx.insert(AuthIdentitiesTable).values({
-        userId: userRow.id,
-        provider,
-        providerUserId,
-      });
+      await tx
+        .insert(AuthIdentitiesTable)
+        .values({
+          userId: userRow.id,
+          provider,
+          providerUserId,
+        })
+        .onConflictDoNothing({
+          target: [AuthIdentitiesTable.provider, AuthIdentitiesTable.providerUserId],
+        });
 
       return new User(userRow);
     });

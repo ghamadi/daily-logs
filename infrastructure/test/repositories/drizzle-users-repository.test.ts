@@ -10,7 +10,7 @@ describe('DrizzleUsersRepository', () => {
   it('creates users and finds them by id and email', async () => {
     const repository = new DrizzleUsersRepository(getTestDatabase().db);
 
-    const created = await repository.create({
+    const created = await repository.getOrCreateUser({
       email: 'owner@example.com',
       displayName: 'Owner',
       isActive: true,
@@ -29,7 +29,7 @@ describe('DrizzleUsersRepository', () => {
 
   it('updates users by id', async () => {
     const repository = new DrizzleUsersRepository(getTestDatabase().db);
-    const created = await repository.create({
+    const created = await repository.getOrCreateUser({
       email: 'member@example.com',
       displayName: 'Member',
       isActive: true,
@@ -53,7 +53,7 @@ describe('DrizzleUsersRepository', () => {
   it('optionally requires an auth identity when finding by email', async () => {
     const repository = new DrizzleUsersRepository(getTestDatabase().db);
 
-    const linkedUser = await repository.create({
+    const linkedUser = await repository.getOrCreateUser({
       email: 'linked@example.com',
       displayName: 'Linked User',
       isActive: true,
@@ -83,7 +83,7 @@ describe('DrizzleUsersRepository', () => {
   it('creates users with auth identities and finds them by matching email and provider identity', async () => {
     const repository = new DrizzleUsersRepository(getTestDatabase().db);
 
-    const created = await repository.create({
+    const created = await repository.getOrCreateUser({
       email: 'auth-user@example.com',
       displayName: 'Auth User',
       isActive: true,
@@ -117,7 +117,7 @@ describe('DrizzleUsersRepository', () => {
   it('does not return a user when the provider identity belongs to a different user', async () => {
     const repository = new DrizzleUsersRepository(getTestDatabase().db);
 
-    const linkedUser = await repository.create({
+    const linkedUser = await repository.getOrCreateUser({
       email: 'linked-user@example.com',
       displayName: 'Linked User',
       isActive: true,
@@ -125,7 +125,7 @@ describe('DrizzleUsersRepository', () => {
       providerUserId: 'supabase-linked-user',
     });
 
-    const otherUser = await repository.create({
+    const otherUser = await repository.getOrCreateUser({
       email: 'other-user@example.com',
       displayName: 'Other User',
       isActive: true,
@@ -144,7 +144,7 @@ describe('DrizzleUsersRepository', () => {
 
   it('enforces provider identity uniqueness', async () => {
     const repository = new DrizzleUsersRepository(getTestDatabase().db);
-    await repository.create({
+    await repository.getOrCreateUser({
       email: 'first-auth@example.com',
       displayName: 'First Auth User',
       isActive: true,
@@ -153,7 +153,7 @@ describe('DrizzleUsersRepository', () => {
     });
 
     await expect(
-      repository.create({
+      repository.getOrCreateUser({
         email: 'second-auth@example.com',
         displayName: 'Second Auth User',
         isActive: true,
@@ -165,7 +165,7 @@ describe('DrizzleUsersRepository', () => {
 
   it('deletes users by id', async () => {
     const repository = new DrizzleUsersRepository(getTestDatabase().db);
-    const created = await repository.create({
+    const created = await repository.getOrCreateUser({
       email: 'delete-me@example.com',
       displayName: 'Delete Me',
       isActive: true,

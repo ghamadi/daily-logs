@@ -29,16 +29,9 @@ export async function getAuthenticatedPrincipal(): Promise<User> {
 
   const usersRepository = new DrizzleUsersRepository(getDb());
 
-  const user = await usersRepository.findByEmail(email, {
+  return await usersRepository.getOrCreateUser({
+    email,
     provider: AuthProvider.Supabase,
     providerUserId: supabaseUserId,
   });
-
-  if (!user) {
-    throw new ApiErrors.UnauthorizedError(
-      'Could not authenticate user. Invalid email or auth identity.',
-    );
-  }
-
-  return user;
 }
