@@ -15,7 +15,7 @@ export type UpdateWorkspaceInput = Omit<UpdateWorkspaceRepoInput, 'updatedAt'>;
 export class WorkspacesService {
   constructor(private readonly workspacesRepo: IWorkspacesRepository) {}
 
-  findWorkspaceById(id: string) {
+  findById(id: string) {
     return this.workspacesRepo.findById(id);
   }
 
@@ -25,7 +25,7 @@ export class WorkspacesService {
 
   async getWorkspaceById(props: { id: string; principalId: string }) {
     const { id, principalId } = props;
-    const workspace = await this.findWorkspaceById(id);
+    const workspace = await this.findById(id);
     if (!workspace) {
       throw new DomainErrors.NotFoundError('Workspace not found', { id });
     }
@@ -35,7 +35,7 @@ export class WorkspacesService {
 
   async createWorkspaceWithOwner(input: CreateWorkspaceInput) {
     if (input.id) {
-      const existingWorkspace = await this.findWorkspaceById(input.id);
+      const existingWorkspace = await this.findById(input.id);
       if (existingWorkspace) {
         throw new DomainErrors.InvalidInputError('Workspace with this ID already exists', {
           id: input.id,
