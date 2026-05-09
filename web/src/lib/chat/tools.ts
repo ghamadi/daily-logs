@@ -2,25 +2,14 @@ import { tool, type InferUITools, type ToolSet } from 'ai';
 import { z } from 'zod';
 import { WorkspacesService } from '@domains/workspaces/services/workspaces-service';
 
-/**
- * Server-trusted context passed to every tool factory. The fields here come
- * exclusively from values resolved server-side after the chat session row is
- * loaded — never from URL params, request body, or model output — so tools
- * can never be tricked into acting outside the workspace that owns the chat.
- *
- * `workspacesRepo` lets workspace-scoped tools lazily fetch fresh workspace
- * data inside their `execute`, so we don't pay the load cost on every request
- * regardless of whether the model actually needs it.
- */
 export type ChatToolContext = {
   workspaceId: string;
   workspacesService: WorkspacesService;
 };
 
 /**
- * Builds the chat tool registry, closing each tool's `execute` over the
- * server-trusted `ChatToolContext`. Returns a fresh registry per request so
- * different chats never share captured state.
+ * Builds the chat tool registry, closing each tool's `execute`
+ * over the server-provided `ChatToolContext`.
  */
 export function buildChatTools(context: ChatToolContext) {
   const { workspaceId, workspacesService } = context;
