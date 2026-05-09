@@ -4,7 +4,7 @@ import { XIcon } from 'lucide-react';
 import { Dialog as DialogPrimitive } from 'radix-ui';
 import { cn, composeCompoundComponent } from '@web/lib/utils/components';
 import { Button } from '@web/components/ui/button';
-import { ComponentProps, useEffect, useMemo, useRef, useState } from 'react';
+import { ComponentProps, useMemo } from 'react';
 
 export const Dialog = composeCompoundComponent(DialogRoot, {
   Trigger: DialogTrigger,

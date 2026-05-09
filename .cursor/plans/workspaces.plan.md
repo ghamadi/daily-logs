@@ -22,7 +22,7 @@
    - Port a `withApiErrorHandling` higher-order handler from the existing project into `web/src/lib/errors/` that maps `DomainError` subclasses to `ApiError` responses (`AccessDenied -> 403`, `EntityNotFound -> 404`, `InvalidInput -> 400` or `422`) and unexpected errors to a 500.
    - Add the missing `ApiError` subclasses needed for that mapping under `web/src/lib/errors/api-errors/`: `NotFoundError` and `BadRequestError` (or `UnprocessableEntityError`). Existing today: `UnauthorizedError`, `ForbiddenError`.
    - Add shared route helpers for JSON responses and Zod request validation. `getAuthenticatedPrincipal()` already exists in `web/src/lib/utils/api/auth.ts` and returns the domain `User`.
-   - Add workspace route handlers for create/list/get/update/delete and member list/add/update/remove/leave.
+   - Add workspace route handlers for create/list/get/update/delete. Member management routes (list/add/update/remove/leave) are deferred — see "Deferred to a Later Pass" — and the immediate slice operates on workspaces with only their owner as a member.
    - Keep authorization in `WorkspacesService`; routes authenticate, validate, call service, and serialize.
    - Add service/repository methods only when a route requires them (top-down). Example: `GET /api/workspaces` needs a "list workspaces for principal" capability that does not exist on the service yet.
 
@@ -68,6 +68,7 @@
 
 ## Deferred to a Later Pass
 
+- **Workspace member management routes:** `GET` and `POST` on `/api/workspaces/[id]/members` are implemented. `PATCH /api/workspaces/[id]/members/[memberId]`, `DELETE /api/workspaces/[id]/members/[memberId]`, and `DELETE /api/workspaces/[id]/members/me` (leave) are deferred until invitations / member UX are designed. Repository, service, and `IWorkspacesRepository` surface for these ops are already in place. Until then, all downstream features assume single-owner workspaces.
 - **Test foundation:** move Vitest/shared DB helpers from `infrastructure/test` to root `test/` (helpers, setup, scripts), add a root `vitest.config.ts` with package aliases for `@db`, `@domains`, `@infrastructure`, `@web`, `@utils`, configure `web/next.config.ts` `pageExtensions` to exclude `.test.{ts,tsx}` so colocated route tests are not treated as Next entries, and update `.cursor/rules/project-overview.mdc` section 4 to reflect colocated tests.
 - **Workspace route integration tests** colocated as `route.test.ts` next to each `route.ts`, covering: auth required, non-member denial, member read access, admin/owner member management, owner-only update/delete, owner immutability, duplicate membership.
 - **Chat route integration tests** covering: workspace membership required, owners only see their own chats inside a workspace, users cannot read or post to another user's private chat, posting through a mismatched workspace URL is rejected, posting streams an assistant response and persists the final messages, dummy tool result is streamed and persisted, AI calls go through `'ai/test'` mocks rather than the real provider.
