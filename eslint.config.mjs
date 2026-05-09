@@ -61,12 +61,13 @@ export const noRestrictedImports = [
           patterns: [
             {
               group: fromPackage('web', 'mobile', 'infrastructure'),
-              message: 'The domain package must not import from web, mobile, or infrastructure.',
+              allowTypeImports: true,
+              message: 'The domains package may only import types from web, mobile, or infrastructure.',
             },
             {
               group: fromPackage('db'),
               allowTypeImports: true,
-              message: 'The domain package may only import types from the db package.',
+              message: 'The domains package may only import types from db.',
             },
           ],
         },

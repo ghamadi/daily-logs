@@ -4,6 +4,8 @@ import { WorkspacesTable } from './workspaces-table';
 
 export const WORKSPACE_USER_ROLES = ['owner', 'admin', 'member'] as const;
 
+export const workspaceUserRoleEnum = pgEnum('role', WORKSPACE_USER_ROLES);
+
 /**
  * Workspace memberships
  * - Many users can belong to many workspaces.
@@ -18,7 +20,7 @@ export const WorkspaceUsersTable = pgTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => UsersTable.id, { onDelete: 'cascade' }),
-    role: pgEnum('role', WORKSPACE_USER_ROLES)().notNull().default('member'),
+    role: workspaceUserRoleEnum().notNull().default('member'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

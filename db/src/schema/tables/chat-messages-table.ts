@@ -4,6 +4,8 @@ import type { ChatMessagePayload } from '@web/lib/chat/types';
 
 export const CHAT_MESSAGE_ROLES = ['user', 'assistant', 'system'] as const;
 
+export const chatMessageRoleEnum = pgEnum('chat_message_role', CHAT_MESSAGE_ROLES);
+
 /**
  * Chat messages
  * - `id` is supplied by the AI SDK v6 message-id generator (`msg_<16-char-id>`),
@@ -19,7 +21,7 @@ export const ChatMessagesTable = pgTable(
     sessionId: uuid('session_id')
       .notNull()
       .references(() => ChatSessionsTable.id, { onDelete: 'cascade' }),
-    role: pgEnum('chat_message_role', CHAT_MESSAGE_ROLES)().notNull(),
+    role: chatMessageRoleEnum().notNull(),
     payload: jsonb('payload').$type<ChatMessagePayload>().notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

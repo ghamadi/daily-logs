@@ -73,11 +73,12 @@
 - **Workspace route integration tests** colocated as `route.test.ts` next to each `route.ts`, covering: auth required, non-member denial, member read access, admin/owner member management, owner-only update/delete, owner immutability, duplicate membership.
 - **Chat route integration tests** covering: workspace membership required, owners only see their own chats inside a workspace, users cannot read or post to another user's private chat, posting through a mismatched workspace URL is rejected, posting streams an assistant response and persists the final messages, dummy tool result is streamed and persisted, AI calls go through `'ai/test'` mocks rather than the real provider.
 - **Hard delete** on chat sessions, once sharing/cleanup semantics are designed.
+- **Chat cleanup on workspace-membership removal.** Decision: when a member is removed from a workspace, do **not** touch their chats — they simply become inaccessible via the chat APIs (see `ChatsService.requireOwnedChat`). FK cascades already handle the strong signals (user deleted → chats deleted; workspace deleted → chats deleted), so the only remaining concern is long-term storage of chats whose owner is no longer a workspace member. We'll address that, if needed, with a background job (e.g. archive/hard-delete after N days of orphaned-by-membership state) once we actually have data and a real cleanup story.
 
 ## Assumptions
 
 - Tests are deliberately deferred for this pass; when added, they will be colocated with the code they exercise and discovered from a root Vitest config.
 - "Private to owner" means no workspace member except the owner can see a session until sharing exists.
-- If the owner loses workspace membership, the chat becomes inaccessible through workspace chat APIs.
+- If the owner loses workspace membership, the chat becomes inaccessible through workspace chat APIs but is **not** deleted; the rows persist until the user or workspace itself is deleted, or until a future background job decides to clean them up.
 - Tools operate only within the chat session's workspace, never from URL params, request body, or model-supplied workspace ids.
 - AI Gateway (imported from `'ai'`) is the real provider path; future tests will swap it for an `MockLanguageModelV2` from `'ai/test'` via the model factory.
