@@ -35,7 +35,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
   ]);
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col">
+    <div className="mx-auto flex h-full w-full max-w-3xl flex-1 flex-col">
       <header className="border-border border-b px-4 py-4">
         <Link
           href={`/workspaces/${workspaceId}`}
@@ -46,13 +46,11 @@ export default async function ChatPage({ params }: ChatPageProps) {
         <h1 className="mt-1 text-lg font-semibold tracking-tight">{chat.title ?? 'Untitled chat'}</h1>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col">
-        <ChatThread
-          workspaceId={workspaceId}
-          chatId={chatId}
-          initialMessages={history.map((entry) => entry.payload)}
-        />
-      </div>
+      <ChatThread
+        workspaceId={workspaceId}
+        chatId={chatId}
+        initialMessages={history.map((entry) => entry.payload)}
+      />
     </div>
   );
 }

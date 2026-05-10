@@ -8,12 +8,11 @@ import {
   type KeyboardEvent,
   type SubmitEvent,
   useCallback,
-  useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 
+import { Conversation } from '@web/components/ai-elements/conversation';
 import { Button } from '@web/components/ui/button';
 import { createChatTransport } from '@web/lib/chat/transport';
 import type { UiMessagePayload } from '@web/lib/chat/types';
@@ -60,8 +59,8 @@ export function ChatThread(props: ChatThreadProps) {
   );
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <MessageList messages={messages} status={status} />
+    <div className="flex flex-1 flex-col">
+      <MessageList messages={messages} />
 
       {error && (
         <div className="border-destructive/30 bg-destructive/10 text-destructive mx-4 mb-3 flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-xs">
@@ -89,43 +88,28 @@ export function ChatThread(props: ChatThreadProps) {
 
 type MessageListProps = {
   messages: UiMessagePayload[];
-  status: ReturnType<typeof useChat<UiMessagePayload>>['status'];
 };
 
 function MessageList(props: MessageListProps) {
-  const { messages, status } = props;
-  const scrollRef = useRef<HTMLDivElement | null>(null);
-
-  // Pin to the bottom whenever new content lands. A real product wants
-  // smarter "stick to bottom" behaviour so the user can scroll up without
-  // being yanked back; the demo doesn't need it.
-  useEffect(() => {
-    const node = scrollRef.current;
-    if (!node) return;
-    node.scrollTop = node.scrollHeight;
-  }, [messages, status]);
-
-  if (messages.length === 0) {
-    return (
-      <div ref={scrollRef} className="flex flex-1 items-center justify-center px-4 py-12">
-        <p className="text-muted-foreground max-w-sm text-center text-sm">
-          Send a message to start the conversation. Try asking{' '}
-          <em>&ldquo;what workspace am I in?&rdquo;</em> to exercise the workspace tool.
-        </p>
-      </div>
-    );
-  }
+  const { messages } = props;
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6">
-      <ol className="mx-auto flex max-w-2xl flex-col gap-6">
-        {messages.map((message) => (
-          <li key={message.id}>
-            <MessageBubble message={message} />
-          </li>
-        ))}
-      </ol>
-    </div>
+    <Conversation className="flex flex-1 flex-col">
+      {!messages.length && <Conversation.EmptyState className="flex-1" />}
+
+      {messages.length > 0 && (
+        <Conversation.Content className="px-4 py-6">
+          <ol className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+            {messages.map((message) => (
+              <li key={message.id}>
+                <MessageBubble message={message} />
+              </li>
+            ))}
+          </ol>
+        </Conversation.Content>
+      )}
+      <Conversation.ScrollButton />
+    </Conversation>
   );
 }
 
