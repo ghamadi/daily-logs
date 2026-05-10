@@ -16,24 +16,21 @@ import {
 
 import { Button } from '@web/components/ui/button';
 import { createChatTransport } from '@web/lib/chat/transport';
-import type { ChatMessagePayload } from '@web/lib/chat/types';
+import type { UiMessagePayload } from '@web/lib/chat/types';
 import { cn } from '@web/lib/utils/components';
 
 export type ChatThreadProps = {
   workspaceId: string;
   chatId: string;
-  initialMessages: ChatMessagePayload[];
+  initialMessages: UiMessagePayload[];
 };
 
 export function ChatThread(props: ChatThreadProps) {
   const { workspaceId, chatId, initialMessages } = props;
 
-  // Stable transport instance per (workspaceId, chatId). The plan locks down
-  // `prepareSendMessagesRequest` to send only the latest message; rebuilding
-  // the transport on every render would be harmless but wasteful.
   const transport = useMemo(() => createChatTransport({ workspaceId, chatId }), [workspaceId, chatId]);
 
-  const { messages, sendMessage, status, error, stop, clearError } = useChat<ChatMessagePayload>({
+  const { messages, sendMessage, status, error, stop, clearError } = useChat<UiMessagePayload>({
     id: chatId,
     transport,
     messages: initialMessages,
@@ -91,8 +88,8 @@ export function ChatThread(props: ChatThreadProps) {
 // ------------------------------------------------------------
 
 type MessageListProps = {
-  messages: ChatMessagePayload[];
-  status: ReturnType<typeof useChat<ChatMessagePayload>>['status'];
+  messages: UiMessagePayload[];
+  status: ReturnType<typeof useChat<UiMessagePayload>>['status'];
 };
 
 function MessageList(props: MessageListProps) {
@@ -136,7 +133,7 @@ function MessageList(props: MessageListProps) {
 // Message bubble
 // ------------------------------------------------------------
 
-function MessageBubble({ message }: { message: ChatMessagePayload }) {
+function MessageBubble({ message }: { message: UiMessagePayload }) {
   const isUser = message.role === 'user';
 
   return (
@@ -167,7 +164,7 @@ function MessageBubble({ message }: { message: ChatMessagePayload }) {
 // ------------------------------------------------------------
 
 type MessagePartProps = {
-  part: ChatMessagePayload['parts'][number];
+  part: UiMessagePayload['parts'][number];
 };
 
 function MessagePart({ part }: MessagePartProps) {
@@ -198,7 +195,7 @@ function MessagePart({ part }: MessagePartProps) {
 
 type ToolInvocationProps = {
   part: Extract<
-    ChatMessagePayload['parts'][number],
+    UiMessagePayload['parts'][number],
     { type: `tool-${string}` } | { type: 'dynamic-tool' }
   >;
 };

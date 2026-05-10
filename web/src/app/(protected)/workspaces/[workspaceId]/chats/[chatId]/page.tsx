@@ -1,12 +1,11 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-
 import { ChatsService } from '@domains/chats/services/chats-service';
 import { DomainErrors } from '@domains/lib/errors';
 import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleChatRepository } from '@infrastructure/repositories/chats/drizzle-chat-repository';
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
-import { ChatThread } from '@web/lib/chat/components/chat-thread';
+import { ChatThread } from '@web/app/(protected)/workspaces/[workspaceId]/chats/_components/chat-thread';
 import { getAuthenticatedPrincipal } from '@web/lib/utils/api/auth';
 
 export const dynamic = 'force-dynamic';

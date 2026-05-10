@@ -10,11 +10,11 @@ import { ApiErrors } from '@web/lib/errors';
 import { getChatModel } from '@web/lib/chat/model';
 import { getSystemPrompt } from '@web/lib/chat/system-prompt';
 import { buildChatTools, ChatToolSet } from '@web/lib/chat/tools';
-import type { ChatMessagePayload } from '@web/lib/chat/types';
+import type { UiMessagePayload } from '@web/lib/chat/types';
 import { getAuthenticatedPrincipal } from '@web/lib/utils/api/auth';
 import {
   logError,
-  translateAccessDeniedToNotFound,
+  translateAccessDeniedToNotFoundAndThrow as mapAccessDeniedToNotFoundAndThrow,
   withApiErrorHandler,
 } from '@web/lib/utils/api/errors';
 import { parseJsonBody } from '@web/lib/utils/api/request';
@@ -47,7 +47,7 @@ export const GET = withApiErrorHandler(
     const messages = await chatsService
       .loadChatMessages({ chatId, workspaceId, principalId: principal.id })
       .catch((error) =>
-        translateAccessDeniedToNotFound(error, `Could not find chat with id "${chatId}".`),
+        mapAccessDeniedToNotFoundAndThrow(error, `Could not find chat with id "${chatId}".`),
       );
 
     // Heal-on-read: hide zombie rows persisted from a failed stream (e.g. an
@@ -75,6 +75,8 @@ const POSTBodySchema = z.object({
   message: z.unknown(),
 });
 
+export type SendChatMessageRequestBody = z.infer<typeof POSTBodySchema>;
+
 const messageIdGenerator = createIdGenerator({ prefix: 'msg', size: 16 });
 
 export const POST = withApiErrorHandler(
@@ -91,7 +93,7 @@ export const POST = withApiErrorHandler(
     const history = await chatsService
       .loadChatMessages({ chatId, workspaceId, principalId: principal.id })
       .catch((error) =>
-        translateAccessDeniedToNotFound(error, `Could not find chat with id "${chatId}".`),
+        mapAccessDeniedToNotFoundAndThrow(error, `Could not find chat with id "${chatId}".`),
       );
 
     // The workspaces repo is threaded into tools so `getWorkspaceContext` can
@@ -116,25 +118,25 @@ export const POST = withApiErrorHandler(
     // still runs and we persist the final exchange. Intentionally not awaited.
     void result.consumeStream();
 
-    return result.toUIMessageStreamResponse<ChatMessagePayload>({
+    return result.toUIMessageStreamResponse<UiMessagePayload>({
       originalMessages: uiMessages,
       generateMessageId: messageIdGenerator,
       onError: extractStreamErrorMessage,
-      onFinish: async ({ messages, isAborted }) => {
-        // Persist on every finish — including aborts — so a disconnected
-        // assistant turn still lands in the DB. Idempotency is handled by
-        // `DrizzleChatRepository.appendMessages` via `onConflictDoNothing` on
-        // the AI-SDK-stable message id, so re-running with the full message
-        // list (history + new) is safe.
+      onFinish: async ({ messages }) => {
         try {
-          // When the stream errors before the assistant emits any parts (the
-          // canonical example: AI Gateway rejects the request outright), the
+          // When the stream errors before the assistant emits any parts
+          // (e.g., AI Gateway rejects the request outright), the
           // SDK still hands us an empty assistant placeholder here. Writing
           // it would brick the chat: every subsequent send would fail
           // `validateUIMessages` because UIMessage parts must be non-empty.
+          // So, we filter out empty messages here to avoid persisting them.
           const inputs = messages.filter(uiMessageHasContent).map(toAppendMessageInput);
 
           if (inputs.length > 0) {
+            // Persist everything on every finish.
+            // Idempotency is handled by `DrizzleChatRepository.appendMessages` via `onConflictDoNothing` on
+            // the AI-SDK-stable message id, so re-running with the full message
+            // list (history + new) is safe.
             await chatsService.appendMessages({
               chatId,
               workspaceId,
@@ -157,7 +159,7 @@ export const POST = withApiErrorHandler(
 // Helper functions
 // ------------------------------------------------------------
 
-function toAppendMessageInput(message: ChatMessagePayload): AppendMessageInput {
+function toAppendMessageInput(message: UiMessagePayload): AppendMessageInput {
   return {
     id: message.id,
     role: message.role,
@@ -175,9 +177,9 @@ function createServices(db = getDb()) {
 }
 
 async function parseMessages(messages: unknown[], tools: ChatToolSet) {
-  let uiMessages: ChatMessagePayload[];
+  let uiMessages: UiMessagePayload[];
   try {
-    uiMessages = await validateUIMessages<ChatMessagePayload>({
+    uiMessages = await validateUIMessages<UiMessagePayload>({
       messages,
       tools,
     });
@@ -201,7 +203,7 @@ function messageHasContent(entry: ChatMessage): boolean {
   return uiMessageHasContent(entry.payload);
 }
 
-function uiMessageHasContent(message: ChatMessagePayload): boolean {
+function uiMessageHasContent(message: UiMessagePayload): boolean {
   return Array.isArray(message.parts) && message.parts.length > 0;
 }
 

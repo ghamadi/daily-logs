@@ -1,4 +1,4 @@
-import type { ChatMessagePayload } from '@web/lib/chat/types';
+import type { UiMessagePayload } from '@web/lib/chat/types';
 
 import { ChatSession, ChatSessionProps } from '../entities/chat-session';
 import { ChatMessageRole } from '../value-objects/chat-message-role';
@@ -13,7 +13,7 @@ export interface ChatMessage {
   id: string;
   chatId: string;
   role: ChatMessageRole;
-  payload: ChatMessagePayload;
+  payload: UiMessagePayload;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,7 +21,7 @@ export interface ChatMessage {
 export interface AppendMessageInput {
   id: string;
   role: ChatMessageRole;
-  payload: ChatMessagePayload;
+  payload: UiMessagePayload;
 }
 
 export interface IChatRepository {

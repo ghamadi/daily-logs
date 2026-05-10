@@ -12,4 +12,4 @@ import type { ChatTools } from '@web/lib/chat/tools';
  * `metadata` and data-parts schemas are intentionally left as defaults until we
  * actually need them.
  */
-export type ChatMessagePayload = UIMessage<unknown, never, ChatTools>;
+export type UiMessagePayload = UIMessage<unknown, never, ChatTools>;

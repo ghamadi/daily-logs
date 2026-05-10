@@ -7,7 +7,7 @@ import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleChatRepository } from '@infrastructure/repositories/chats/drizzle-chat-repository';
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
 import { getAuthenticatedPrincipal } from '@web/lib/utils/api/auth';
-import { translateAccessDeniedToNotFound, withApiErrorHandler } from '@web/lib/utils/api/errors';
+import { translateAccessDeniedToNotFoundAndThrow, withApiErrorHandler } from '@web/lib/utils/api/errors';
 import { parseJsonBody } from '@web/lib/utils/api/request';
 import { ApiResponse, toApiResponse } from '@web/lib/utils/api/response';
 
@@ -37,7 +37,7 @@ export const GET = withApiErrorHandler(
     const chat = await service
       .getChatById({ chatId, workspaceId, principalId: principal.id })
       .catch((error) =>
-        translateAccessDeniedToNotFound(error, `Could not find chat with id "${chatId}".`),
+        translateAccessDeniedToNotFoundAndThrow(error, `Could not find chat with id "${chatId}".`),
       );
 
     return toApiResponse(chat);
@@ -86,7 +86,7 @@ export const PATCH = withApiErrorHandler(
     const chat = await service
       .updateChat({ chatId, workspaceId, principalId: principal.id, input: updates })
       .catch((error) =>
-        translateAccessDeniedToNotFound(error, `Could not update chat with id "${chatId}".`),
+        translateAccessDeniedToNotFoundAndThrow(error, `Could not update chat with id "${chatId}".`),
       );
 
     return toApiResponse(chat);
@@ -117,7 +117,7 @@ export const DELETE = withApiErrorHandler(
     await service
       .archiveChat({ chatId, workspaceId, principalId: principal.id })
       .catch((error) =>
-        translateAccessDeniedToNotFound(error, `Could not find chat with id "${chatId}".`),
+        translateAccessDeniedToNotFoundAndThrow(error, `Could not find chat with id "${chatId}".`),
       );
 
     return new NextResponse(null, { status: 204 });

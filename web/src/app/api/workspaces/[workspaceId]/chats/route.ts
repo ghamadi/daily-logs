@@ -7,7 +7,7 @@ import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleChatRepository } from '@infrastructure/repositories/chats/drizzle-chat-repository';
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
 import { getAuthenticatedPrincipal } from '@web/lib/utils/api/auth';
-import { translateAccessDeniedToNotFound, withApiErrorHandler } from '@web/lib/utils/api/errors';
+import { translateAccessDeniedToNotFoundAndThrow, withApiErrorHandler } from '@web/lib/utils/api/errors';
 import { parseJsonBody } from '@web/lib/utils/api/request';
 import { ApiResponse, toApiResponse } from '@web/lib/utils/api/response';
 
@@ -45,7 +45,10 @@ export const POST = withApiErrorHandler(
     const chat = await service
       .createChat({ workspaceId, principalId: principal.id, title })
       .catch((error) =>
-        translateAccessDeniedToNotFound(error, `Could not find workspace with id "${workspaceId}".`),
+        translateAccessDeniedToNotFoundAndThrow(
+          error,
+          `Could not find workspace with id "${workspaceId}".`,
+        ),
       );
 
     return toApiResponse(chat, { responseInit: { status: 201 } });
@@ -74,7 +77,10 @@ export const GET = withApiErrorHandler(
     const chats = await service
       .listChats({ workspaceId, principalId: principal.id })
       .catch((error) =>
-        translateAccessDeniedToNotFound(error, `Could not find workspace with id "${workspaceId}".`),
+        translateAccessDeniedToNotFoundAndThrow(
+          error,
+          `Could not find workspace with id "${workspaceId}".`,
+        ),
       );
 
     return toApiResponse(chats);

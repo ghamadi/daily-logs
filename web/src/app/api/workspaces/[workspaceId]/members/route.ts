@@ -7,7 +7,7 @@ import { WorkspaceRole } from '@domains/workspaces/value-objects/workspace-role'
 import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
 import { getAuthenticatedPrincipal } from '@web/lib/utils/api/auth';
-import { translateAccessDeniedToNotFound, withApiErrorHandler } from '@web/lib/utils/api/errors';
+import { translateAccessDeniedToNotFoundAndThrow, withApiErrorHandler } from '@web/lib/utils/api/errors';
 import { parseJsonBody } from '@web/lib/utils/api/request';
 import { ApiResponse, toApiResponse } from '@web/lib/utils/api/response';
 
@@ -33,7 +33,10 @@ export const GET = withApiErrorHandler(
     const members = await service
       .listMembers({ workspaceId, principalId: principal.id })
       .catch((error) =>
-        translateAccessDeniedToNotFound(error, `Could not find workspace with id "${workspaceId}".`),
+        translateAccessDeniedToNotFoundAndThrow(
+          error,
+          `Could not find workspace with id "${workspaceId}".`,
+        ),
       );
 
     return toApiResponse(members);
@@ -73,7 +76,10 @@ export const POST = withApiErrorHandler(
     const member = await service
       .addMember({ workspaceId, principalId: principal.id, memberId, role })
       .catch((error) =>
-        translateAccessDeniedToNotFound(error, `Could not find workspace with id "${workspaceId}".`),
+        translateAccessDeniedToNotFoundAndThrow(
+          error,
+          `Could not find workspace with id "${workspaceId}".`,
+        ),
       );
 
     return toApiResponse(member, { responseInit: { status: 201 } });

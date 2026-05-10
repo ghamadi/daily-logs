@@ -5,7 +5,7 @@ import { WorkspacesService } from '@domains/workspaces/services/workspaces-servi
 import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
 import { getAuthenticatedPrincipal } from '@web/lib/utils/api/auth';
-import { translateAccessDeniedToNotFound, withApiErrorHandler } from '@web/lib/utils/api/errors';
+import { translateAccessDeniedToNotFoundAndThrow, withApiErrorHandler } from '@web/lib/utils/api/errors';
 import { parseJsonBody } from '@web/lib/utils/api/request';
 import { ApiResponse, toApiResponse } from '@web/lib/utils/api/response';
 import { Workspace } from '@domains/workspaces/entities/workspace';
@@ -32,7 +32,10 @@ export const GET = withApiErrorHandler(
     const workspace = await service
       .getWorkspaceById({ id: workspaceId, principalId: principal.id })
       .catch((error) =>
-        translateAccessDeniedToNotFound(error, `Could not find workspace with id "${workspaceId}".`),
+        translateAccessDeniedToNotFoundAndThrow(
+          error,
+          `Could not find workspace with id "${workspaceId}".`,
+        ),
       );
 
     return toApiResponse(workspace);
@@ -75,7 +78,10 @@ export const PATCH = withApiErrorHandler(
     const workspace = await service
       .updateWorkspace({ id: workspaceId, principalId: principal.id, input: updates })
       .catch((error) =>
-        translateAccessDeniedToNotFound(error, `Could not update workspace with id "${workspaceId}".`),
+        translateAccessDeniedToNotFoundAndThrow(
+          error,
+          `Could not update workspace with id "${workspaceId}".`,
+        ),
       );
 
     return toApiResponse(workspace);
@@ -100,7 +106,10 @@ export const DELETE = withApiErrorHandler(
     await service
       .deleteWorkspace({ id: workspaceId, principalId: principal.id })
       .catch((error) =>
-        translateAccessDeniedToNotFound(error, `Could not find workspace with id "${workspaceId}".`),
+        translateAccessDeniedToNotFoundAndThrow(
+          error,
+          `Could not find workspace with id "${workspaceId}".`,
+        ),
       );
 
     return new NextResponse(null, { status: 204 });
