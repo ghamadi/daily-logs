@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ChatsService } from '@domains/chats/services/chats-service';
 import { DomainErrors } from '@domains/lib/errors';
@@ -35,23 +34,11 @@ export default async function ChatPage({ params }: ChatPageProps) {
   ]);
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-3xl flex-1 flex-col">
-      <header className="border-border border-b px-4 py-4">
-        <Link
-          href={`/workspaces/${workspaceId}`}
-          className="text-muted-foreground hover:text-foreground text-xs"
-        >
-          ← Chats
-        </Link>
-        <h1 className="mt-1 text-lg font-semibold tracking-tight">{chat.title ?? 'Untitled chat'}</h1>
-      </header>
-
-      <ChatThread
-        workspaceId={workspaceId}
-        chatId={chatId}
-        initialMessages={history.map((entry) => entry.payload)}
-      />
-    </div>
+    <ChatThread
+      workspaceId={workspaceId}
+      chatId={chatId}
+      initialMessages={history.map((entry) => entry.payload)}
+    />
   );
 }
 

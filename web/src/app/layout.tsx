@@ -28,6 +28,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Suspense fallback={<LoadingSpinner fullPage />}>{children}</Suspense>
+        <div id="dialog-root" />
       </body>
     </html>
   );

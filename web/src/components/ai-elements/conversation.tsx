@@ -24,7 +24,10 @@ function ConversationRoot(props: ConversationProps) {
   const { className, ...rest } = props;
   return (
     <StickToBottom
-      className={cn('relative flex-1 overflow-y-hidden', className)}
+      // `min-h-0` is required when this is rendered as a `flex-1` child of a
+      // flex-column parent — otherwise it can't shrink below its content and
+      // the inner scroll element never overflows.
+      className={cn('relative min-h-0 flex-1 overflow-y-hidden', className)}
       initial="smooth"
       resize="smooth"
       role="log"

@@ -59,7 +59,7 @@ export function ChatThread(props: ChatThreadProps) {
   );
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex size-full flex-col">
       <MessageList messages={messages} />
 
       {error && (
@@ -94,12 +94,12 @@ function MessageList(props: MessageListProps) {
   const { messages } = props;
 
   return (
-    <Conversation className="flex flex-1 flex-col">
-      {!messages.length && <Conversation.EmptyState className="flex-1" />}
+    <Conversation className="flex flex-col">
+      {!messages.length && <Conversation.EmptyState />}
 
       {messages.length > 0 && (
         <Conversation.Content className="px-4 py-6">
-          <ol className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+          <ol className="flex w-full flex-col gap-6">
             {messages.map((message) => (
               <li key={message.id}>
                 <MessageBubble message={message} />
@@ -108,6 +108,7 @@ function MessageList(props: MessageListProps) {
           </ol>
         </Conversation.Content>
       )}
+
       <Conversation.ScrollButton />
     </Conversation>
   );
@@ -127,7 +128,7 @@ function MessageBubble({ message }: { message: UiMessagePayload }) {
       </span>
       <div
         className={cn(
-          'max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
+          'max-w-[55%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
           isUser
             ? 'bg-primary text-primary-foreground'
             : 'bg-muted text-foreground border-border border',
@@ -265,9 +266,9 @@ function Composer(props: ComposerProps) {
       onSubmit={(event) => {
         void onSubmit(event);
       }}
-      className="border-border bg-background sticky bottom-0 border-t px-4 py-3"
+      className="border-border bg-background border-t px-4 py-3"
     >
-      <div className="border-border bg-background focus-within:ring-ring/40 mx-auto flex max-w-2xl items-end gap-2 rounded-2xl border p-2 focus-within:ring-2">
+      <div className="border-border bg-background focus-within:ring-ring/40 mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border p-2 focus-within:ring-2">
         <textarea
           value={value}
           onChange={handleChange}

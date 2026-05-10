@@ -15,7 +15,7 @@ export default async function WorkspacesPage() {
   const workspaces = await service.listWorkspacesForUser(principal.id);
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-10">
+    <div className="w-full px-4 py-10">
       <div className="mb-8 flex items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Workspaces</h1>

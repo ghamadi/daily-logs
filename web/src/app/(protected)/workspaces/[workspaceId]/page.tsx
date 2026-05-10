@@ -36,7 +36,7 @@ export default async function WorkspacePage({ params }: WorkspacePageProps) {
   ]);
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-10">
+    <div className="w-full px-4 py-10">
       <div className="mb-8 flex items-end justify-between gap-4">
         <div>
           <Link href="/workspaces" className="text-muted-foreground hover:text-foreground text-xs">
