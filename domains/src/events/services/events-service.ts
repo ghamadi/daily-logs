@@ -1,9 +1,6 @@
 import { randomUUID } from 'crypto';
 import { Event } from '../entities/event';
-import { AccessDeniedError } from '../../shared/errors/access-denied-error';
-import { EntityNotFoundError } from '../../shared/errors/entity-not-found-error';
-import { InvalidInputError } from '../../shared/errors/invalid-input-error';
-import { EventStatus, isActionable } from '../value-objects/event-status';
+import { EventStatus } from '../value-objects/event-status';
 import { IWorkspacesRepository } from '../../workspaces/repositories/workspaces-repository';
 import {
   CreateEventRepoInput,
@@ -11,8 +8,12 @@ import {
   UpdateEventRepoInput,
   IEventsRepository,
 } from '../repositories/events-repository';
+import { DomainErrors } from '@domains/lib/errors';
 
-export type CreateEventInput = Omit<CreateEventRepoInput, 'createdAt' | 'updatedAt' | 'userId' | 'workspaceId'>;
+export type CreateEventInput = Omit<
+  CreateEventRepoInput,
+  'createdAt' | 'updatedAt' | 'userId' | 'workspaceId'
+>;
 export type UpdateEventInput = Partial<Omit<UpdateEventRepoInput, 'createdAt' | 'updatedAt' | 'id'>>;
 
 export class EventsService {
@@ -29,7 +30,9 @@ export class EventsService {
     const { id, principalId } = props;
     const event = await this.findEventById(id);
     if (!event) {
-      throw EntityNotFoundError.create({ entity: 'Event', identifier: id });
+      throw new DomainErrors.NotFoundError('Event not found', {
+        identifier: id,
+      });
     }
     await this.requireMembership(event.workspaceId, principalId);
 
@@ -57,7 +60,11 @@ export class EventsService {
     });
   }
 
-  async updateEvent(props: { id: string; principalId: string; input: UpdateEventInput }): Promise<Event> {
+  async updateEvent(props: {
+    id: string;
+    principalId: string;
+    input: UpdateEventInput;
+  }): Promise<Event> {
     const { id, principalId, input } = props;
     const event = await this.getEventById({ id, principalId });
     return this.updateEventHelper({ event, principalId, input });
@@ -66,27 +73,31 @@ export class EventsService {
   async confirmEvent(props: { id: string; principalId: string }): Promise<Event> {
     const { id, principalId } = props;
     const event = await this.getEventById({ id, principalId });
-    if (!isActionable(event.status)) {
-      throw InvalidInputError.create({ field: 'status', reason: 'Only proposed events can be confirmed' });
+    if (event.status !== EventStatus.PROPOSED) {
+      throw new DomainErrors.InvalidInputError('Only proposed events can be confirmed', {
+        eventStatus: event.status,
+      });
     }
-    return this.updateEventHelper({ event, principalId, input: { status: EventStatus.Confirmed } });
+    return this.updateEventHelper({ event, principalId, input: { status: EventStatus.CONFIRMED } });
   }
 
   async rejectEvent(props: { id: string; principalId: string }): Promise<Event> {
     const { id, principalId } = props;
     const event = await this.getEventById({ id, principalId });
-    if (!isActionable(event.status)) {
-      throw InvalidInputError.create({ field: 'status', reason: 'Only proposed events can be rejected' });
+    if (event.status !== EventStatus.PROPOSED) {
+      throw new DomainErrors.InvalidInputError('Only proposed events can be rejected', {
+        eventStatus: event.status,
+      });
     }
-    return this.updateEventHelper({ event, principalId, input: { status: EventStatus.Rejected } });
+    return this.updateEventHelper({ event, principalId, input: { status: EventStatus.REJECTED } });
   }
 
   // ── helpers ──────────────────────────────────────────────
 
   private async requireMembership(workspaceId: string, userId: string): Promise<void> {
-    const member = await this.membersRepo.findMember({ workspaceId, memberId: userId });
-    if (!member) {
-      throw new AccessDeniedError('User is not a member of this workspace');
+    const isMember = await this.membersRepo.isMember({ workspaceId, memberId: userId });
+    if (!isMember) {
+      throw new DomainErrors.AccessDeniedError('User is not a member of this workspace');
     }
   }
 
@@ -97,7 +108,7 @@ export class EventsService {
   }): Promise<Event> {
     const { event, principalId, input } = props;
     if (event.userId !== principalId) {
-      throw new AccessDeniedError('User is not the owner of this event');
+      throw new DomainErrors.AccessDeniedError('User is not the owner of this event');
     }
     return this.eventsRepo.updateById(event.id, { ...input, updatedAt: new Date() });
   }

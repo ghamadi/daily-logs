@@ -1,10 +1,8 @@
 import { setTimeout as sleep } from 'node:timers/promises';
-
 import { sql } from 'drizzle-orm';
-
 import { createDb } from '@db/client/create-db';
 
-const DEFAULT_TEST_DATABASE_URL = 'postgresql://postgres:postgres@localhost:5443/daily_logs_test';
+const DEFAULT_TEST_DATABASE_URL = 'postgresql://postgres:postgres@localhost:5443/test_db';
 
 let dbContext: ReturnType<typeof createDb> | undefined;
 
@@ -17,7 +15,10 @@ export function getTestDatabase(): ReturnType<typeof createDb> {
   return dbContext;
 }
 
-export async function waitForTestDatabase(props?: { retries?: number; delayMs?: number }): Promise<void> {
+export async function waitForTestDatabase(props?: {
+  retries?: number;
+  delayMs?: number;
+}): Promise<void> {
   const retries = props?.retries ?? 30;
   const delayMs = props?.delayMs ?? 1_000;
 
@@ -38,14 +39,18 @@ export async function waitForTestDatabase(props?: { retries?: number; delayMs?: 
     }
   }
 
-  throw new Error(`Unable to connect to the test database at ${getTestDatabaseUrl()}.`, { cause: lastError });
+  throw new Error(`Unable to connect to the test database at ${getTestDatabaseUrl()}.`, {
+    cause: lastError,
+  });
 }
 
 export async function resetTestDatabase(): Promise<void> {
   const { db } = getTestDatabase();
 
   await db.execute(
-    sql.raw('TRUNCATE TABLE "events", "workspace_users", "workspaces", "users" RESTART IDENTITY CASCADE;'),
+    sql.raw(
+      'TRUNCATE TABLE "auth_identities", "events", "workspace_users", "workspaces", "users" RESTART IDENTITY CASCADE;',
+    ),
   );
 }
 

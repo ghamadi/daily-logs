@@ -16,7 +16,3 @@ export function getObjectValues<T extends Record<PropertyKey, unknown>>(value: T
 export function isNotNullish<T>(value: T | null | undefined): value is T {
   return value != null;
 }
-
-export function assertUnreachable(value: never, message?: string): never {
-  throw new Error(message ?? `Reached an unexpected code path. Received value: ${String(value)}`);
-}

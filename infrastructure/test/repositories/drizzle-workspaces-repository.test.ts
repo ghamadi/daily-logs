@@ -21,14 +21,14 @@ describe('DrizzleWorkspacesRepository', () => {
       updatedAt,
     });
 
-    const ownerMember = await repository.getOwner({ workspaceId: workspace.id });
+    const workspaceOwner = await repository.getOwner({ workspaceId: workspace.id });
     const members = await repository.listMembers(workspace.id);
 
     expect(workspace.ownerId).toBe(owner.id);
-    expect(ownerMember.userId).toBe(owner.id);
-    expect(ownerMember.role).toBe(WorkspaceRole.Owner);
+    expect(workspaceOwner.user.id).toBe(owner.id);
+    expect(workspaceOwner.role).toBe(WorkspaceRole.OWNER);
     expect(members).toHaveLength(1);
-    expect(members[0]?.userId).toBe(owner.id);
+    expect(members[0]?.user.id).toBe(owner.id);
   });
 
   it('adds members and updates their roles', async () => {
@@ -47,20 +47,20 @@ describe('DrizzleWorkspacesRepository', () => {
     const added = await repository.addMember({
       workspaceId: workspace.id,
       memberId: member.id,
-      role: WorkspaceRole.Admin,
+      role: WorkspaceRole.ADMIN,
     });
 
     const updated = await repository.updateRole({
       workspaceId: workspace.id,
       memberId: member.id,
-      role: WorkspaceRole.Member,
+      role: WorkspaceRole.MEMBER,
     });
 
     const found = await repository.findMember({ workspaceId: workspace.id, memberId: member.id });
 
-    expect(added.role).toBe(WorkspaceRole.Admin);
-    expect(updated.role).toBe(WorkspaceRole.Member);
-    expect(found?.role).toBe(WorkspaceRole.Member);
+    expect(added.role).toBe(WorkspaceRole.ADMIN);
+    expect(updated.role).toBe(WorkspaceRole.MEMBER);
+    expect(found?.role).toBe(WorkspaceRole.MEMBER);
   });
 
   it('removes members and deletes workspaces', async () => {
@@ -79,12 +79,14 @@ describe('DrizzleWorkspacesRepository', () => {
     await repository.addMember({
       workspaceId: workspace.id,
       memberId: member.id,
-      role: WorkspaceRole.Member,
+      role: WorkspaceRole.MEMBER,
     });
 
     await repository.removeMember({ workspaceId: workspace.id, memberId: member.id });
 
-    await expect(repository.findMember({ workspaceId: workspace.id, memberId: member.id })).resolves.toBeNull();
+    await expect(
+      repository.findMember({ workspaceId: workspace.id, memberId: member.id }),
+    ).resolves.toBeNull();
 
     await repository.deleteById(workspace.id);
 

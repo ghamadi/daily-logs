@@ -5,16 +5,15 @@ services:
     ports:
       # Host:Container
       # Connect from machine to localhost:5442
-      - "5442:5432"
+      - '5442:5432'
     environment:
-      # DATABASE_URL=postgresql://postgres:postgres@localhost:5442/main
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: main
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d main"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d main']
       interval: 10s
       timeout: 5s
       retries: 10

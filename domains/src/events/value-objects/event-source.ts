@@ -1,7 +1,9 @@
+import { type DbEventSource } from '@db/schema';
 import { Enum } from '@utils/ts-utils';
 
 export const EventSource = {
-  User: 1,
-  Assistant: 2,
-} as const;
+  USER: 'user',
+  ASSISTANT: 'assistant',
+} as const satisfies Record<string, DbEventSource>;
+
 export type EventSource = Enum<typeof EventSource>;

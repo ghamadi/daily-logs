@@ -1,4 +1,4 @@
-import { isValidPath } from '@web/lib/utils';
+import { isValidPath } from '@web/lib/utils/routing';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 

@@ -1,48 +1,91 @@
-import { eq } from 'drizzle-orm';
-
+import { and, eq } from 'drizzle-orm';
 import type { Database } from '@db/client/create-db';
-import { UsersTable } from '@db/schema';
+import { AuthIdentitiesTable, UsersTable } from '@db/schema';
 import { User } from '@domains/users/entities/user';
 import type {
-  CreateUserRepoInput,
+  UpsertUserRepoInput,
   UpdateUserRepoInput,
-  UsersRepository,
+  IUsersRepository,
+  FindByEmailOptions,
 } from '@domains/users/repositories/users-repository';
+import { assertNotNullish } from '@utils/assertions';
 
-import { requireRecord } from '../../shared/require-record';
-
-export class DrizzleUsersRepository implements UsersRepository {
+export class DrizzleUsersRepository implements IUsersRepository {
   constructor(private readonly db: Database) {}
 
   async findById(id: string): Promise<User | null> {
-    const rows = await this.db.select().from(UsersTable).where(eq(UsersTable.id, id)).limit(1);
-    const row = rows[0];
+    const [row = null] = await this.db.select().from(UsersTable).where(eq(UsersTable.id, id)).limit(1);
 
-    return row ? new User(row) : null;
+    return row && new User(row);
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    const rows = await this.db.select().from(UsersTable).where(eq(UsersTable.email, email)).limit(1);
-    const row = rows[0];
+  async findByEmail(email: string, options?: FindByEmailOptions): Promise<User | null> {
+    const { provider, providerUserId } = options ?? {};
 
-    return row ? new User(row) : null;
+    const baseQuery = this.db.select({ user: UsersTable }).from(UsersTable);
+
+    const query = provider
+      ? baseQuery.innerJoin(
+          AuthIdentitiesTable,
+          and(
+            eq(AuthIdentitiesTable.userId, UsersTable.id),
+            eq(AuthIdentitiesTable.provider, provider),
+            eq(AuthIdentitiesTable.providerUserId, providerUserId),
+          ),
+        )
+      : baseQuery;
+
+    const [row = null] = await query.where(eq(UsersTable.email, email)).limit(1);
+
+    return row && new User(row.user);
   }
 
-  async create(input: CreateUserRepoInput): Promise<User> {
-    const rows = await this.db.insert(UsersTable).values(input).returning();
-    const row = requireRecord(rows[0], `Failed to create user "${input.id}".`);
+  async getOrCreateUser(input: UpsertUserRepoInput) {
+    return this.db.transaction(async (tx) => {
+      const { provider, providerUserId, ...userInput } = input;
+      const [userRow] = await tx
+        .insert(UsersTable)
+        .values(userInput)
+        .onConflictDoUpdate({
+          target: [UsersTable.email],
+          set: {
+            // no-op update since the email is the same
+            // we only update for `returning()` to return the user record
+            email: userInput.email,
+          },
+        })
+        .returning();
+
+      assertNotNullish(userRow, `Failed to upsert user "${userInput.email}".`);
+
+      await tx
+        .insert(AuthIdentitiesTable)
+        .values({
+          userId: userRow.id,
+          provider,
+          providerUserId,
+        })
+        .onConflictDoNothing({
+          target: [AuthIdentitiesTable.provider, AuthIdentitiesTable.providerUserId],
+        });
+
+      return new User(userRow);
+    });
+  }
+
+  async updateById(id: string, input: UpdateUserRepoInput) {
+    const [row] = await this.db
+      .update(UsersTable)
+      .set({ ...input, updatedAt: new Date() })
+      .where(eq(UsersTable.id, id))
+      .returning();
+
+    assertNotNullish(row, `Failed to update user "${id}".`);
 
     return new User(row);
   }
 
-  async updateById(id: string, input: UpdateUserRepoInput): Promise<User> {
-    const rows = await this.db.update(UsersTable).set(input).where(eq(UsersTable.id, id)).returning();
-    const row = requireRecord(rows[0], `Failed to update user "${id}".`);
-
-    return new User(row);
-  }
-
-  async deleteById(id: string): Promise<void> {
+  async deleteById(id: string) {
     await this.db.delete(UsersTable).where(eq(UsersTable.id, id));
   }
 }

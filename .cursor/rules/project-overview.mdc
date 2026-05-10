@@ -52,7 +52,7 @@ Monorepo root contains:
 - All input validation should be done in the `web/` package using Zod. API routes are responsible for parsing and validating the request body.
 - All business logic should be done in the services of the `domains/` package.
 - All database operations should be done in the repositories (defined in the `domains/` package and implemented in the `web/` package).
-- All domains should throw a `DomainError` instance for expected errors (defined in the `domains/shared/errors` directory).
+- All domains should throw a `DomainError` instance for expected errors (defined in the `domains/lib/errors` directory).
 - All API routes should throw `ApiError` instances for expected errors (defined in the `web/lib/errors` directory).
 - All API routes should be wrapped with an error-handling higher-order function that converts `DomainError` and unexpected errors to `ApiError` instances, and returns the appropriate API response.
 - Domain services assume the input is valid and according to the expected format.
@@ -154,10 +154,19 @@ Monorepo root contains:
 │       ├── middleware.ts                  # basic auth/access gating
 │       │
 │       ├── app/
-│       │   ├── api/
-│       │   │   └── <resource>/
-│       │   │       ├── <method>.ts       # The method handler for the <resource> (POST, PUT, DELETE, GET, etc.)
-│       │   │       └── route.ts          # The route handler for the <resource> (exports the method handlers for the <resource>)
+│       │   ├── api/                                         # See section 6 for URL conventions. All HTTP methods for a route live in one `route.ts` (extract a sibling file only for heavy outliers e.g. AI streaming).
+│       │   │   ├── <root-resource>/                         # e.g. workspaces
+│       │   │   │   ├── route.ts                             # POST/GET on the collection
+│       │   │   │   └── [<root-resource-id>]/
+│       │   │   │       ├── route.ts                         # GET/PATCH/DELETE on the entity
+│       │   │   │       └── <workspace-bound-resource>/      # e.g. chats, members, events
+│       │   │   │           ├── route.ts                     # POST/GET on the workspace-scoped collection
+│       │   │   │           └── [<resource-id>]/
+│       │   │   │               ├── route.ts                 # GET/PATCH/DELETE on the entity
+│       │   │   │               └── <sub-resource>/          # e.g. messages of a chat — sub-resource lives under a static path
+│       │   │   │                   └── route.ts             # GET/POST on the sub-resource collection
+│       │   │   │
+│       │   │   └── ...                                       # More <root-resource> entries follow the same shape.
 │       │   │
 │       │   ├── (protected)/
 │       │   │   ├── ... (all protected sub-layouts and pages)
@@ -187,3 +196,11 @@ Monorepo root contains:
 - React rules should always be followed.
 - Files are named in kebab-case.
 - Code shared between packages should be exported by the package's `exports/*` directory.
+
+## 6. API Route Conventions
+
+- **Workspace-bound resources nest under their workspace.** Every resource that is conceptually scoped to a workspace (chats, members, events, etc.) lives at `/api/workspaces/[workspaceId]/<resource>` for collection ops and `/api/workspaces/[workspaceId]/<resource>/[<resource-id>]` for entity ops. The workspace context belongs in the URL because the listing endpoint needs it; mixing flat detail URLs with workspace-scoped listing URLs would make the API stylistically inconsistent.
+- **Maximum of two ID segments per URL.** A workspace id and one nested resource id is the deepest nesting we accept. We never write URLs that chain three IDs (e.g. `/api/workspaces/[workspaceId]/chats/[chatId]/messages/[messageId]` is **not** allowed).
+- **Deep resources flatten under the workspace.** When a resource conceptually lives "inside" another workspace-bound resource (e.g. an attachment of a chat message), expose it directly under the workspace: `/api/workspaces/[workspaceId]/<deep-resource>/[<deep-resource-id>]`. The service derives the parent context from the loaded row.
+- **Sub-resource collections may live under a static path segment.** This does not violate the two-ID rule because the segment is not an ID. Example: `GET /api/workspaces/[workspaceId]/chats/[chatId]/messages` lists the chat's messages — `messages` is a static path. The corresponding entity URL would **not** be `.../messages/[messageId]` (three IDs); it would flatten to `/api/workspaces/[workspaceId]/messages/[messageId]` if we ever needed it.
+- **Service-layer authorization is the source of truth.** The service must reject cross-workspace access even when the URL looks correct — defense in depth, but the URL is not the authority.
