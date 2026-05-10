@@ -1,7 +1,6 @@
 'use client';
 
-import { environmentManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { type ReactNode } from 'react';
+import { environmentManager, QueryClient } from '@tanstack/react-query';
 
 /**
  * Canonical "App Router + React Query" provider, per the official Tanstack
@@ -30,15 +29,10 @@ function makeQueryClient() {
 
 let browserQueryClient: QueryClient | undefined;
 
-function getQueryClient(): QueryClient {
+export function getQueryClient(): QueryClient {
   if (environmentManager.isServer()) {
     return makeQueryClient();
   }
   browserQueryClient ??= makeQueryClient();
   return browserQueryClient;
-}
-
-export function QueryProvider({ children }: { children: ReactNode }) {
-  const queryClient = getQueryClient();
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 }
