@@ -13,10 +13,10 @@ import {
 } from 'react';
 
 import { Conversation } from '@web/components/ai-elements/conversation';
+import { Message } from '@web/components/ai-elements/message';
 import { Button } from '@web/components/ui/button';
 import { createChatTransport } from '@web/lib/chat/transport';
 import type { UiMessagePayload } from '@web/lib/chat/types';
-import { cn } from '@web/lib/utils/components';
 
 export type ChatThreadProps = {
   workspaceId: string;
@@ -98,11 +98,17 @@ function MessageList(props: MessageListProps) {
       {!messages.length && <Conversation.EmptyState />}
 
       {messages.length > 0 && (
-        <Conversation.Content className="px-4 py-6">
+        <Conversation.Content>
           <ol className="flex w-full flex-col gap-6">
             {messages.map((message) => (
               <li key={message.id}>
-                <MessageBubble message={message} />
+                <Message from={message.role}>
+                  <Message.Content>
+                    {message.parts.map((part, index) => (
+                      <MessagePart key={`${message.id}-${index}`} part={part} />
+                    ))}
+                  </Message.Content>
+                </Message>
               </li>
             ))}
           </ol>
@@ -111,36 +117,6 @@ function MessageList(props: MessageListProps) {
 
       <Conversation.ScrollButton />
     </Conversation>
-  );
-}
-
-// ------------------------------------------------------------
-// Message bubble
-// ------------------------------------------------------------
-
-function MessageBubble({ message }: { message: UiMessagePayload }) {
-  const isUser = message.role === 'user';
-
-  return (
-    <div className={cn('flex flex-col gap-2', isUser ? 'items-end' : 'items-start')}>
-      <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-        {message.role}
-      </span>
-      <div
-        className={cn(
-          'max-w-[55%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
-          isUser
-            ? 'bg-primary text-primary-foreground'
-            : 'bg-muted text-foreground border-border border',
-        )}
-      >
-        <div className="flex flex-col gap-3">
-          {message.parts.map((part, index) => (
-            <MessagePart key={`${message.id}-${index}`} part={part} />
-          ))}
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -154,7 +130,7 @@ type MessagePartProps = {
 
 function MessagePart({ part }: MessagePartProps) {
   if (part.type === 'text') {
-    return <p className="wrap-break-word whitespace-pre-wrap">{part.text}</p>;
+    return <Message.Response>{part.text}</Message.Response>;
   }
 
   if (part.type === 'reasoning') {

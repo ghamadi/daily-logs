@@ -10,6 +10,15 @@ export const Tooltip = composeCompoundComponent(TooltipRoot, {
   Content: TooltipContent,
 });
 
+export type TooltipProviderProps = ComponentProps<typeof TooltipPrimitive.Provider>;
+
+export function TooltipProvider(props: TooltipProviderProps) {
+  const { delayDuration = 0, ...rest } = props;
+  return (
+    <TooltipPrimitive.Provider data-slot="tooltip-provider" delayDuration={delayDuration} {...rest} />
+  );
+}
+
 // ------------------------------------------------------------
 // TooltipRoot
 // ------------------------------------------------------------
