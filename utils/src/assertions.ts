@@ -28,5 +28,8 @@ export function assertNotNullish<T>(value: T | null | undefined, message: string
  * ```
  */
 export function assertUnreachable(value: never, message?: string): never {
-  throw new Error(message ?? `Reached an unexpected code path. Received value: ${String(value)}`);
+  throw new Error(
+    message ??
+      `Reached an unexpected code path. Expected never, but received ${typeof value}. Received value: ${String(value)}`,
+  );
 }

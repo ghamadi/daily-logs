@@ -16,7 +16,7 @@ import { Conversation } from '@web/components/ai-elements/conversation';
 import { Message } from '@web/components/ai-elements/message';
 import { Button } from '@web/components/ui/button';
 import { createChatTransport } from '@web/lib/chat/transport';
-import type { UiMessagePayload } from '@web/lib/chat/types';
+import type { UiMessagePayload } from '@web/lib/ai-sdk/types';
 
 export type ChatThreadProps = {
   workspaceId: string;

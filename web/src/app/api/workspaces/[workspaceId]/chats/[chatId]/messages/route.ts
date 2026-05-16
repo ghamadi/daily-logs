@@ -10,7 +10,7 @@ import { ApiErrors } from '@web/lib/errors';
 import { getChatModel } from '@web/lib/chat/model';
 import { getSystemPrompt } from '@web/lib/chat/system-prompt';
 import { buildChatTools, ChatToolSet } from '@web/lib/chat/tools';
-import type { UiMessagePayload } from '@web/lib/chat/types';
+import type { UiMessagePayload } from '@web/lib/ai-sdk/types';
 import { getAuthenticatedPrincipal } from '@web/lib/utils/api/auth';
 import {
   logError,

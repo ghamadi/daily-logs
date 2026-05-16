@@ -1,6 +1,6 @@
 import { pgTable, uuid, varchar, jsonb, timestamp, index, pgEnum } from 'drizzle-orm/pg-core';
 import { ChatSessionsTable } from './chat-sessions-table';
-import type { UiMessagePayload } from '@web/lib/chat/types';
+import type { UiMessagePayload } from '@web/lib/ai-sdk/types';
 
 export const CHAT_MESSAGE_ROLES = ['user', 'assistant', 'system'] as const;
 
