@@ -1,5 +1,5 @@
 import type { UIMessage } from 'ai';
-import type { ChatTools } from '@web/lib/chat/tools';
+import type { ChatTools } from '@web/lib/ai-sdk/tools';
 
 /**
  * The persisted shape of a single chat message.

@@ -7,9 +7,9 @@ import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleChatRepository } from '@infrastructure/repositories/chats/drizzle-chat-repository';
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
 import { ApiErrors } from '@web/lib/errors';
-import { getChatModel } from '@web/lib/chat/model';
-import { getSystemPrompt } from '@web/lib/chat/system-prompt';
-import { buildChatTools, ChatToolSet } from '@web/lib/chat/tools';
+import { getChatModel } from '@web/lib/ai-sdk/model';
+import { getSystemPrompt } from '@web/lib/ai-sdk/system-prompt';
+import { buildChatTools, ChatToolSet } from '@web/lib/ai-sdk/tools';
 import type { UiMessagePayload } from '@web/lib/ai-sdk/types';
 import { getAuthenticatedPrincipal } from '@web/lib/utils/api/auth';
 import {
