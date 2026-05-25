@@ -1,7 +1,7 @@
 'use client';
 
-import { Button } from '@web/components/ui/button';
-import { cn, composeCompoundComponent } from '@web/lib/utils/components';
+import { Button } from '@/components/ui/button';
+import { cn, composeCompoundComponent } from '@/lib/utils/components';
 import type { UIMessage } from 'ai';
 import { ArrowDownIcon, DownloadIcon } from 'lucide-react';
 import type { ComponentProps } from 'react';

@@ -1,6 +1,6 @@
 import { DefaultChatTransport } from 'ai';
-import type { UiMessagePayload } from '@web/lib/ai-sdk/types';
-import { SendChatMessageRequestBody } from '@web/app/api/workspaces/[workspaceId]/chats/[chatId]/messages/route';
+import type { UiMessagePayload } from '@/lib/ai-sdk/types';
+import { SendChatMessageRequestBody } from '@/app/api/workspaces/[workspaceId]/chats/[chatId]/messages/route';
 
 export type CreateChatTransportInput = {
   workspaceId: string;

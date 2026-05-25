@@ -4,8 +4,8 @@ import { DomainErrors } from '@domains/lib/errors';
 import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleChatRepository } from '@infrastructure/repositories/chats/drizzle-chat-repository';
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
-import { ChatThread } from '@web/app/(protected)/workspaces/[workspaceId]/chats/_components/chat-thread';
-import { getAuthenticatedPrincipal } from '@web/lib/utils/api/auth';
+import { ChatThread } from '@/app/(protected)/workspaces/[workspaceId]/chats/_components/chat-thread';
+import { getAuthenticatedPrincipal } from '@/lib/utils/api/auth';
 
 export const dynamic = 'force-dynamic';
 

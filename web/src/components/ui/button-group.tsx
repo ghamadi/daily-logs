@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Slot } from 'radix-ui';
-import { cn, composeCompoundComponent } from '@web/lib/utils/components';
-import { Separator, SeparatorProps } from '@web/components/ui/separator';
+import { cn, composeCompoundComponent } from '@/lib/utils/components';
+import { Separator, SeparatorProps } from '@/components/ui/separator';
 
 export const ButtonGroup = composeCompoundComponent(ButtonGroupRoot, {
   Text: ButtonGroupText,

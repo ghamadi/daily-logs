@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { ApiErrors } from '@web/lib/errors';
+import { ApiErrors } from '@/lib/errors';
 
 /**
  * Reads the JSON body from a Request and validates it against a Zod schema.

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { WorkspacesService } from '@domains/workspaces/services/workspaces-service';
 import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
-import { getAuthenticatedPrincipal } from '@web/lib/utils/api/auth';
+import { getAuthenticatedPrincipal } from '@/lib/utils/api/auth';
 
 import { CreateWorkspaceDialog } from './_components/create-workspace-dialog';
 

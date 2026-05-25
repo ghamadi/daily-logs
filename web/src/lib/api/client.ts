@@ -1,4 +1,4 @@
-import { ApiError } from '@web/lib/errors/api-error';
+import { ApiError } from '@/lib/errors/api-error';
 
 export type ApiFetchInit = Omit<RequestInit, 'body'> & {
   /** Plain object — `apiFetch` JSON-encodes it for you. Pass a string/FormData via `rawBody` instead. */

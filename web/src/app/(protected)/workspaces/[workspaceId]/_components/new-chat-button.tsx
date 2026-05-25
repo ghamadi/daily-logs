@@ -4,9 +4,9 @@ import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 
 import type { ChatSession } from '@domains/chats/entities/chat-session';
-import { Button } from '@web/components/ui/button';
-import { LoadingSpinner } from '@web/components/ui/loading-spinner';
-import { apiFetch } from '@web/lib/api/client';
+import { Button } from '@/components/ui/button';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { apiFetch } from '@/lib/api/client';
 
 export type NewChatButtonProps = {
   workspaceId: string;

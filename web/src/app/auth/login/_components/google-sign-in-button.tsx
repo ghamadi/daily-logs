@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@web/components/ui/button';
+import { Button } from '@/components/ui/button';
 
-import { createClient } from '@web/lib/supabase/client';
-import { useAuthVerificationUrl } from '@web/hooks/use-auth-verification-url';
-import { SimpleGoogleLogoIcon } from '@web/components/icons/google-logo-simple-icon';
+import { createClient } from '@/lib/supabase/client';
+import { useAuthVerificationUrl } from '@/hooks/use-auth-verification-url';
+import { SimpleGoogleLogoIcon } from '@/components/icons/google-logo-simple-icon';
 
 function GoogleSignInButton() {
   const [isLoading, setIsLoading] = useState(false);

@@ -1,9 +1,9 @@
 'use client';
 
-import { Button } from '@web/components/ui/button';
-import { ButtonGroup } from '@web/components/ui/button-group';
-import { Tooltip, TooltipProvider } from '@web/components/ui/tooltip';
-import { cn, composeCompoundComponent } from '@web/lib/utils/components';
+import { Button } from '@/components/ui/button';
+import { ButtonGroup } from '@/components/ui/button-group';
+import { Tooltip, TooltipProvider } from '@/components/ui/tooltip';
+import { cn, composeCompoundComponent } from '@/lib/utils/components';
 import { cjk } from '@streamdown/cjk';
 import { code } from '@streamdown/code';
 import { math } from '@streamdown/math';

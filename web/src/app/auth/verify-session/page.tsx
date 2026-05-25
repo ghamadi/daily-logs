@@ -2,9 +2,9 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
-import { LoadingSpinner } from '@web/components/ui/loading-spinner';
-import { createClient } from '@web/lib/supabase/client';
-import { isValidPath } from '@web/lib/utils/routing';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { createClient } from '@/lib/supabase/client';
+import { isValidPath } from '@/lib/utils/routing';
 
 /**
  * This page is used as a redirect URL after the user clicks on the magic link or completes the OAuth flow.

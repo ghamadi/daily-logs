@@ -1,5 +1,5 @@
 import { createServerClient } from '@supabase/ssr';
-import { ProxyResult } from '@web/proxy';
+import { ProxyResult } from '@/proxy';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function updateSession(request: NextRequest): Promise<ProxyResult> {

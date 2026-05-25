@@ -12,11 +12,11 @@ import {
   useState,
 } from 'react';
 
-import { Conversation } from '@web/components/ai-elements/conversation';
-import { Message } from '@web/components/ai-elements/message';
-import { Button } from '@web/components/ui/button';
-import { createChatTransport } from '@web/lib/ai-sdk/transport';
-import type { UiMessagePayload } from '@web/lib/ai-sdk/types';
+import { Conversation } from '@/components/ai-elements/conversation';
+import { Message } from '@/components/ai-elements/message';
+import { Button } from '@/components/ui/button';
+import { createChatTransport } from '@/lib/ai-sdk/transport';
+import type { UiMessagePayload } from '@/lib/ai-sdk/types';
 
 export type ChatThreadProps = {
   workspaceId: string;
@@ -29,7 +29,7 @@ export function ChatThread(props: ChatThreadProps) {
 
   const transport = useMemo(() => createChatTransport({ workspaceId, chatId }), [workspaceId, chatId]);
 
-  const { messages, sendMessage, status, error, stop, clearError,  } = useChat<UiMessagePayload>({
+  const { messages, sendMessage, status, error, stop, clearError } = useChat<UiMessagePayload>({
     id: chatId,
     transport,
     messages: initialMessages,

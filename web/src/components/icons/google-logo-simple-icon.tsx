@@ -1,4 +1,4 @@
-import { Icon, type IconProps } from '@web/components/icon';
+import { Icon, type IconProps } from '@/components/icon';
 
 export type SimpleGoogleLogoIconProps = Omit<IconProps, 'children'>;
 

@@ -5,12 +5,12 @@ import { useRouter } from 'next/navigation';
 import { type SubmitEvent, useState } from 'react';
 
 import type { Workspace } from '@domains/workspaces/entities/workspace';
-import { Button } from '@web/components/ui/button';
-import { Dialog } from '@web/components/ui/dialog';
-import { Label } from '@web/components/ui/label';
-import { LoadingSpinner } from '@web/components/ui/loading-spinner';
-import type { CreateWorkspaceRequestBody } from '@web/app/api/workspaces/route';
-import { apiFetch } from '@web/lib/api/client';
+import { Button } from '@/components/ui/button';
+import { Dialog } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import type { CreateWorkspaceRequestBody } from '@/app/api/workspaces/route';
+import { apiFetch } from '@/lib/api/client';
 
 export function CreateWorkspaceDialog() {
   const router = useRouter();

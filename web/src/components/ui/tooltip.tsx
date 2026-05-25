@@ -1,9 +1,9 @@
 'use client';
 
 import { Tooltip as TooltipPrimitive } from 'radix-ui';
-import { cn, composeCompoundComponent } from '@web/lib/utils/components';
+import { cn, composeCompoundComponent } from '@/lib/utils/components';
 import { ComponentProps } from 'react';
-import { usePortalContainer } from '@web/hooks/use-portal-container';
+import { usePortalContainer } from '@/hooks/use-portal-container';
 
 export const Tooltip = composeCompoundComponent(TooltipRoot, {
   Trigger: TooltipTrigger,

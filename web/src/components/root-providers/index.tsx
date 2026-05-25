@@ -1,4 +1,4 @@
-import { QueryProvider } from '@web/components/root-providers/query-provider';
+import { QueryProvider } from '@/components/root-providers/query-provider';
 import { ReactNode } from 'react';
 
 export function RootProviders(props: { children: ReactNode }) {

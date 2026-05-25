@@ -6,10 +6,10 @@ import { ChatsService } from '@domains/chats/services/chats-service';
 import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleChatRepository } from '@infrastructure/repositories/chats/drizzle-chat-repository';
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
-import { getAuthenticatedPrincipal } from '@web/lib/utils/api/auth';
-import { translateAccessDeniedToNotFoundAndThrow, withApiErrorHandler } from '@web/lib/utils/api/errors';
-import { parseJsonBody } from '@web/lib/utils/api/request';
-import { ApiResponse, toApiResponse } from '@web/lib/utils/api/response';
+import { getAuthenticatedPrincipal } from '@/lib/utils/api/auth';
+import { translateAccessDeniedToNotFoundAndThrow, withApiErrorHandler } from '@/lib/utils/api/errors';
+import { parseJsonBody } from '@/lib/utils/api/request';
+import { ApiResponse, toApiResponse } from '@/lib/utils/api/response';
 
 // ========================================================
 // POST /api/workspaces/[workspaceId]/chats

@@ -2,10 +2,10 @@
 
 import { XIcon } from 'lucide-react';
 import { Dialog as DialogPrimitive } from 'radix-ui';
-import { cn, composeCompoundComponent } from '@web/lib/utils/components';
-import { Button } from '@web/components/ui/button';
+import { cn, composeCompoundComponent } from '@/lib/utils/components';
+import { Button } from '@/components/ui/button';
 import { ComponentProps } from 'react';
-import { usePortalContainer } from '@web/hooks/use-portal-container';
+import { usePortalContainer } from '@/hooks/use-portal-container';
 
 export const Dialog = composeCompoundComponent(DialogRoot, {
   Trigger: DialogTrigger,

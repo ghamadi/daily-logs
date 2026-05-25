@@ -6,19 +6,19 @@ import { ChatsService } from '@domains/chats/services/chats-service';
 import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleChatRepository } from '@infrastructure/repositories/chats/drizzle-chat-repository';
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
-import { ApiErrors } from '@web/lib/errors';
-import { getChatModel } from '@web/lib/ai-sdk/model';
-import { getSystemPrompt } from '@web/lib/ai-sdk/system-prompt';
-import { buildChatTools, ChatToolSet } from '@web/lib/ai-sdk/tools';
-import type { UiMessagePayload } from '@web/lib/ai-sdk/types';
-import { getAuthenticatedPrincipal } from '@web/lib/utils/api/auth';
+import { ApiErrors } from '@/lib/errors';
+import { getChatModel } from '@/lib/ai-sdk/model';
+import { getSystemPrompt } from '@/lib/ai-sdk/system-prompt';
+import { buildChatTools, ChatToolSet } from '@/lib/ai-sdk/tools';
+import type { UiMessagePayload } from '@/lib/ai-sdk/types';
+import { getAuthenticatedPrincipal } from '@/lib/utils/api/auth';
 import {
   logError,
   translateAccessDeniedToNotFoundAndThrow as mapAccessDeniedToNotFoundAndThrow,
   withApiErrorHandler,
-} from '@web/lib/utils/api/errors';
-import { parseJsonBody } from '@web/lib/utils/api/request';
-import { ApiResponse, toApiResponse } from '@web/lib/utils/api/response';
+} from '@/lib/utils/api/errors';
+import { parseJsonBody } from '@/lib/utils/api/request';
+import { ApiResponse, toApiResponse } from '@/lib/utils/api/response';
 import { WorkspacesService } from '@domains/workspaces/services/workspaces-service';
 
 // ========================================================

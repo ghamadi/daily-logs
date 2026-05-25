@@ -7,7 +7,7 @@ import { WorkspacesService } from '@domains/workspaces/services/workspaces-servi
 import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleChatRepository } from '@infrastructure/repositories/chats/drizzle-chat-repository';
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
-import { getAuthenticatedPrincipal } from '@web/lib/utils/api/auth';
+import { getAuthenticatedPrincipal } from '@/lib/utils/api/auth';
 
 import { NewChatButton } from './_components/new-chat-button';
 

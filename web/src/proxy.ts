@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { updateSession } from '@web/lib/middleware/supabase-session';
+import { updateSession } from '@/lib/middleware/supabase-session';
 
 export type ProxyResult =
   | { redirectResponse: NextResponse; nextResponse?: undefined }

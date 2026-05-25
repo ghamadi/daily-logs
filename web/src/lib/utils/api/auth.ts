@@ -1,7 +1,7 @@
 import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleUsersRepository } from '@infrastructure/repositories/users/drizzle-users-repository';
-import { createServerClient } from '@web/lib/supabase/server';
-import { ApiErrors } from '@web/lib/errors';
+import { createServerClient } from '@/lib/supabase/server';
+import { ApiErrors } from '@/lib/errors';
 import { User } from '@domains/users/entities/user';
 import { AuthProvider } from '@domains/users/value-objects/auth-provider';
 

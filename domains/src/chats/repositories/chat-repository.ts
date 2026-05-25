@@ -1,5 +1,4 @@
 import type { UiMessagePayload } from '@web/lib/ai-sdk/types';
-
 import { ChatSession, ChatSessionProps } from '../entities/chat-session';
 import { ChatMessageRole } from '../value-objects/chat-message-role';
 
