@@ -9,7 +9,7 @@ export class ChatMessage {
   readonly chatId: string;
   readonly createdAt: Date;
   readonly updatedAt: Date;
-  private readonly payload: UiMessagePayload;
+  readonly payload: UiMessagePayload;
 
   constructor(props: ChatMessageProps) {
     if (props.id !== props.payload.id) {

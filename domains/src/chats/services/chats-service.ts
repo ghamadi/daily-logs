@@ -1,13 +1,13 @@
-import { randomUUID } from 'crypto';
 import { DomainErrors } from '@domains/lib/errors';
 import {
-  AppendMessageInput,
+  ChatMessageInput,
   IChatRepository,
   UpdateChatRepoInput,
 } from '@domains/chats/repositories/chat-repository';
 import { IWorkspacesRepository } from '@domains/workspaces/repositories/workspaces-repository';
 
 export type CreateChatInput = {
+  chatId: string;
   workspaceId: string;
   principalId: string;
   title?: string;
@@ -27,16 +27,25 @@ export class ChatsService {
     private readonly workspacesRepo: IWorkspacesRepository,
   ) {}
 
-  async createChat(props: CreateChatInput) {
-    const { workspaceId, principalId, title = 'New Chat' } = props;
+  async ensureChat(props: CreateChatInput) {
+    const { chatId, workspaceId, principalId, title = 'New Chat' } = props;
     await this.assertWorkspaceMembership(workspaceId, principalId);
 
-    return this.chatsRepo.createChat({
-      id: randomUUID(),
-      workspaceId,
-      ownerUserId: principalId,
-      title,
-    });
+    const existing = await this.chatsRepo.findChatById(chatId);
+    if (!existing) {
+      return await this.chatsRepo.createChat({
+        id: chatId,
+        workspaceId,
+        ownerUserId: principalId,
+        title,
+      });
+    }
+
+    if (existing.workspaceId !== workspaceId || existing.ownerUserId !== principalId) {
+      throw new DomainErrors.AccessDeniedError('You are not allowed to access this chat');
+    }
+
+    return existing;
   }
 
   async listChats(props: { workspaceId: string; principalId: string }) {
@@ -71,11 +80,22 @@ export class ChatsService {
     return this.chatsRepo.loadMessages(chatId);
   }
 
-  async appendMessages(props: ChatScopedActionParams & { messages: AppendMessageInput[] }) {
+  async appendMessages(props: ChatScopedActionParams & { messages: ChatMessageInput[] }) {
     const { chatId, workspaceId, principalId, messages } = props;
     await this.requireOwnedChat({ chatId, workspaceId, principalId });
 
-    await this.chatsRepo.appendMessages({ chatId, messages });
+    const invalidMessageIds = messages
+      .filter((message) => message.id !== message.payload.id)
+      .map((message) => ({ id: message.id, payloadId: message.payload.id }));
+
+    if (invalidMessageIds.length > 0) {
+      throw new DomainErrors.InvalidInputError(
+        'Message id mismatch. Message id must be the same as the payload id.',
+        { invalidMessageIds },
+      );
+    }
+
+    await this.chatsRepo.appendMessages(chatId, messages);
   }
 
   // ── helpers ──────────────────────────────────────────────

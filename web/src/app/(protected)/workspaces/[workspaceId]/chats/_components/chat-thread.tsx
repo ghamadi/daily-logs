@@ -1,22 +1,18 @@
 'use client';
 
+import { v7 as uuidv7 } from 'uuid';
 import { useChat } from '@ai-sdk/react';
 import { getToolName, isToolUIPart } from 'ai';
-import { ArrowUpIcon } from 'lucide-react';
-import {
-  type ChangeEvent,
-  type KeyboardEvent,
-  type SubmitEvent,
-  useCallback,
-  useMemo,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { Conversation } from '@/components/ai-elements/conversation';
 import { Message } from '@/components/ai-elements/message';
 import { Button } from '@/components/ui/button';
 import { createChatTransport } from '@/lib/ai-sdk/transport';
 import type { UiMessagePayload } from '@/lib/ai-sdk/types';
+import { PromptComposer } from '@/app/(protected)/workspaces/[workspaceId]/chats/_components/prompt-composer';
+import { useChatContext } from '@/app/(protected)/workspaces/[workspaceId]/_components/chat-context-provider';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 export type ChatThreadProps = {
   workspaceId: string;
@@ -29,25 +25,34 @@ export function ChatThread(props: ChatThreadProps) {
 
   const transport = useMemo(() => createChatTransport({ workspaceId, chatId }), [workspaceId, chatId]);
 
+  const { initialPrompt, setInitialPrompt } = useChatContext();
+  const initialPromptRef = useRef(initialPrompt);
+
   const { messages, sendMessage, status, error, stop, clearError } = useChat<UiMessagePayload>({
     id: chatId,
     transport,
     messages: initialMessages,
+    generateId: uuidv7,
   });
 
-  const [input, setInput] = useState('');
+  // Send the initial prompt immediately after mounting if it exists
+  // This will create a new chat and then append the new message to it
+  useEffect(() => {
+    if (initialPromptRef.current) {
+      sendMessage({ text: initialPromptRef.current });
+      initialPromptRef.current = undefined;
+    }
+  }, [sendMessage, setInitialPrompt]);
+
   const isBusy = status === 'submitted' || status === 'streaming';
 
   const handleSubmit = useCallback(
-    async (event?: SubmitEvent) => {
-      event?.preventDefault();
-      const text = input.trim();
-      if (!text || isBusy) return;
-
-      // Clear the textarea optimistically so the user sees their input was
-      // accepted; sendMessage owns appending the message + driving the stream.
-      setInput('');
+    async (message: string) => {
       try {
+        const text = message.trim();
+        if (!text || isBusy) {
+          return;
+        }
         await sendMessage({ text });
       } catch (cause) {
         // `useChat` already surfaces this through `error`; we just want to
@@ -55,12 +60,12 @@ export function ChatThread(props: ChatThreadProps) {
         console.error(cause);
       }
     },
-    [input, isBusy, sendMessage],
+    [isBusy, sendMessage],
   );
 
   return (
-    <div className="flex size-full flex-col">
-      <MessageList messages={messages} />
+    <div className="mx-auto flex size-full w-full max-w-4xl flex-col px-6 py-8">
+      <MessageList messages={messages} loading={status === 'submitted'} />
 
       {error && (
         <div className="border-destructive/30 bg-destructive/10 text-destructive mx-4 mb-3 flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-xs">
@@ -71,13 +76,7 @@ export function ChatThread(props: ChatThreadProps) {
         </div>
       )}
 
-      <Composer
-        value={input}
-        onChange={setInput}
-        onSubmit={handleSubmit}
-        onStop={stop}
-        isBusy={isBusy}
-      />
+      <PromptComposer onSubmit={handleSubmit} onStop={stop} isBusy={isBusy} />
     </div>
   );
 }
@@ -88,29 +87,59 @@ export function ChatThread(props: ChatThreadProps) {
 
 type MessageListProps = {
   messages: UiMessagePayload[];
+  loading: boolean;
 };
 
 function MessageList(props: MessageListProps) {
-  const { messages } = props;
+  const { messages, loading } = props;
+
+  const messagesToRender = useMemo(() => {
+    const loadingMessage: UiMessagePayload = {
+      id: 'loading',
+      role: 'assistant',
+      parts: [{ type: 'text', text: 'Thinking...' }],
+    };
+
+    if (!messages.length) {
+      return [];
+    }
+
+    if (loading) {
+      return [...messages, loadingMessage];
+    }
+
+    return [...messages];
+  }, [messages, loading]);
 
   return (
     <Conversation className="flex flex-col">
-      {!messages.length && <Conversation.EmptyState />}
+      {!messagesToRender.length && <Conversation.EmptyState />}
 
-      {messages.length > 0 && (
+      {messagesToRender.length > 0 && (
         <Conversation.Content>
           <ol className="flex w-full flex-col gap-6">
-            {messages.map((message) => (
-              <li key={message.id}>
-                <Message from={message.role}>
-                  <Message.Content>
-                    {message.parts.map((part, index) => (
-                      <MessagePart key={`${message.id}-${index}`} part={part} />
-                    ))}
-                  </Message.Content>
-                </Message>
-              </li>
-            ))}
+            {messagesToRender.map((message, index) => {
+              const isLoadingMessage = index === messagesToRender.length - 1 && loading;
+              return (
+                <li key={message.id}>
+                  <Message from={message.role}>
+                    <Message.Content>
+                      {isLoadingMessage ? (
+                        <div className="ps-4">
+                          <LoadingSpinner className="size-4" />
+                        </div>
+                      ) : (
+                        <>
+                          {message.parts.map((part, index) => (
+                            <MessagePart key={`${message.id}-${index}`} part={part} />
+                          ))}
+                        </>
+                      )}
+                    </Message.Content>
+                  </Message>
+                </li>
+              );
+            })}
           </ol>
         </Conversation.Content>
       )}
@@ -206,66 +235,4 @@ function safeStringify(value: unknown): string {
   } catch {
     return String(value);
   }
-}
-
-// ------------------------------------------------------------
-// Composer
-// ------------------------------------------------------------
-
-type ComposerProps = {
-  value: string;
-  onChange: (value: string) => void;
-  onSubmit: (event?: SubmitEvent<HTMLFormElement>) => void | Promise<void>;
-  onStop: () => void;
-  isBusy: boolean;
-};
-
-function Composer(props: ComposerProps) {
-  const { value, onChange, onSubmit, onStop, isBusy } = props;
-
-  const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    // Enter sends, Shift+Enter inserts a newline. Standard chat ergonomics.
-    if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
-      event.preventDefault();
-      void onSubmit();
-    }
-  };
-
-  const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    onChange(event.target.value);
-  };
-
-  const isEmpty = value.trim().length === 0;
-
-  return (
-    <form
-      onSubmit={(event) => {
-        void onSubmit(event);
-      }}
-      className="border-border bg-background border-t px-4 py-3"
-    >
-      <div className="border-border bg-background focus-within:ring-ring/40 mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border p-2 focus-within:ring-2">
-        <textarea
-          value={value}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          rows={1}
-          placeholder="Send a message…"
-          className="placeholder:text-muted-foreground max-h-48 min-h-9 flex-1 resize-none bg-transparent px-2 py-1.5 text-sm outline-none"
-          disabled={false}
-        />
-        {isBusy ? (
-          <Button type="button" size="icon" variant="outline" onClick={onStop}>
-            <span className="bg-foreground size-2.5 rounded-sm" aria-hidden />
-            <span className="sr-only">Stop generating</span>
-          </Button>
-        ) : (
-          <Button type="submit" size="icon" disabled={isEmpty}>
-            <ArrowUpIcon />
-            <span className="sr-only">Send message</span>
-          </Button>
-        )}
-      </div>
-    </form>
-  );
 }

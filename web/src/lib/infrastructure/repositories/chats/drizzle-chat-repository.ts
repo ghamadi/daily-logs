@@ -5,7 +5,7 @@ import { ChatMessagesTable, ChatsTable } from '@db/schema';
 import { Chat } from '@domains/chats/entities/chat-session';
 import { ChatMessage } from '@domains/chats/entities/chat-message';
 import type {
-  AppendMessageInput,
+  ChatMessageInput,
   CreateChatRepoInput,
   IChatRepository,
   UpdateChatRepoInput,
@@ -74,9 +74,10 @@ export class DrizzleChatRepository implements IChatRepository {
     return rows.map((row) => new ChatMessage(row));
   }
 
-  async appendMessages(params: { chatId: string; messages: AppendMessageInput[] }): Promise<void> {
-    const { chatId, messages } = params;
-    if (messages.length === 0) return;
+  async appendMessages(chatId: string, messages: ChatMessageInput[]): Promise<void> {
+    if (messages.length === 0) {
+      return;
+    }
 
     // Bulk INSERT would otherwise stamp every row with the same `now()` (Postgres
     // resolves at transaction start, not per row), so we explicitly offset each
@@ -90,7 +91,7 @@ export class DrizzleChatRepository implements IChatRepository {
       updatedAt: new Date(baseTime + i),
     }));
 
-    // We dedupe on the AI-SDK-stable message id so retries from `onFinish`
+    // We dedupe on the message id so retries from `onFinish`
     // (e.g. after client disconnect + reconnect) are idempotent. Switch to
     // `.onConflictDoUpdate(...)` once message editing is supported.
     await this.db

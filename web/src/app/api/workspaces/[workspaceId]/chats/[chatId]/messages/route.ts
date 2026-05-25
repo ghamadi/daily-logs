@@ -1,10 +1,13 @@
 import { NextRequest } from 'next/server';
+import { v7 as uuidv7 } from 'uuid';
 import { convertToModelMessages, streamText, validateUIMessages } from 'ai';
 import { z } from 'zod';
-import { AppendMessageInput, ChatMessage } from '@domains/chats/repositories/chat-repository';
+
+import { ChatMessage } from '@domains/chats/entities/chat-message';
 import { ChatsService } from '@domains/chats/services/chats-service';
-import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleChatRepository } from '@infrastructure/repositories/chats/drizzle-chat-repository';
+
+import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
 import { ApiErrors } from '@/lib/errors';
 import { getChatModel } from '@/lib/ai-sdk/model';
@@ -88,11 +91,17 @@ export const POST = withApiErrorHandler(
 
     const { chatsService, workspacesService } = createServices();
 
-    const history = await chatsService
-      .loadChatMessages({ chatId, workspaceId, principalId: principal.id })
+    await chatsService
+      .ensureChat({ chatId, workspaceId, principalId: principal.id })
       .catch((error) =>
         mapAccessDeniedToNotFoundAndThrow(error, `Could not find chat with id "${chatId}".`),
       );
+
+    const history = await chatsService.loadChatMessages({
+      chatId,
+      workspaceId,
+      principalId: principal.id,
+    });
 
     // The workspaces repo is threaded into tools so `getWorkspaceContext` can
     // load workspace details lazily — only when the model actually asks. We
@@ -118,7 +127,7 @@ export const POST = withApiErrorHandler(
 
     return result.toUIMessageStreamResponse<UiMessagePayload>({
       originalMessages: uiMessages,
-      generateMessageId: crypto.randomUUID,
+      generateMessageId: uuidv7,
       onError: extractStreamErrorMessage,
       onFinish: async ({ messages }) => {
         try {
@@ -128,7 +137,9 @@ export const POST = withApiErrorHandler(
           // it would brick the chat: every subsequent send would fail
           // `validateUIMessages` because UIMessage parts must be non-empty.
           // So, we filter out empty messages here to avoid persisting them.
-          const inputs = messages.filter(uiMessageHasContent).map(toAppendMessageInput);
+          const inputs = messages
+            .filter(uiMessageHasContent)
+            .map((payload) => ({ id: payload.id, payload }));
 
           if (inputs.length > 0) {
             // Persist everything on every finish.
@@ -156,14 +167,6 @@ export const POST = withApiErrorHandler(
 // ------------------------------------------------------------
 // Helper functions
 // ------------------------------------------------------------
-
-function toAppendMessageInput(message: UiMessagePayload): AppendMessageInput {
-  return {
-    id: message.id,
-    role: message.role,
-    payload: message,
-  };
-}
 
 function createServices(db = getDb()) {
   const workspacesRepo = new DrizzleWorkspacesRepository(db);

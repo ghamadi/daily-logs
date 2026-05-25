@@ -1,37 +1,44 @@
-import { notFound } from 'next/navigation';
-import { ChatsService } from '@domains/chats/services/chats-service';
-import { DomainErrors } from '@domains/lib/errors';
-import { getDb } from '@infrastructure/db/get-db';
-import { DrizzleChatRepository } from '@infrastructure/repositories/chats/drizzle-chat-repository';
-import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
+'use client';
+
+import { useParams } from 'next/navigation';
 import { ChatThread } from '@/app/(protected)/workspaces/[workspaceId]/chats/_components/chat-thread';
-import { getAuthenticatedPrincipal } from '@/lib/utils/api/auth';
+import { useChatContext } from '@/app/(protected)/workspaces/[workspaceId]/_components/chat-context-provider';
+import { useQuery } from '@tanstack/react-query';
+import { ChatMessage } from '@domains/chats/entities/chat-message';
+import { useEffect, useRef, useState } from 'react';
 
-export const dynamic = 'force-dynamic';
+export default function ChatPage() {
+  const params = useParams();
+  const { initialPrompt } = useChatContext();
+  const [isHistoryQueryEnabled, setIsHistoryQueryEnabled] = useState(false);
 
-type ChatPageProps = {
-  params: Promise<{ workspaceId: string; chatId: string }>;
-};
+  const workspaceId = String(params.workspaceId);
+  const chatId = String(params.chatId);
 
-export default async function ChatPage({ params }: ChatPageProps) {
-  const { workspaceId, chatId } = await params;
-  const principal = await getAuthenticatedPrincipal();
+  const initialPromptRef = useRef(initialPrompt);
 
-  const db = getDb();
-  const chatsService = new ChatsService(
-    new DrizzleChatRepository(db),
-    new DrizzleWorkspacesRepository(db),
-  );
+  useEffect(() => {
+    if (!initialPromptRef.current) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsHistoryQueryEnabled(true);
+    }
+  }, [initialPrompt]);
 
-  // Both calls go through the same auth/membership/ownership guard, so a
-  // failure on either is the same "you can't see this chat" outcome from a
-  // privacy standpoint — translate to 404 to avoid confirming existence.
-  const [_chat, history] = await Promise.all([
-    chatsService.getChatById({ chatId, workspaceId, principalId: principal.id }).catch(handleAsNotFound),
-    chatsService
-      .loadChatMessages({ chatId, workspaceId, principalId: principal.id })
-      .catch(handleAsNotFound),
-  ]);
+  const historyQuery = useChatHistoryQuery({
+    chatId,
+    workspaceId,
+    enabled: isHistoryQueryEnabled,
+  });
+
+  const history = historyQuery.data ?? [];
+
+  if (historyQuery.isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (historyQuery.isError) {
+    return <div>Error: {historyQuery.error.message}</div>;
+  }
 
   return (
     <ChatThread
@@ -42,9 +49,22 @@ export default async function ChatPage({ params }: ChatPageProps) {
   );
 }
 
-function handleAsNotFound(error: unknown): never {
-  if (error instanceof DomainErrors.NotFoundError || error instanceof DomainErrors.AccessDeniedError) {
-    notFound();
-  }
-  throw error;
+function useChatHistoryQuery(params: { workspaceId: string; chatId: string; enabled: boolean }) {
+  const { workspaceId, chatId, enabled } = params;
+  return useQuery({
+    enabled,
+    queryKey: ['chat-history', workspaceId, chatId],
+    queryFn: async () => {
+      const response = await fetch(`/api/workspaces/${workspaceId}/chats/${chatId}/messages`, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch chat history');
+      }
+
+      const data = await response.json();
+      return data.data as ChatMessage[];
+    },
+  });
 }
