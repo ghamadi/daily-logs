@@ -3,7 +3,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 
-import type { ChatSession } from '@domains/chats/entities/chat-session';
+import type { Chat } from '@domains/chats/entities/chat-session';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { apiFetch } from '@/lib/api/client';
@@ -22,7 +22,7 @@ export function NewChatButton(props: NewChatButtonProps) {
     // No variables: the chat is unconditionally created untitled — the title
     // is editable later via the `PATCH` route once we have UI for it.
     mutationFn: () =>
-      apiFetch<ChatSession>(`/api/workspaces/${workspaceId}/chats`, {
+      apiFetch<Chat>(`/api/workspaces/${workspaceId}/chats`, {
         method: 'POST',
         body: {},
       }),

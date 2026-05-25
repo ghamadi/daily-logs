@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { convertToModelMessages, createIdGenerator, streamText, validateUIMessages } from 'ai';
+import { convertToModelMessages, streamText, validateUIMessages } from 'ai';
 import { z } from 'zod';
 import { AppendMessageInput, ChatMessage } from '@domains/chats/repositories/chat-repository';
 import { ChatsService } from '@domains/chats/services/chats-service';
@@ -77,8 +77,6 @@ const POSTBodySchema = z.object({
 
 export type SendChatMessageRequestBody = z.infer<typeof POSTBodySchema>;
 
-const messageIdGenerator = createIdGenerator({ prefix: 'msg', size: 16 });
-
 export const POST = withApiErrorHandler(
   async (
     request: NextRequest,
@@ -120,7 +118,7 @@ export const POST = withApiErrorHandler(
 
     return result.toUIMessageStreamResponse<UiMessagePayload>({
       originalMessages: uiMessages,
-      generateMessageId: messageIdGenerator,
+      generateMessageId: crypto.randomUUID,
       onError: extractStreamErrorMessage,
       onFinish: async ({ messages }) => {
         try {

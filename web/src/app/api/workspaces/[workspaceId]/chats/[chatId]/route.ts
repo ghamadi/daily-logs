@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { ChatSession } from '@domains/chats/entities/chat-session';
+import { Chat } from '@domains/chats/entities/chat-session';
 import { ChatsService } from '@domains/chats/services/chats-service';
 import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleChatRepository } from '@infrastructure/repositories/chats/drizzle-chat-repository';
@@ -22,7 +22,7 @@ const GETParamsSchema = z.object({
 
 export type GetChatByIdRequestParams = z.infer<typeof GETParamsSchema>;
 
-export type GetChatByIdResponseBody = ApiResponse<ChatSession>;
+export type GetChatByIdResponseBody = ApiResponse<Chat>;
 
 export const GET = withApiErrorHandler(
   async (
@@ -70,7 +70,7 @@ export type UpdateChatRequestParams = z.infer<typeof PATCHParamsSchema>;
 
 export type UpdateChatRequestBody = z.infer<typeof PATCHBodySchema>;
 
-export type UpdateChatResponseBody = ApiResponse<ChatSession>;
+export type UpdateChatResponseBody = ApiResponse<Chat>;
 
 export const PATCH = withApiErrorHandler(
   async (

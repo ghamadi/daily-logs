@@ -1,8 +1,8 @@
 import type { DbChatSession } from '@db/schema';
 
-export type ChatSessionProps = DbChatSession;
+export type ChatProps = DbChatSession;
 
-export class ChatSession {
+export class Chat {
   readonly id: string;
   readonly workspaceId: string;
   readonly ownerUserId: string;
@@ -11,7 +11,7 @@ export class ChatSession {
   readonly updatedAt: Date;
   readonly archivedAt: Date | null;
 
-  constructor(props: ChatSessionProps) {
+  constructor(props: ChatProps) {
     this.id = props.id;
     this.workspaceId = props.workspaceId;
     this.ownerUserId = props.ownerUserId;

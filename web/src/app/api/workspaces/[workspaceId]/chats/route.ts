@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 
-import { ChatSession } from '@domains/chats/entities/chat-session';
+import { Chat } from '@domains/chats/entities/chat-session';
 import { ChatsService } from '@domains/chats/services/chats-service';
 import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleChatRepository } from '@infrastructure/repositories/chats/drizzle-chat-repository';
@@ -32,7 +32,7 @@ export type CreateChatRequestParams = z.infer<typeof POSTParamsSchema>;
 
 export type CreateChatRequestBody = z.infer<typeof POSTBodySchema>;
 
-export type CreateChatResponseBody = ApiResponse<ChatSession>;
+export type CreateChatResponseBody = ApiResponse<Chat>;
 
 export const POST = withApiErrorHandler(
   async (request: NextRequest, context: RouteContext<'/api/workspaces/[workspaceId]/chats'>) => {
@@ -65,7 +65,7 @@ const GETParamsSchema = z.object({
 
 export type ListChatsRequestParams = z.infer<typeof GETParamsSchema>;
 
-export type ListChatsResponseBody = ApiResponse<ChatSession[]>;
+export type ListChatsResponseBody = ApiResponse<Chat[]>;
 
 export const GET = withApiErrorHandler(
   async (_request: NextRequest, context: RouteContext<'/api/workspaces/[workspaceId]/chats'>) => {

@@ -2,7 +2,7 @@ import { and, asc, desc, eq, isNull } from 'drizzle-orm';
 
 import type { Database } from '@db/client/create-db';
 import { ChatMessagesTable, ChatSessionsTable, type DbChatMessage } from '@db/schema';
-import { ChatSession } from '@domains/chats/entities/chat-session';
+import { Chat } from '@domains/chats/entities/chat-session';
 import type {
   AppendMessageInput,
   ChatMessage,
@@ -15,24 +15,24 @@ import { assertNotNullish } from '@utils/assertions';
 export class DrizzleChatRepository implements IChatRepository {
   constructor(private readonly db: Database) {}
 
-  async createChat(input: CreateChatRepoInput): Promise<ChatSession> {
+  async createChat(input: CreateChatRepoInput): Promise<Chat> {
     const [row] = await this.db.insert(ChatSessionsTable).values(input).returning();
     assertNotNullish(row, `Failed to create chat "${input.id}".`);
 
-    return new ChatSession(row);
+    return new Chat(row);
   }
 
-  async findChatById(id: string): Promise<ChatSession | null> {
+  async findChatById(id: string): Promise<Chat | null> {
     const [row = null] = await this.db
       .select()
       .from(ChatSessionsTable)
       .where(eq(ChatSessionsTable.id, id))
       .limit(1);
 
-    return row && new ChatSession(row);
+    return row && new Chat(row);
   }
 
-  async listOwnerChats(params: { workspaceId: string; ownerUserId: string }): Promise<ChatSession[]> {
+  async listOwnerChats(params: { workspaceId: string; ownerUserId: string }): Promise<Chat[]> {
     const rows = await this.db
       .select()
       .from(ChatSessionsTable)
@@ -45,10 +45,10 @@ export class DrizzleChatRepository implements IChatRepository {
       )
       .orderBy(desc(ChatSessionsTable.updatedAt), asc(ChatSessionsTable.id));
 
-    return rows.map((row) => new ChatSession(row));
+    return rows.map((row) => new Chat(row));
   }
 
-  async updateChat(id: string, input: UpdateChatRepoInput): Promise<ChatSession> {
+  async updateChat(id: string, input: UpdateChatRepoInput): Promise<Chat> {
     const [row] = await this.db
       .update(ChatSessionsTable)
       .set({ ...input, updatedAt: new Date() })
@@ -57,7 +57,7 @@ export class DrizzleChatRepository implements IChatRepository {
 
     assertNotNullish(row, `Failed to update chat "${id}".`);
 
-    return new ChatSession(row);
+    return new Chat(row);
   }
 
   async archiveChat(id: string): Promise<void> {
