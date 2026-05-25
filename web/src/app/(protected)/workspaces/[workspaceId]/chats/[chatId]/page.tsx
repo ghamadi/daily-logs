@@ -26,7 +26,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
   // Both calls go through the same auth/membership/ownership guard, so a
   // failure on either is the same "you can't see this chat" outcome from a
   // privacy standpoint — translate to 404 to avoid confirming existence.
-  const [chat, history] = await Promise.all([
+  const [_chat, history] = await Promise.all([
     chatsService.getChatById({ chatId, workspaceId, principalId: principal.id }).catch(handleAsNotFound),
     chatsService
       .loadChatMessages({ chatId, workspaceId, principalId: principal.id })

@@ -29,7 +29,7 @@ export function ChatThread(props: ChatThreadProps) {
 
   const transport = useMemo(() => createChatTransport({ workspaceId, chatId }), [workspaceId, chatId]);
 
-  const { messages, sendMessage, status, error, stop, clearError } = useChat<UiMessagePayload>({
+  const { messages, sendMessage, status, error, stop, clearError,  } = useChat<UiMessagePayload>({
     id: chatId,
     transport,
     messages: initialMessages,

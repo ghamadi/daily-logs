@@ -122,6 +122,15 @@ importers:
       '@ai-sdk/react':
         specifier: ^3.0.179
         version: 3.0.179(react@19.2.3)(zod@4.3.6)
+      '@daily-logs/db':
+        specifier: workspace:*
+        version: link:../db
+      '@daily-logs/domain':
+        specifier: workspace:*
+        version: link:../domains
+      '@daily-logs/utils':
+        specifier: workspace:*
+        version: link:../utils
       '@streamdown/cjk':
         specifier: ^1.0.3
         version: 1.0.3(@types/mdast@4.0.4)(micromark-util-types@2.0.2)(micromark@4.0.2)(react@19.2.3)(unified@11.0.5)
@@ -152,6 +161,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      drizzle-orm:
+        specifier: ^0.45.1
+        version: 0.45.1(@electric-sql/pglite@0.3.15)(@opentelemetry/api@1.9.0)(@types/pg@8.16.0)(pg@8.18.0)(postgres@3.4.8)
       lucide-react:
         specifier: ^1.14.0
         version: 1.14.0(react@19.2.3)
@@ -170,6 +182,9 @@ importers:
       react-dom:
         specifier: 19.2.3
         version: 19.2.3(react@19.2.3)
+      server-only:
+        specifier: ^0.0.1
+        version: 0.0.1
       shadcn:
         specifier: ^4.7.0
         version: 4.7.0(@types/node@20.19.30)(typescript@5.9.3)
@@ -210,9 +225,15 @@ importers:
       tailwindcss:
         specifier: ^4.1.18
         version: 4.1.18
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
       typescript:
         specifier: ^5
         version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/debug@4.1.13)(@types/node@20.19.30)(jiti@2.6.1)(lightningcss@1.30.2)(msw@2.14.5(@types/node@20.19.30)(typescript@5.9.3))(tsx@4.21.0)
 
 packages:
 
@@ -5248,6 +5269,9 @@ packages:
   serve-static@2.2.1:
     resolution: {integrity: sha512-xRXBn0pPqQTVQiC8wyQrKs2MOlX24zQ0POGaj0kultvoOCstBQM5yvOhAVSUwOMjQtTvsPWoNCHfPGwaaQJhTw==}
     engines: {node: '>= 18'}
+
+  server-only@0.0.1:
+    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
 
   set-cookie-parser@3.1.0:
     resolution: {integrity: sha512-kjnC1DXBHcxaOaOXBHBeRtltsDG2nUiUni+jP92M9gYdW12rsmx92UsfpH7o5tDRs7I1ZZPSQJQGv3UaRfCiuw==}
@@ -11366,6 +11390,8 @@ snapshots:
       send: 1.2.1
     transitivePeerDependencies:
       - supports-color
+
+  server-only@0.0.1: {}
 
   set-cookie-parser@3.1.0: {}
 

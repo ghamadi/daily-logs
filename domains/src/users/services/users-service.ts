@@ -43,7 +43,7 @@ export class UsersService {
       throw new DomainErrors.InvalidInputError('Email is already in use', { email: input.email });
     }
 
-    return this.usersRepo.create(input);
+    return this.usersRepo.getOrCreateUser(input);
   }
 
   async updateUser(id: string, input: UpdateUserInput): Promise<User> {
