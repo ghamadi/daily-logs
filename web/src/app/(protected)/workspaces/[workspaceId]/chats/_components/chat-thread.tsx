@@ -2,7 +2,7 @@
 
 import { v7 as uuidv7 } from 'uuid';
 import { useChat } from '@ai-sdk/react';
-import { getToolName, isToolUIPart } from 'ai';
+import { getToolName, isToolUIPart, type ChatStatus } from 'ai';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { Conversation } from '@/components/ai-elements/conversation';
@@ -65,7 +65,7 @@ export function ChatThread(props: ChatThreadProps) {
 
   return (
     <div className="mx-auto flex size-full w-full max-w-4xl flex-col px-6 py-8">
-      <MessageList messages={messages} loading={status === 'submitted'} />
+      <MessageList messages={messages} status={status} />
 
       {error && (
         <div className="border-destructive/30 bg-destructive/10 text-destructive mx-4 mb-3 flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-xs">
@@ -87,29 +87,30 @@ export function ChatThread(props: ChatThreadProps) {
 
 type MessageListProps = {
   messages: UiMessagePayload[];
-  loading: boolean;
+  status: ChatStatus;
 };
 
 function MessageList(props: MessageListProps) {
-  const { messages, loading } = props;
+  const { messages, status } = props;
 
   const messagesToRender = useMemo(() => {
+    const renderableMessages = messages.filter(messageHasRenderableContent);
     const loadingMessage: UiMessagePayload = {
       id: 'loading',
       role: 'assistant',
       parts: [{ type: 'text', text: 'Thinking...' }],
     };
 
-    if (!messages.length) {
+    if (!renderableMessages.length) {
       return [];
     }
 
-    if (loading) {
-      return [...messages, loadingMessage];
+    if (status === 'submitted' || isAwaitingFirstAssistantPart(messages, status)) {
+      return [...renderableMessages, loadingMessage];
     }
 
-    return [...messages];
-  }, [messages, loading]);
+    return renderableMessages;
+  }, [messages, status]);
 
   return (
     <Conversation className="flex flex-col">
@@ -118,8 +119,8 @@ function MessageList(props: MessageListProps) {
       {messagesToRender.length > 0 && (
         <Conversation.Content>
           <ol className="flex w-full flex-col gap-6">
-            {messagesToRender.map((message, index) => {
-              const isLoadingMessage = index === messagesToRender.length - 1 && loading;
+            {messagesToRender.map((message) => {
+              const isLoadingMessage = message.id === 'loading';
               return (
                 <li key={message.id}>
                   <Message from={message.role}>
@@ -147,6 +148,25 @@ function MessageList(props: MessageListProps) {
       <Conversation.ScrollButton />
     </Conversation>
   );
+}
+
+function isAwaitingFirstAssistantPart(messages: UiMessagePayload[], status: ChatStatus): boolean {
+  if (status !== 'streaming') {
+    return false;
+  }
+
+  const lastMessage = messages.at(-1);
+  return lastMessage?.role === 'assistant' && !messageHasRenderableContent(lastMessage);
+}
+
+function messageHasRenderableContent(message: UiMessagePayload): boolean {
+  return message.parts.some((part) => {
+    if (part.type === 'text' || part.type === 'reasoning') {
+      return part.text.trim().length > 0;
+    }
+
+    return isToolUIPart(part);
+  });
 }
 
 // ------------------------------------------------------------

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { v7 as uuidv7 } from 'uuid';
-import { convertToModelMessages, streamText, validateUIMessages } from 'ai';
+import { convertToModelMessages, smoothStream, streamText, validateUIMessages } from 'ai';
 import { z } from 'zod';
 
 import { ChatMessage } from '@domains/chats/entities/chat-message';
@@ -119,11 +119,11 @@ export const POST = withApiErrorHandler(
       system: getSystemPrompt(),
       messages: modelMessages,
       tools,
+      experimental_transform: smoothStream({
+        chunking: 'word',
+        delayInMs: 12,
+      }),
     });
-
-    // Force the stream to finish even if the client disconnects, so `onFinish`
-    // still runs and we persist the final exchange. Intentionally not awaited.
-    void result.consumeStream();
 
     return result.toUIMessageStreamResponse<UiMessagePayload>({
       originalMessages: uiMessages,
