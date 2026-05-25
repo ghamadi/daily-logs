@@ -1,11 +1,11 @@
 import { and, asc, desc, eq, isNull } from 'drizzle-orm';
 
 import type { Database } from '@db/client/create-db';
-import { ChatMessagesTable, ChatSessionsTable, type DbChatMessage } from '@db/schema';
+import { ChatMessagesTable, ChatsTable } from '@db/schema';
 import { Chat } from '@domains/chats/entities/chat-session';
+import { ChatMessage } from '@domains/chats/entities/chat-message';
 import type {
   AppendMessageInput,
-  ChatMessage,
   CreateChatRepoInput,
   IChatRepository,
   UpdateChatRepoInput,
@@ -16,18 +16,14 @@ export class DrizzleChatRepository implements IChatRepository {
   constructor(private readonly db: Database) {}
 
   async createChat(input: CreateChatRepoInput): Promise<Chat> {
-    const [row] = await this.db.insert(ChatSessionsTable).values(input).returning();
+    const [row] = await this.db.insert(ChatsTable).values(input).returning();
     assertNotNullish(row, `Failed to create chat "${input.id}".`);
 
     return new Chat(row);
   }
 
   async findChatById(id: string): Promise<Chat | null> {
-    const [row = null] = await this.db
-      .select()
-      .from(ChatSessionsTable)
-      .where(eq(ChatSessionsTable.id, id))
-      .limit(1);
+    const [row = null] = await this.db.select().from(ChatsTable).where(eq(ChatsTable.id, id)).limit(1);
 
     return row && new Chat(row);
   }
@@ -35,24 +31,24 @@ export class DrizzleChatRepository implements IChatRepository {
   async listOwnerChats(params: { workspaceId: string; ownerUserId: string }): Promise<Chat[]> {
     const rows = await this.db
       .select()
-      .from(ChatSessionsTable)
+      .from(ChatsTable)
       .where(
         and(
-          eq(ChatSessionsTable.workspaceId, params.workspaceId),
-          eq(ChatSessionsTable.ownerUserId, params.ownerUserId),
-          isNull(ChatSessionsTable.archivedAt),
+          eq(ChatsTable.workspaceId, params.workspaceId),
+          eq(ChatsTable.ownerUserId, params.ownerUserId),
+          isNull(ChatsTable.archivedAt),
         ),
       )
-      .orderBy(desc(ChatSessionsTable.updatedAt), asc(ChatSessionsTable.id));
+      .orderBy(desc(ChatsTable.updatedAt), asc(ChatsTable.id));
 
     return rows.map((row) => new Chat(row));
   }
 
   async updateChat(id: string, input: UpdateChatRepoInput): Promise<Chat> {
     const [row] = await this.db
-      .update(ChatSessionsTable)
+      .update(ChatsTable)
       .set({ ...input, updatedAt: new Date() })
-      .where(eq(ChatSessionsTable.id, id))
+      .where(eq(ChatsTable.id, id))
       .returning();
 
     assertNotNullish(row, `Failed to update chat "${id}".`);
@@ -63,19 +59,19 @@ export class DrizzleChatRepository implements IChatRepository {
   async archiveChat(id: string): Promise<void> {
     const now = new Date();
     await this.db
-      .update(ChatSessionsTable)
+      .update(ChatsTable)
       .set({ archivedAt: now, updatedAt: now })
-      .where(eq(ChatSessionsTable.id, id));
+      .where(eq(ChatsTable.id, id));
   }
 
   async loadMessages(chatId: string): Promise<ChatMessage[]> {
     const rows = await this.db
       .select()
       .from(ChatMessagesTable)
-      .where(eq(ChatMessagesTable.sessionId, chatId))
+      .where(eq(ChatMessagesTable.chatId, chatId))
       .orderBy(asc(ChatMessagesTable.createdAt), asc(ChatMessagesTable.id));
 
-    return rows.map(toChatMessage);
+    return rows.map((row) => new ChatMessage(row));
   }
 
   async appendMessages(params: { chatId: string; messages: AppendMessageInput[] }): Promise<void> {
@@ -88,8 +84,7 @@ export class DrizzleChatRepository implements IChatRepository {
     const baseTime = Date.now();
     const rows = messages.map((message, i) => ({
       id: message.id,
-      sessionId: chatId,
-      role: message.role,
+      chatId,
       payload: message.payload,
       createdAt: new Date(baseTime + i),
       updatedAt: new Date(baseTime + i),
@@ -103,15 +98,4 @@ export class DrizzleChatRepository implements IChatRepository {
       .values(rows)
       .onConflictDoNothing({ target: ChatMessagesTable.id });
   }
-}
-
-function toChatMessage(row: DbChatMessage): ChatMessage {
-  return {
-    id: row.id,
-    chatId: row.sessionId,
-    role: row.role,
-    payload: row.payload,
-    createdAt: row.createdAt,
-    updatedAt: row.updatedAt,
-  };
 }

@@ -1,6 +1,6 @@
 import type { UiMessagePayload } from '@web/lib/ai-sdk/types';
 import { Chat, ChatProps } from '../entities/chat-session';
-import { ChatMessageRole } from '../value-objects/chat-message-role';
+import { ChatMessage } from '../entities/chat-message';
 
 export type CreateChatRepoInput = Omit<ChatProps, 'archivedAt' | 'createdAt' | 'updatedAt'>;
 
@@ -8,18 +8,8 @@ export type UpdateChatRepoInput = Partial<
   Omit<CreateChatRepoInput, 'id' | 'workspaceId' | 'ownerUserId'>
 >;
 
-export interface ChatMessage {
-  id: string;
-  chatId: string;
-  role: ChatMessageRole;
-  payload: UiMessagePayload;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 export interface AppendMessageInput {
   id: string;
-  role: ChatMessageRole;
   payload: UiMessagePayload;
 }
 
