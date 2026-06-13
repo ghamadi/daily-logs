@@ -12,7 +12,7 @@
     "./events/client": "./src/events/client.ts",
     "./chats": "./src/chats/index.ts",
     "./chats/client": "./src/chats/client.ts",
-    "./errors": "./src/lib/errors/index.ts"
+    "./errors": "./src/lib/domain-errors/index.ts"
   },
   "scripts": {
     "lint:js": "eslint ./src --ext .ts",

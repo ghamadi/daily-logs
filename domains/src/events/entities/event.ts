@@ -1,6 +1,6 @@
 import type { DbEvent } from '@daily-logs/db/schema';
-import { EventStatus } from '../value-objects/event-status';
-import { EventSource } from '../value-objects/event-source';
+import { EventStatus } from '@/events/value-objects/event-status';
+import { EventSource } from '@/events/value-objects/event-source';
 
 export type EventProps = DbEvent;
 

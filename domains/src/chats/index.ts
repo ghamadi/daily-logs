@@ -1,2 +1,2 @@
-export * from './client';
-export * from './services/chats-service';
+export * from '@/chats/client';
+export * from '@/chats/services/chats-service';

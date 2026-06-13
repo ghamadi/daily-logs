@@ -1,5 +1,5 @@
-import { Chat, ChatProps } from '../entities/chat-session';
-import { ChatMessage, ChatMessageProps } from '../entities/chat-message';
+import { Chat, ChatProps } from '@/chats/entities/chat-session';
+import { ChatMessage, ChatMessageProps } from '@/chats/entities/chat-message';
 
 export type CreateChatRepoInput = Omit<ChatProps, 'archivedAt' | 'createdAt' | 'updatedAt'>;
 

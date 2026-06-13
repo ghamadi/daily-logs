@@ -1,3 +1,3 @@
-export * from './entities/chat-session';
-export * from './entities/chat-message';
-export * from './repositories/chat-repository';
+export * from '@/chats/entities/chat-session';
+export * from '@/chats/entities/chat-message';
+export * from '@/chats/repositories/chat-repository';

@@ -9,7 +9,7 @@ import { DrizzleChatRepository } from '@infrastructure/repositories/chats/drizzl
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
 import { getAuthenticatedPrincipal } from '@/lib/utils/api/auth';
 
-import { NewChatButton } from './_components/new-chat-button';
+import { NewChatButton } from '@/app/(protected)/workspaces/[workspaceId]/_components/new-chat-button';
 
 export const dynamic = 'force-dynamic';
 

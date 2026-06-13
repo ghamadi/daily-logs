@@ -5,7 +5,7 @@ import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
 import { getAuthenticatedPrincipal } from '@/lib/utils/api/auth';
 
-import { CreateWorkspaceDialog } from './_components/create-workspace-dialog';
+import { CreateWorkspaceDialog } from '@/app/(protected)/workspaces/_components/create-workspace-dialog';
 
 export const dynamic = 'force-dynamic';
 

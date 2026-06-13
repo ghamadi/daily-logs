@@ -1,3 +1,3 @@
-export * from './entities/workspace';
-export * from './value-objects/workspace-role';
-export * from './repositories/workspaces-repository';
+export * from '@/workspaces/entities/workspace';
+export * from '@/workspaces/value-objects/workspace-role';
+export * from '@/workspaces/repositories/workspaces-repository';

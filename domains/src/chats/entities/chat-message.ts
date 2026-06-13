@@ -1,5 +1,5 @@
 import type { DbChatMessage, StoredUiMessage } from '@daily-logs/db/schema';
-import { DomainErrors } from '../../lib/errors';
+import { DomainErrors } from '@/lib/domain-errors';
 
 export type ChatMessageProps<TPayload extends StoredUiMessage = StoredUiMessage> = Omit<
   DbChatMessage,

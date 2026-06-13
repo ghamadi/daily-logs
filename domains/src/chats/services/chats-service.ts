@@ -1,10 +1,10 @@
-import { DomainErrors } from '../../lib/errors';
+import { DomainErrors } from '@/lib/domain-errors';
 import {
   ChatMessageInput,
   IChatRepository,
   UpdateChatRepoInput,
-} from '../repositories/chat-repository';
-import { IWorkspacesRepository } from '../../workspaces/repositories/workspaces-repository';
+} from '@/chats/repositories/chat-repository';
+import { IWorkspacesRepository } from '@/workspaces/repositories/workspaces-repository';
 
 export type CreateChatInput = {
   chatId: string;
