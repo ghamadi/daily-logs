@@ -13,9 +13,9 @@ export interface IChatRepository {
   createChat(input: CreateChatRepoInput): Promise<Chat>;
   findChatById(id: string): Promise<Chat | null>;
   listOwnerChats(params: { workspaceId: string; ownerUserId: string }): Promise<Chat[]>;
-  updateChat(id: string, input: UpdateChatRepoInput): Promise<Chat>;
-  archiveChat(id: string): Promise<void>;
+  updateChatById(id: string, input: UpdateChatRepoInput): Promise<Chat>;
+  archiveChatById(id: string): Promise<void>;
 
-  loadMessages(chatId: string): Promise<ChatMessage[]>;
+  loadMessagesByChatId(chatId: string): Promise<ChatMessage[]>;
   appendMessages(chatId: string, messages: ChatMessageInput[]): Promise<void>;
 }

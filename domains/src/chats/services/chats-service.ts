@@ -63,21 +63,21 @@ export class ChatsService {
     const { chatId, workspaceId, principalId, input } = props;
     await this.requireOwnedChat({ chatId, workspaceId, principalId });
 
-    return this.chatsRepo.updateChat(chatId, input);
+    return this.chatsRepo.updateChatById(chatId, input);
   }
 
   async archiveChat(props: ChatScopedActionParams) {
     const { chatId, workspaceId, principalId } = props;
     await this.requireOwnedChat({ chatId, workspaceId, principalId });
 
-    await this.chatsRepo.archiveChat(chatId);
+    await this.chatsRepo.archiveChatById(chatId);
   }
 
   async loadChatMessages(props: ChatScopedActionParams) {
     const { chatId, workspaceId, principalId } = props;
     await this.requireOwnedChat({ chatId, workspaceId, principalId });
 
-    return this.chatsRepo.loadMessages(chatId);
+    return this.chatsRepo.loadMessagesByChatId(chatId);
   }
 
   async appendMessages(props: ChatScopedActionParams & { messages: ChatMessageInput[] }) {

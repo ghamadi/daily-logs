@@ -44,7 +44,7 @@ export class DrizzleChatRepository implements IChatRepository {
     return rows.map((row) => new Chat(row));
   }
 
-  async updateChat(id: string, input: UpdateChatRepoInput): Promise<Chat> {
+  async updateChatById(id: string, input: UpdateChatRepoInput): Promise<Chat> {
     const [row] = await this.db
       .update(ChatsTable)
       .set({ ...input, updatedAt: new Date() })
@@ -56,7 +56,7 @@ export class DrizzleChatRepository implements IChatRepository {
     return new Chat(row);
   }
 
-  async archiveChat(id: string): Promise<void> {
+  async archiveChatById(id: string): Promise<void> {
     const now = new Date();
     await this.db
       .update(ChatsTable)
@@ -64,7 +64,7 @@ export class DrizzleChatRepository implements IChatRepository {
       .where(eq(ChatsTable.id, id));
   }
 
-  async loadMessages(chatId: string): Promise<ChatMessage[]> {
+  async loadMessagesByChatId(chatId: string): Promise<ChatMessage[]> {
     const rows = await this.db
       .select()
       .from(ChatMessagesTable)
