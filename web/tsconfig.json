@@ -6,7 +6,8 @@
     "plugins": [{ "name": "next" }],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*", "../domains/src/*", "../db/src/*", "../utils/src/*"],
+      "@/*": ["src/*", "../db/src/*", "../utils/src/*"],
+      "@domains/*": ["../domains/src/*"],
       "@infrastructure/*": ["src/lib/infrastructure/*"]
     }
   },

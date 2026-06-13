@@ -1,4 +1,4 @@
-import { DomainError } from '@/lib/domain-errors/domain-error';
+import { DomainError } from '@domains/lib/errors/domain-error';
 
 export class ConflictError extends DomainError {
   readonly code = 'CONFLICT' as const;

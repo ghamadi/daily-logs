@@ -5,6 +5,7 @@
   "scripts": {
     "web": "pnpm --filter @daily-logs/web",
     "db": "pnpm --filter @daily-logs/db",
+    "domains": "pnpm --filter @daily-logs/domains",
     "add:infrastructure": "pnpm add --filter @daily-logs/infrastructure",
     "db:test:up": "docker compose -f docker-compose.test.yml up -d",
     "db:test:down": "docker compose -f docker-compose.test.yml down -v",
@@ -45,6 +46,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
+    "typescript": "5.9.3",
     "vitest": "^3.2.4"
   },
   "keywords": [],

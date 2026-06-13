@@ -12,12 +12,13 @@
     "./events/client": "./src/events/client.ts",
     "./chats": "./src/chats/index.ts",
     "./chats/client": "./src/chats/client.ts",
-    "./errors": "./src/lib/domain-errors/index.ts"
+    "./errors": "./src/lib/errors/index.ts"
   },
   "scripts": {
     "lint:js": "eslint ./src --ext .ts",
     "lint:ts": "tsc --noEmit",
-    "lint": "pnpm run lint:js && pnpm run lint:ts"
+    "lint": "pnpm run lint:js && pnpm run lint:ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@daily-logs/db": "workspace:*",

@@ -1,2 +1,2 @@
-export * from '@/events/client';
-export * from '@/events/services/events-service';
+export * from '@domains/events/client';
+export * from '@domains/events/services/events-service';

@@ -1,4 +1,4 @@
-import { Event, EventProps } from '@/events/entities/event';
+import { Event, EventProps } from '@domains/events/entities/event';
 
 export type CreateEventRepoInput = EventProps;
 

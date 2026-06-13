@@ -1,2 +1,2 @@
-export * from '@/users/client';
-export * from '@/users/services/users-service';
+export * from '@domains/users/client';
+export * from '@domains/users/services/users-service';

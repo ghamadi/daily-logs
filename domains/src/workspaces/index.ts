@@ -1,2 +1,2 @@
-export * from '@/workspaces/client';
-export * from '@/workspaces/services/workspaces-service';
+export * from '@domains/workspaces/client';
+export * from '@domains/workspaces/services/workspaces-service';
