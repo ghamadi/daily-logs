@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { ChatsService } from '@domains/chats/services/chats-service';
-import { DomainErrors } from '@domains/lib/errors';
-import { WorkspacesService } from '@domains/workspaces/services/workspaces-service';
+import { ChatsService } from '@daily-logs/domains/chats';
+import { DomainErrors } from '@daily-logs/domains/errors';
+import { WorkspacesService } from '@daily-logs/domains/workspaces';
 import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleChatRepository } from '@infrastructure/repositories/chats/drizzle-chat-repository';
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';

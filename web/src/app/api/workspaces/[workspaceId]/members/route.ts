@@ -1,9 +1,11 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 
-import { WorkspaceMember } from '@domains/workspaces/repositories/workspaces-repository';
-import { WorkspacesService } from '@domains/workspaces/services/workspaces-service';
-import { WorkspaceRole } from '@domains/workspaces/value-objects/workspace-role';
+import {
+  WorkspaceMember,
+  WorkspaceRole,
+  WorkspacesService,
+} from '@daily-logs/domains/workspaces';
 import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
 import { getAuthenticatedPrincipal } from '@/lib/utils/api/auth';

@@ -1,5 +1,5 @@
-import { User } from '@domains/users/entities/user';
-import { WorkspaceRole } from '@domains/workspaces/value-objects/workspace-role';
+import { User } from '../../users/entities/user';
+import { WorkspaceRole } from '../value-objects/workspace-role';
 import { Workspace, WorkspaceProps } from '../entities/workspace';
 
 export type CreateWorkspaceRepoInput = WorkspaceProps;

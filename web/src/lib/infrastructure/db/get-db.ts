@@ -1,4 +1,4 @@
-import { createDb, Database } from '@db/client/create-db';
+import { createDb, Database } from '@daily-logs/db/client';
 
 let dbSingleton: Database | undefined;
 

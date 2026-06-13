@@ -1,16 +1,16 @@
 import { and, asc, desc, eq, isNull } from 'drizzle-orm';
 
-import type { Database } from '@db/client/create-db';
-import { ChatMessagesTable, ChatsTable } from '@db/schema';
-import { Chat } from '@domains/chats/entities/chat-session';
-import { ChatMessage } from '@domains/chats/entities/chat-message';
-import type {
-  ChatMessageInput,
-  CreateChatRepoInput,
-  IChatRepository,
-  UpdateChatRepoInput,
-} from '@domains/chats/repositories/chat-repository';
-import { assertNotNullish } from '@utils/assertions';
+import type { Database } from '@daily-logs/db/client';
+import { ChatMessagesTable, ChatsTable } from '@daily-logs/db/schema';
+import {
+  Chat,
+  ChatMessage,
+  type ChatMessageInput,
+  type CreateChatRepoInput,
+  type IChatRepository,
+  type UpdateChatRepoInput,
+} from '@daily-logs/domains/chats';
+import { assertNotNullish } from '@daily-logs/utils/assertions';
 
 export class DrizzleChatRepository implements IChatRepository {
   constructor(private readonly db: Database) {}

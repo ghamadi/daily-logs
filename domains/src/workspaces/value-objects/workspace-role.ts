@@ -1,5 +1,5 @@
-import { type DbWorkspaceUserRole } from '@db/schema';
-import { Enum } from '@utils/ts-utils';
+import { type DbWorkspaceUserRole } from '@daily-logs/db/schema';
+import { Enum } from '@daily-logs/utils/ts-utils';
 
 export const WorkspaceRole = {
   MEMBER: 'member',

@@ -1,4 +1,4 @@
-import type { DbWorkspace } from '@db/schema';
+import type { DbWorkspace } from '@daily-logs/db/schema';
 
 export type WorkspaceProps = DbWorkspace;
 

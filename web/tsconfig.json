@@ -19,10 +19,7 @@
     "paths": {
       "@/*": ["src/*"],
       "@web/*": ["src/*"],
-      "@db/*": ["../db/src/*"],
-      "@domains/*": ["../domains/src/*"],
-      "@infrastructure/*": ["src/lib/infrastructure/*"],
-      "@utils/*": ["../utils/src/*"]
+      "@infrastructure/*": ["src/lib/infrastructure/*"]
     }
   },
   "include": [

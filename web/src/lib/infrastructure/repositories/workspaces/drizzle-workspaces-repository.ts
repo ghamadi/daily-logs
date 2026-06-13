@@ -1,23 +1,23 @@
 import { and, asc, eq, getTableColumns } from 'drizzle-orm';
 
-import type { Database, Transaction } from '@db/client/create-db';
+import type { Database, Transaction } from '@daily-logs/db/client';
 import {
   UsersTable,
   WorkspaceUsersTable,
   WorkspacesTable,
   type DbUser,
   type DbWorkspaceUser,
-} from '@db/schema';
-import { User } from '@domains/users/entities/user';
-import { Workspace } from '@domains/workspaces/entities/workspace';
-import type {
-  CreateWorkspaceRepoInput,
-  IWorkspacesRepository,
-  UpdateWorkspaceRepoInput,
-  WorkspaceMember,
-} from '@domains/workspaces/repositories/workspaces-repository';
-import { WorkspaceRole } from '@domains/workspaces/value-objects/workspace-role';
-import { assertNotNullish } from '@utils/assertions';
+} from '@daily-logs/db/schema';
+import { User } from '@daily-logs/domains/users';
+import {
+  Workspace,
+  WorkspaceRole,
+  type CreateWorkspaceRepoInput,
+  type IWorkspacesRepository,
+  type UpdateWorkspaceRepoInput,
+  type WorkspaceMember,
+} from '@daily-logs/domains/workspaces';
+import { assertNotNullish } from '@daily-logs/utils/assertions';
 
 type WorkspaceMemberRow = { member: DbWorkspaceUser; user: DbUser };
 

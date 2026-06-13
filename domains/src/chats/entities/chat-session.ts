@@ -1,4 +1,4 @@
-import type { DbChatSession } from '@db/schema';
+import type { DbChatSession } from '@daily-logs/db/schema';
 
 export type ChatProps = DbChatSession;
 

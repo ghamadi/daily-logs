@@ -4,7 +4,8 @@ import { useParams } from 'next/navigation';
 import { ChatThread } from '@/app/(protected)/workspaces/[workspaceId]/chats/_components/chat-thread';
 import { useChatContext } from '@/app/(protected)/workspaces/[workspaceId]/_components/chat-context-provider';
 import { useQuery } from '@tanstack/react-query';
-import { ChatMessage } from '@domains/chats/entities/chat-message';
+import { ChatMessage } from '@daily-logs/domains/chats/client';
+import type { UiMessagePayload } from '@/lib/ai-sdk/types';
 import { useEffect, useRef, useState } from 'react';
 
 export default function ChatPage() {
@@ -64,7 +65,7 @@ function useChatHistoryQuery(params: { workspaceId: string; chatId: string; enab
       }
 
       const data = await response.json();
-      return data.data as ChatMessage[];
+      return data.data as ChatMessage<UiMessagePayload>[];
     },
   });
 }

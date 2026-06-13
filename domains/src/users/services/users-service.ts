@@ -1,4 +1,4 @@
-import { DomainErrors } from '@domains/lib/errors';
+import { DomainErrors } from '../../lib/errors';
 import { User } from '../entities/user';
 import {
   UpsertUserRepoInput,

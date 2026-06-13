@@ -6,11 +6,10 @@ import {
   UsersTable,
   WorkspaceUsersTable,
   WorkspacesTable,
-} from '@db/schema';
-import { EventSource } from '@domains/events/value-objects/event-source';
-import { EventStatus } from '@domains/events/value-objects/event-status';
-import { AuthProvider } from '@domains/users/value-objects/auth-provider';
-import { WorkspaceRole } from '@domains/workspaces/value-objects/workspace-role';
+} from '@daily-logs/db/schema';
+import { EventSource, EventStatus } from '@daily-logs/domains/events';
+import { AuthProvider } from '@daily-logs/domains/users';
+import { WorkspaceRole } from '@daily-logs/domains/workspaces';
 
 import { getTestDatabase } from './test-database';
 

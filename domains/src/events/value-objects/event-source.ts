@@ -1,5 +1,5 @@
-import { type DbEventSource } from '@db/schema';
-import { Enum } from '@utils/ts-utils';
+import { type DbEventSource } from '@daily-logs/db/schema';
+import { Enum } from '@daily-logs/utils/ts-utils';
 
 export const EventSource = {
   USER: 'user',

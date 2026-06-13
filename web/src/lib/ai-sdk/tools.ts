@@ -1,6 +1,6 @@
 import { tool, type InferUITools, type ToolSet } from 'ai';
 import { z } from 'zod';
-import { WorkspacesService } from '@domains/workspaces/services/workspaces-service';
+import { WorkspacesService } from '@daily-logs/domains/workspaces';
 
 export type ChatToolContext = {
   workspaceId: string;

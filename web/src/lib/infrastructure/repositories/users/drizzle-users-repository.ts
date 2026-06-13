@@ -1,14 +1,14 @@
 import { and, eq } from 'drizzle-orm';
-import type { Database } from '@db/client/create-db';
-import { AuthIdentitiesTable, UsersTable } from '@db/schema';
-import { User } from '@domains/users/entities/user';
-import type {
-  UpsertUserRepoInput,
-  UpdateUserRepoInput,
-  IUsersRepository,
-  FindByEmailOptions,
-} from '@domains/users/repositories/users-repository';
-import { assertNotNullish } from '@utils/assertions';
+import type { Database } from '@daily-logs/db/client';
+import { AuthIdentitiesTable, UsersTable } from '@daily-logs/db/schema';
+import {
+  User,
+  type UpsertUserRepoInput,
+  type UpdateUserRepoInput,
+  type IUsersRepository,
+  type FindByEmailOptions,
+} from '@daily-logs/domains/users';
+import { assertNotNullish } from '@daily-logs/utils/assertions';
 
 export class DrizzleUsersRepository implements IUsersRepository {
   constructor(private readonly db: Database) {}

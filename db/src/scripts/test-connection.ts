@@ -8,7 +8,7 @@
  */
 
 /* eslint-disable no-console */
-import { testConnection } from '@db/client/test-connection';
+import { testConnection } from '../client/test-connection';
 
 (async () => {
   const connectionString = process.env.DATABASE_URL?.trim();

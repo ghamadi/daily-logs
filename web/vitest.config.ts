@@ -5,15 +5,11 @@ import { defineConfig } from 'vitest/config';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const fromCurrentDir = (...segments: string[]) => resolve(currentDir, ...segments);
-const fromRepoRoot = (...segments: string[]) => resolve(currentDir, '..', ...segments);
 
 export default defineConfig({
   resolve: {
     alias: {
       '@web': fromCurrentDir('./src'),
-      '@db': fromRepoRoot('db/src'),
-      '@domains': fromRepoRoot('domains/src'),
-      '@utils': fromRepoRoot('utils/src'),
     },
   },
   test: {

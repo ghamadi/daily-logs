@@ -1,14 +1,14 @@
 import { desc, eq } from 'drizzle-orm';
-import type { Database } from '@db/client/create-db';
-import { EventsTable } from '@db/schema';
-import { Event } from '@domains/events/entities/event';
-import type {
-  CreateEventRepoInput,
-  FindEventsOptions,
-  IEventsRepository,
-  UpdateEventRepoInput,
-} from '@domains/events/repositories/events-repository';
-import { assertNotNullish } from '@utils/assertions';
+import type { Database } from '@daily-logs/db/client';
+import { EventsTable } from '@daily-logs/db/schema';
+import {
+  Event,
+  type CreateEventRepoInput,
+  type FindEventsOptions,
+  type IEventsRepository,
+  type UpdateEventRepoInput,
+} from '@daily-logs/domains/events';
+import { assertNotNullish } from '@daily-logs/utils/assertions';
 
 export class DrizzleEventsRepository implements IEventsRepository {
   constructor(private readonly db: Database) {}

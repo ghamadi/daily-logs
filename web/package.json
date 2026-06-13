@@ -14,7 +14,7 @@
   "dependencies": {
     "@ai-sdk/react": "^3.0.179",
     "@daily-logs/db": "workspace:*",
-    "@daily-logs/domain": "workspace:*",
+    "@daily-logs/domains": "workspace:*",
     "@daily-logs/utils": "workspace:*",
     "@streamdown/cjk": "^1.0.3",
     "@streamdown/code": "^1.1.1",

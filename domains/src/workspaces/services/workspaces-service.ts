@@ -5,7 +5,7 @@ import {
   IWorkspacesRepository,
 } from '../repositories/workspaces-repository';
 import { hasAdminAccess, isOwner, WorkspaceRole } from '../value-objects/workspace-role';
-import { DomainErrors } from '@domains/lib/errors';
+import { DomainErrors } from '../../lib/errors';
 
 export type CreateWorkspaceInput = Omit<CreateWorkspaceRepoInput, 'createdAt' | 'updatedAt' | 'id'> & {
   id?: string;

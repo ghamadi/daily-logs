@@ -1,4 +1,4 @@
-import { createDb } from '@db/client/create-db';
+import { createDb } from './create-db';
 
 /**
  * Test the connection to the database.

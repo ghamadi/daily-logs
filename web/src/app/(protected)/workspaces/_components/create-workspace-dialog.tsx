@@ -4,7 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { type SubmitEvent, useState } from 'react';
 
-import type { Workspace } from '@domains/workspaces/entities/workspace';
+import type { Workspace } from '@daily-logs/domains/workspaces/client';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';

@@ -44,12 +44,6 @@ importers:
 
   db:
     dependencies:
-      '@daily-logs/domain':
-        specifier: workspace:*
-        version: link:../domains
-      '@daily-logs/utils':
-        specifier: workspace:*
-        version: link:../utils
       drizzle-orm:
         specifier: ^0.45.1
         version: 0.45.1(@electric-sql/pglite@0.3.15)(@opentelemetry/api@1.9.0)(@types/pg@8.16.0)(pg@8.18.0)(postgres@3.4.8)
@@ -92,25 +86,6 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
-  infrastructure:
-    dependencies:
-      '@daily-logs/db':
-        specifier: workspace:*
-        version: link:../db
-      '@daily-logs/domain':
-        specifier: workspace:*
-        version: link:../domains
-      '@daily-logs/utils':
-        specifier: workspace:*
-        version: link:../utils
-      drizzle-orm:
-        specifier: ^0.45.1
-        version: 0.45.1(@electric-sql/pglite@0.3.15)(@opentelemetry/api@1.9.0)(@types/pg@8.16.0)(pg@8.18.0)(postgres@3.4.8)
-    devDependencies:
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-
   utils:
     devDependencies:
       typescript:
@@ -125,7 +100,7 @@ importers:
       '@daily-logs/db':
         specifier: workspace:*
         version: link:../db
-      '@daily-logs/domain':
+      '@daily-logs/domains':
         specifier: workspace:*
         version: link:../domains
       '@daily-logs/utils':

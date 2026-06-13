@@ -1,8 +1,7 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 
-import { Chat } from '@domains/chats/entities/chat-session';
-import { ChatsService } from '@domains/chats/services/chats-service';
+import { Chat, ChatsService } from '@daily-logs/domains/chats';
 import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleChatRepository } from '@infrastructure/repositories/chats/drizzle-chat-repository';
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';

@@ -3,8 +3,7 @@ import { v7 as uuidv7 } from 'uuid';
 import { convertToModelMessages, smoothStream, streamText, validateUIMessages } from 'ai';
 import { z } from 'zod';
 
-import { ChatMessage } from '@domains/chats/entities/chat-message';
-import { ChatsService } from '@domains/chats/services/chats-service';
+import { ChatMessage, ChatsService } from '@daily-logs/domains/chats';
 import { DrizzleChatRepository } from '@infrastructure/repositories/chats/drizzle-chat-repository';
 
 import { getDb } from '@infrastructure/db/get-db';
@@ -14,6 +13,7 @@ import { getChatModel } from '@/lib/ai-sdk/model';
 import { getSystemPrompt } from '@/lib/ai-sdk/system-prompt';
 import { buildChatTools, ChatToolSet } from '@/lib/ai-sdk/tools';
 import type { UiMessagePayload } from '@/lib/ai-sdk/types';
+import type { StoredUiMessage } from '@daily-logs/db/schema';
 import { getAuthenticatedPrincipal } from '@/lib/utils/api/auth';
 import {
   logError,
@@ -22,7 +22,7 @@ import {
 } from '@/lib/utils/api/errors';
 import { parseJsonBody } from '@/lib/utils/api/request';
 import { ApiResponse, toApiResponse } from '@/lib/utils/api/response';
-import { WorkspacesService } from '@domains/workspaces/services/workspaces-service';
+import { WorkspacesService } from '@daily-logs/domains/workspaces';
 
 // ========================================================
 // GET /api/workspaces/[workspaceId]/chats/[chatId]/messages
@@ -35,7 +35,7 @@ const GETParamsSchema = z.object({
 
 export type ListChatMessagesRequestParams = z.infer<typeof GETParamsSchema>;
 
-export type ListChatMessagesResponseBody = ApiResponse<ChatMessage[]>;
+export type ListChatMessagesResponseBody = ApiResponse<ChatMessage<UiMessagePayload>[]>;
 
 export const GET = withApiErrorHandler(
   async (
@@ -204,7 +204,7 @@ function messageHasContent(entry: ChatMessage): boolean {
   return uiMessageHasContent(entry.payload);
 }
 
-function uiMessageHasContent(message: UiMessagePayload): boolean {
+function uiMessageHasContent(message: StoredUiMessage): boolean {
   return Array.isArray(message.parts) && message.parts.length > 0;
 }
 

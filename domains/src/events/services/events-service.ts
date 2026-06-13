@@ -8,7 +8,7 @@ import {
   UpdateEventRepoInput,
   IEventsRepository,
 } from '../repositories/events-repository';
-import { DomainErrors } from '@domains/lib/errors';
+import { DomainErrors } from '../../lib/errors';
 
 export type CreateEventInput = Omit<
   CreateEventRepoInput,

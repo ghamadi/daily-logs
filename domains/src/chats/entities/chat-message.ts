@@ -1,17 +1,19 @@
-import type { DbChatMessage } from '@db/schema';
-import { DomainErrors } from '@domains/lib/errors';
-import type { UiMessagePayload } from '@web/lib/ai-sdk/types';
+import type { DbChatMessage, StoredUiMessage } from '@daily-logs/db/schema';
+import { DomainErrors } from '../../lib/errors';
 
-export type ChatMessageProps = DbChatMessage;
+export type ChatMessageProps<TPayload extends StoredUiMessage = StoredUiMessage> = Omit<
+  DbChatMessage,
+  'payload'
+> & { payload: TPayload };
 
-export class ChatMessage {
+export class ChatMessage<TPayload extends StoredUiMessage = StoredUiMessage> {
   readonly id: string;
   readonly chatId: string;
   readonly createdAt: Date;
   readonly updatedAt: Date;
-  readonly payload: UiMessagePayload;
+  readonly payload: TPayload;
 
-  constructor(props: ChatMessageProps) {
+  constructor(props: ChatMessageProps<TPayload>) {
     if (props.id !== props.payload.id) {
       throw new DomainErrors.UnexpectedError('Message id mismatch');
     }

@@ -1,4 +1,4 @@
-import type { DbUser } from '@db/schema';
+import type { DbUser } from '@daily-logs/db/schema';
 import type { AuthProvider } from '../value-objects/auth-provider';
 import { User } from '../entities/user';
 

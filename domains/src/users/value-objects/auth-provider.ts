@@ -1,4 +1,4 @@
-import { Enum } from '@utils/ts-utils';
+import { Enum } from '@daily-logs/utils/ts-utils';
 
 export const AuthProvider = {
   Supabase: 'supabase',
