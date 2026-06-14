@@ -2,7 +2,7 @@ import { pgTable, uuid, jsonb, timestamp, index, pgEnum } from 'drizzle-orm/pg-c
 import type { UIMessage } from 'ai';
 import { ChatsTable } from './chat-sessions-table';
 
-export const CHAT_MESSAGE_ROLES = ['user', 'assistant', 'system'] as const;
+export const CHAT_MESSAGE_ROLES = ['user', 'assistant', 'system'] as const satisfies UIMessage['role'][];
 
 export const chatMessageRoleEnum = pgEnum('chat_message_role', CHAT_MESSAGE_ROLES);
 
@@ -17,6 +17,7 @@ export const ChatMessagesTable = pgTable(
     chatId: uuid('chat_id')
       .notNull()
       .references(() => ChatsTable.id, { onDelete: 'cascade' }),
+    role: chatMessageRoleEnum('role').notNull(),
     payload: jsonb('payload').$type<UIMessage>().notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

@@ -1,11 +1,17 @@
 import { and, asc, desc, eq, isNull } from 'drizzle-orm';
 
 import type { Database } from '@daily-logs/db/client';
-import { ChatMessagesTable, ChatsTable } from '@daily-logs/db/schema';
 import {
+  ChatMessagesTable,
+  ChatsTable,
+  DbChatMessage,
+  WorkspaceUsersTable,
+} from '@daily-logs/db/schema';
+import {
+  AppendMessagesParams,
   Chat,
   ChatMessage,
-  type ChatMessageInput,
+  GetUserOwnedChatMessagesParams,
   type CreateChatRepoInput,
   type IChatRepository,
   type UpdateChatRepoInput,
@@ -64,17 +70,36 @@ export class DrizzleChatRepository implements IChatRepository {
       .where(eq(ChatsTable.id, id));
   }
 
-  async loadMessagesByChatId(chatId: string): Promise<ChatMessage[]> {
+  async getUserOwnedChatMessages(params: GetUserOwnedChatMessagesParams): Promise<ChatMessage[]> {
+    const { chatId, workspaceId, principalId } = params;
+
     const rows = await this.db
-      .select()
+      .select({
+        id: ChatMessagesTable.id,
+        chatId: ChatMessagesTable.chatId,
+        role: ChatMessagesTable.role,
+        payload: ChatMessagesTable.payload,
+        createdAt: ChatMessagesTable.createdAt,
+        updatedAt: ChatMessagesTable.updatedAt,
+      })
       .from(ChatMessagesTable)
-      .where(eq(ChatMessagesTable.chatId, chatId))
+      .innerJoin(ChatsTable, eq(ChatMessagesTable.chatId, ChatsTable.id))
+      .innerJoin(WorkspaceUsersTable, eq(ChatsTable.workspaceId, WorkspaceUsersTable.workspaceId))
+      .where(
+        and(
+          eq(ChatMessagesTable.chatId, chatId),
+          eq(ChatsTable.workspaceId, workspaceId),
+          eq(WorkspaceUsersTable.userId, principalId),
+        ),
+      )
       .orderBy(asc(ChatMessagesTable.createdAt), asc(ChatMessagesTable.id));
 
     return rows.map((row) => new ChatMessage(row));
   }
 
-  async appendMessages(chatId: string, messages: ChatMessageInput[]): Promise<void> {
+  async appendChatMessages(params: AppendMessagesParams): Promise<void> {
+    const { chatId, messages } = params;
+
     if (messages.length === 0) {
       return;
     }
@@ -83,9 +108,10 @@ export class DrizzleChatRepository implements IChatRepository {
     // resolves at transaction start, not per row), so we explicitly offset each
     // row by its index in milliseconds to preserve intra-batch ordering.
     const baseTime = Date.now();
-    const rows = messages.map((message, i) => ({
+    const rows: DbChatMessage[] = messages.map((message, i) => ({
       id: message.id,
       chatId,
+      role: message.role,
       payload: message.payload,
       createdAt: new Date(baseTime + i),
       updatedAt: new Date(baseTime + i),

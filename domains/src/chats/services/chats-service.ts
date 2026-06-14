@@ -1,10 +1,7 @@
 import { DomainErrors } from '@domains/lib/errors';
-import {
-  ChatMessageInput,
-  IChatRepository,
-  UpdateChatRepoInput,
-} from '@domains/chats/repositories/chat-repository';
+import { IChatRepository, UpdateChatRepoInput } from '@domains/chats/repositories/chat-repository';
 import { IWorkspacesRepository } from '@domains/workspaces/repositories/workspaces-repository';
+import { ChatMessage } from '@domains/chats/client';
 
 export type CreateChatInput = {
   chatId: string;
@@ -75,13 +72,13 @@ export class ChatsService {
 
   async loadChatMessages(props: ChatScopedActionParams) {
     const { chatId, workspaceId, principalId } = props;
-    await this.requireOwnedChat({ chatId, workspaceId, principalId });
 
-    return this.chatsRepo.loadMessagesByChatId(chatId);
+    return await this.chatsRepo.getUserOwnedChatMessages({ chatId, workspaceId, principalId });
   }
 
-  async appendMessages(props: ChatScopedActionParams & { messages: ChatMessageInput[] }) {
+  async appendMessages(props: ChatScopedActionParams & { messages: ChatMessage[] }) {
     const { chatId, workspaceId, principalId, messages } = props;
+
     await this.requireOwnedChat({ chatId, workspaceId, principalId });
 
     const invalidMessageIds = messages
@@ -95,7 +92,7 @@ export class ChatsService {
       );
     }
 
-    await this.chatsRepo.appendMessages(chatId, messages);
+    await this.chatsRepo.appendChatMessages({ chatId, messages });
   }
 
   // ── helpers ──────────────────────────────────────────────

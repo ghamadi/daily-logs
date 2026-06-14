@@ -1,5 +1,5 @@
 {
-  "id": "6f84ff6d-2f55-4f63-84ff-a002806f93e6",
+  "id": "26380ec6-62a3-40a0-ba87-129024ed9466",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -676,6 +676,13 @@
         "chat_id": {
           "name": "chat_id",
           "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "chat_message_role",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
