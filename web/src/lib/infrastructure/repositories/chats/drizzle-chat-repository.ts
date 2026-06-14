@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, isNull } from 'drizzle-orm';
+import { and, asc, desc, eq, isNull, or } from 'drizzle-orm';
 
 import type { Database } from '@daily-logs/db/client';
 import {
@@ -12,6 +12,7 @@ import {
   Chat,
   ChatMessage,
   GetUserOwnedChatMessagesParams,
+  SetMessagesParams,
   type CreateChatRepoInput,
   type IChatRepository,
   type UpdateChatRepoInput,
@@ -124,5 +125,31 @@ export class DrizzleChatRepository implements IChatRepository {
       .insert(ChatMessagesTable)
       .values(rows)
       .onConflictDoNothing({ target: ChatMessagesTable.id });
+  }
+
+  async setChatMessages(params: SetMessagesParams): Promise<void> {
+    const { chatId, newMessages, discardedMessageIds: deletedMessageIds } = params;
+
+    await this.db.transaction(async (tx) => {
+      const insertPromise = tx.insert(ChatMessagesTable).values(
+        newMessages.map((message) => ({
+          id: message.id,
+          chatId,
+          role: message.role,
+          payload: message.payload,
+        })),
+      );
+
+      const deletePromise = (() => {
+        if (deletedMessageIds && deletedMessageIds.length > 0) {
+          return tx
+            .delete(ChatMessagesTable)
+            .where(or(...deletedMessageIds.map((id) => eq(ChatMessagesTable.id, id))));
+        }
+        return Promise.resolve();
+      })();
+
+      await Promise.all([deletePromise, insertPromise]);
+    });
   }
 }

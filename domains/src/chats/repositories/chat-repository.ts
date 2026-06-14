@@ -18,6 +18,12 @@ export type AppendMessagesParams = {
   messages: ChatMessage[];
 };
 
+export type SetMessagesParams = {
+  chatId: string;
+  newMessages: ChatMessage[];
+  discardedMessageIds?: string[];
+};
+
 export interface IChatRepository {
   createChat(input: CreateChatRepoInput): Promise<Chat>;
   findChatById(id: string): Promise<Chat | null>;
@@ -38,4 +44,9 @@ export interface IChatRepository {
    * Appends the provided messages to the chat.
    */
   appendChatMessages(params: AppendMessagesParams): Promise<void>;
+
+  /**
+   * Sets the messages of the chat.
+   */
+  setChatMessages(params: SetMessagesParams): Promise<void>;
 }

@@ -39,6 +39,14 @@ export class ChatMessage {
     this.updatedAt = props.updatedAt;
   }
 
+  get hasContent() {
+    return Array.isArray(this.payload.parts) && this.payload.parts.length > 0;
+  }
+
+  static toUiMessage<T extends ChatMessagePayload>(msg: ChatMessage): T {
+    return msg.payload as T;
+  }
+
   static fromPayload(params: ChatMessagePayload & { chatId: string }): ChatMessage {
     const { chatId, ...payload } = params;
     const id = payload.id;

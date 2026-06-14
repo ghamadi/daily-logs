@@ -1,5 +1,9 @@
 import { DomainErrors } from '@domains/lib/errors';
-import { IChatRepository, UpdateChatRepoInput } from '@domains/chats/repositories/chat-repository';
+import {
+  IChatRepository,
+  SetMessagesParams,
+  UpdateChatRepoInput,
+} from '@domains/chats/repositories/chat-repository';
 import { IWorkspacesRepository } from '@domains/workspaces/repositories/workspaces-repository';
 import { ChatMessage } from '@domains/chats/client';
 
@@ -39,7 +43,7 @@ export class ChatsService {
     }
 
     if (existing.workspaceId !== workspaceId || existing.ownerUserId !== principalId) {
-      throw new DomainErrors.AccessDeniedError('You are not allowed to access this chat');
+      throw new DomainErrors.ConflictError('Chat ID is already in use.');
     }
 
     return existing;
@@ -81,37 +85,35 @@ export class ChatsService {
 
     await this.requireOwnedChat({ chatId, workspaceId, principalId });
 
-    const invalidMessageIds = messages
-      .filter((message) => message.id !== message.payload.id)
-      .map((message) => ({ id: message.id, payloadId: message.payload.id }));
-
-    if (invalidMessageIds.length > 0) {
-      throw new DomainErrors.InvalidInputError(
-        'Message id mismatch. Message id must be the same as the payload id.',
-        { invalidMessageIds },
-      );
-    }
-
     await this.chatsRepo.appendChatMessages({ chatId, messages });
   }
 
-  // ── helpers ──────────────────────────────────────────────
+  async setMessages(params: ChatScopedActionParams & SetMessagesParams) {
+    const {
+      chatId,
+      workspaceId,
+      principalId,
+      newMessages,
+      discardedMessageIds: deletedMessageIds,
+    } = params;
 
-  private async assertWorkspaceMembership(workspaceId: string, principalId: string) {
-    const isMember = await this.workspacesRepo.isMember({ workspaceId, memberId: principalId });
-    if (!isMember) {
-      throw new DomainErrors.AccessDeniedError('User is not a member of this workspace');
-    }
+    await this.requireOwnedChat({ chatId, workspaceId, principalId });
+
+    await this.chatsRepo.setChatMessages({
+      chatId,
+      newMessages,
+      discardedMessageIds: deletedMessageIds,
+    });
   }
 
-  private async requireOwnedChat(props: ChatScopedActionParams) {
+  async requireOwnedChat(props: ChatScopedActionParams) {
     const { chatId, workspaceId, principalId } = props;
     const chat = await this.chatsRepo.findChatById(chatId);
 
     // A chat in a different workspace is treated as not-found here so we never
     // confirm cross-workspace existence to a caller who shouldn't know.
     if (!chat || chat.workspaceId !== workspaceId) {
-      throw new DomainErrors.NotFoundError('Chat not found', { id: chatId });
+      throw new DomainErrors.NotFoundError('Chat not found', { id: chatId, workspaceId, principalId });
     }
 
     await this.assertWorkspaceMembership(workspaceId, principalId);
@@ -121,5 +123,14 @@ export class ChatsService {
     }
 
     return chat;
+  }
+
+  // ── helpers ──────────────────────────────────────────────
+
+  private async assertWorkspaceMembership(workspaceId: string, principalId: string) {
+    const isMember = await this.workspacesRepo.isMember({ workspaceId, memberId: principalId });
+    if (!isMember) {
+      throw new DomainErrors.AccessDeniedError('User is not a member of this workspace');
+    }
   }
 }

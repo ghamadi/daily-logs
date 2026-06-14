@@ -6,7 +6,7 @@ import { gateway, type LanguageModel } from 'ai';
  * reasonable speed/quality default; swap by changing this constant or by
  * threading a `modelId` argument through the factory.
  */
-const DEFAULT_CHAT_MODEL_ID = 'openai/gpt-4o-mini';
+const CHRONICLE_MODEL_ID = 'openai/gpt-4o-mini';
 
 /**
  * Returns the language model used by the chat route. Centralised here so we
@@ -18,5 +18,5 @@ const DEFAULT_CHAT_MODEL_ID = 'openai/gpt-4o-mini';
  * through the factory.
  */
 export function getChatModel(): LanguageModel {
-  return gateway(DEFAULT_CHAT_MODEL_ID);
+  return gateway(CHRONICLE_MODEL_ID);
 }
