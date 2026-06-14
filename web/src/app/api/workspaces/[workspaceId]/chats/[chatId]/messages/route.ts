@@ -31,6 +31,8 @@ import { ChronicleMessagePayload } from '@/lib/ai-sdk/chronicle/types';
 import { generateMessageId, logAndExtractAiGenerationErrorMessage } from '@/lib/ai-sdk/helpers';
 import { buildSaveMessagesUseCase } from '@/lib/application/chat/use-cases/save-messages-factory';
 
+export const maxDuration = 60;
+
 // ========================================================
 // GET /api/workspaces/[workspaceId]/chats/[chatId]/messages
 // ========================================================
@@ -95,23 +97,32 @@ export const POST = withApiErrorHandler(
     const { workspaceId, chatId } = POSTParamsSchema.parse(await context.params);
     const chatsService = createChatService();
 
-    const principal = await getAuthenticatedPrincipal();
-
-    const [{ message }] = await Promise.all([
+    const [principal, { message }] = await Promise.all([
+      getAuthenticatedPrincipal(),
       parseJsonBody(request, POSTBodySchema),
-      chatsService.requireOwnedChat({ chatId, workspaceId, principalId: principal.id }),
     ]);
 
-    const toolsRuntime = new ToolsRuntime();
+    // Keep the route handler alive until the DB write settles, in case the client disconnects early.
+    const dataPersistence = Promise.withResolvers<void>();
+    after(dataPersistence.promise);
 
+    // ------------------------------------------------------------
+    // Prepare dependencies and construct use cases
+    // ------------------------------------------------------------
+    const toolsRuntime = new ToolsRuntime();
     const chronicleTools = buildChronicleTools({
       chatId,
       workspaceId,
       principalId: principal.id,
       runtime: toolsRuntime,
     });
-
+    const saveMessagesUseCase = buildSaveMessagesUseCase(chatsService);
     const prepareConversationUseCase = buildPrepareConversationUseCase(chatsService, chronicleTools);
+
+    // --------------------------------------------------------------------------
+    // Prepare the conversation
+    // (throws if the chat is not found or the user does not have access to it)
+    // --------------------------------------------------------------------------
     const conversation = await prepareConversationUseCase({
       workspaceId,
       chatId,
@@ -119,15 +130,13 @@ export const POST = withApiErrorHandler(
       message,
     });
 
-    // Keep the route handler alive until the DB write settles, in case the client disconnects early.
-    const dataPersistence = Promise.withResolvers<void>();
-    after(dataPersistence.promise);
-
+    // --------------------------------------------------------------------------
+    // Create the stream
+    // --------------------------------------------------------------------------
     const stream = createUIMessageStream<ChronicleMessagePayload>({
       originalMessages: conversation.uiMessages,
       generateId: generateMessageId,
       onFinish: async ({ messages }) => {
-        const saveMessagesUseCase = buildSaveMessagesUseCase(chatsService);
         await saveMessagesUseCase({
           chatId,
           workspaceId,
