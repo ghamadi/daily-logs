@@ -63,6 +63,9 @@ importers:
       '@electric-sql/pglite':
         specifier: ^0.3.15
         version: 0.3.15
+      ai:
+        specifier: ^6.0.177
+        version: 6.0.177(zod@4.3.6)
       drizzle-kit:
         specifier: ^0.31.9
         version: 0.31.9
@@ -85,6 +88,9 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
     devDependencies:
+      ai:
+        specifier: ^6.0.177
+        version: 6.0.177(zod@4.3.6)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3

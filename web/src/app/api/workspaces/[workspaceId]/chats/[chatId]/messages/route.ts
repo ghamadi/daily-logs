@@ -12,8 +12,8 @@ import { ApiErrors } from '@/lib/errors';
 import { getChatModel } from '@/lib/ai-sdk/model';
 import { getSystemPrompt } from '@/lib/ai-sdk/system-prompt';
 import { buildChatTools, ChatToolSet } from '@/lib/ai-sdk/tools';
+import type { UIMessage } from 'ai';
 import type { UiMessagePayload } from '@/lib/ai-sdk/types';
-import type { StoredUiMessage } from '@daily-logs/db/schema';
 import { getAuthenticatedPrincipal } from '@/lib/utils/api/auth';
 import {
   logError,
@@ -35,7 +35,7 @@ const GETParamsSchema = z.object({
 
 export type ListChatMessagesRequestParams = z.infer<typeof GETParamsSchema>;
 
-export type ListChatMessagesResponseBody = ApiResponse<ChatMessage<UiMessagePayload>[]>;
+export type ListChatMessagesResponseBody = ApiResponse<ChatMessage[]>;
 
 export const GET = withApiErrorHandler(
   async (
@@ -204,7 +204,7 @@ function messageHasContent(entry: ChatMessage): boolean {
   return uiMessageHasContent(entry.payload);
 }
 
-function uiMessageHasContent(message: StoredUiMessage): boolean {
+function uiMessageHasContent(message: UIMessage): boolean {
   return Array.isArray(message.parts) && message.parts.length > 0;
 }
 

@@ -45,7 +45,7 @@ export default function ChatPage() {
     <ChatThread
       workspaceId={workspaceId}
       chatId={chatId}
-      initialMessages={history.map((entry) => entry.payload)}
+      initialMessages={history.map((entry) => entry.payload as UiMessagePayload)}
     />
   );
 }
@@ -65,7 +65,7 @@ function useChatHistoryQuery(params: { workspaceId: string; chatId: string; enab
       }
 
       const data = await response.json();
-      return data.data as ChatMessage<UiMessagePayload>[];
+      return data.data as ChatMessage[];
     },
   });
 }
