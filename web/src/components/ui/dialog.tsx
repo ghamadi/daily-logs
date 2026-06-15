@@ -5,7 +5,7 @@ import { Dialog as DialogPrimitive } from 'radix-ui';
 import { cn, composeCompoundComponent } from '@/lib/utils/components';
 import { Button } from '@/components/ui/button';
 import { ComponentProps } from 'react';
-import { usePortalContainer } from '@/hooks/use-portal-container';
+import { useLayer } from '@/hooks/use-layer';
 
 export const Dialog = composeCompoundComponent(DialogRoot, {
   Trigger: DialogTrigger,
@@ -88,20 +88,18 @@ export type DialogContentProps = ComponentProps<typeof DialogPrimitive.Content> 
 };
 
 function DialogContent(props: DialogContentProps) {
-  const { className, children, showCloseButton = true, portal, ...rest } = props;
+  const { className, children, showCloseButton = true, portal, style, ...rest } = props;
 
   const { container, ...portalProps } = portal ?? {};
 
-  const dialogContainer = usePortalContainer({
-    container,
-    fallbackContainerId: 'dialog-root',
-  });
+  const interactiveLayer = useLayer('interactive');
 
   return (
-    <DialogPortal container={dialogContainer} {...portalProps}>
-      <DialogOverlay />
+    <DialogPortal container={container ?? interactiveLayer.container} {...portalProps}>
+      <DialogOverlay style={{ zIndex: interactiveLayer.zIndex }} />
       <DialogPrimitive.Content
         data-slot="dialog-content"
+        style={{ zIndex: interactiveLayer.zIndex, ...style }}
         className={cn(
           'bg-popover text-popover-foreground ring-foreground/10 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 fixed top-1/2 left-1/2 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl p-4 text-sm ring-1 duration-100 outline-none sm:max-w-sm',
           className,

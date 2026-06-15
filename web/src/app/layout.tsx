@@ -32,10 +32,8 @@ export default function RootLayout({
           <RootProviders>{children}</RootProviders>
         </Suspense>
 
-        <div id="dialog-root" />
-        <div id="toast-root" />
-        <div id="popper-root" />
-        <div id="tooltip-root" />
+        <div id="interactive-layer-root" />
+        <div id="notification-layer-root" />
       </body>
     </html>
   );

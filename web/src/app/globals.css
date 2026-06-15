@@ -26,11 +26,6 @@
   --chart-3: hsl(197 37% 24%);
   --chart-4: hsl(43 74% 66%);
   --chart-5: hsl(27 87% 67%);
-
-  --z-index-dialog: 1000;
-  --z-index-popper: 1100;
-  --z-index-toast: 1200;
-  --z-index-tooltip: 1300;
 }
 
 .dark {
@@ -119,27 +114,17 @@
 }
 
 @layer components {
-  #dialog-root,
-  #popper-root,
-  #toast-root,
-  #tooltip-root {
+  #interactive-layer-root,
+  #notification-layer-root {
     position: relative;
     isolation: isolate;
   }
 
-  #dialog-root {
-    z-index: var(--z-index-dialog);
+  #interactive-layer-root {
+    z-index: 1000;
   }
 
-  #popper-root {
-    z-index: var(--z-index-popper);
-  }
-
-  #toast-root {
-    z-index: var(--z-index-toast);
-  }
-
-  #tooltip-root {
-    z-index: var(--z-index-tooltip);
+  #notification-layer-root {
+    z-index: 2000;
   }
 }
