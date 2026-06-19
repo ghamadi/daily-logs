@@ -21,7 +21,7 @@ The goal is that an installed component is indistinguishable from one already in
 
 Match these exactly. They are the source of truth for the pattern:
 
-- [`web/src/components/ui/dialog.tsx`](web/src/components/ui/dialog.tsx) — **preferred reference.** Unified `radix-ui` import, every part wrapped in a named function, `data-slot` on every node, portal handling via `usePortalContainer`.
+- [`web/src/components/ui/dialog.tsx`](web/src/components/ui/dialog.tsx) — **preferred reference.** Unified `radix-ui` import, every part wrapped in a named function, `data-slot` on every node, portal + stacking handled through the layer system (`useLayer`, see [rule 11](#11-overlays--adapt-to-the-layer-system-drop-hardcoded-z-index)).
 - [`web/src/components/ui/tooltip.tsx`](web/src/components/ui/tooltip.tsx) — compound component **plus** a standalone exported helper (`TooltipProvider`) that lives outside the compound object.
 - [`web/src/components/ai-elements/conversation.tsx`](web/src/components/ai-elements/conversation.tsx) — non-Radix compound (wraps a third-party primitive) with a `Helper functions` section at the bottom.
 
@@ -225,6 +225,52 @@ The part **functions are not exported** — only their types and the compound ob
 
 **One exception:** a standalone helper that consumers must use directly and that is *not* a member of the compound object may be exported as a named function — e.g. `export function TooltipProvider(...)` in `tooltip.tsx`. Use this sparingly, only for genuine standalone pieces like providers.
 
+### 11. Overlays — adapt to the layer system, drop hardcoded z-index
+
+Anything that renders in a portal and floats above the page — dialogs, alert dialogs, drawers, sheets, popovers, tooltips, dropdown/select menus — must stack through the project's **layer system** rather than a fixed Tailwind z-index. Pasted source almost always hardcodes `z-50` (or similar) on the overlay and content; this project instead assigns z-index dynamically so stacked overlays (a popover opened from inside a dialog, say) layer in the right order. [`dialog.tsx`](web/src/components/ui/dialog.tsx) is the canonical example — match it.
+
+Use the `useLayer` hook from `@/hooks/use-layer`. It takes a **band** and returns `{ container, zIndex }` — the DOM node to portal into and the z-index for that band. The content part wires both into its portal; this is the exact shape `dialog.tsx` ships, so copy it:
+
+```tsx
+import { useLayer } from '@/hooks/use-layer';
+
+export type DialogContentProps = ComponentProps<typeof DialogPrimitive.Content> & {
+  portal?: DialogPortalProps;
+};
+
+function DialogContent(props: DialogContentProps) {
+  const { className, children, portal, style, ...rest } = props;
+  const { container, ...portalProps } = portal ?? {};
+
+  const interactiveLayer = useLayer('interactive');
+
+  return (
+    <DialogPortal container={container ?? interactiveLayer.container} {...portalProps}>
+      <DialogOverlay style={{ zIndex: interactiveLayer.zIndex }} />
+      <DialogPrimitive.Content
+        style={{ zIndex: interactiveLayer.zIndex, ...style }}
+        className={cn('… (no z-50 here) …', className)}
+        {...rest}
+      >
+        {children}
+      </DialogPrimitive.Content>
+    </DialogPortal>
+  );
+}
+```
+
+Apply this whole shape — don't shortcut it:
+
+- **Expose a `portal` prop.** When the content part renders a portal, widen its props type with `portal?: <Name>PortalProps` (e.g. `portal?: DialogPortalProps`), reusing the portal part's own exported type. This lets a caller customize the portal (a different container, `forceMount`, etc.) without you exporting the portal separately.
+- **Split `container` out of it.** Destructure `portal` (and `style`) from props, then `const { container, ...portalProps } = portal ?? {};`. Pulling `container` out on its own is what lets you apply the layer fallback to it while still forwarding every other portal prop.
+- **Point the portal at `container ?? layer.container`** and spread the rest: `<Portal container={container ?? interactiveLayer.container} {...portalProps}>`. A caller-supplied container wins; otherwise the component lands in its layer's root.
+- **Name the layer variable after its band**, so the band is legible at the call site: `const interactiveLayer = useLayer('interactive')`, `const notificationLayer = useLayer('notifications')`. Pick the band that fits the component — `'interactive'` is the usual one for modal/dialog/drawer-style overlays; toasts/notifications use `'notifications'`. See the `LayerBand` type in `@/components/root-providers/layer-stack-provider` for the full set.
+- **Drop hardcoded stacking** (`z-50`, `z-40`, an inline `zIndex`) from the overlay and content classes, and instead set `style={{ zIndex: layer.zIndex }}` on both the overlay and the content node. Spread any caller `style` *after* it (`{ zIndex: layer.zIndex, ...style }`) so consumers can still override.
+
+This shape is uniform across portal primitives — apply it the same way whether the primitive is Radix (`Dialog`, `AlertDialog`, `Popover`, …) or a third-party one like `vaul`'s `Drawer`; the portal wrapper's props type carries `container` through either way.
+
+If a component never portals or floats — a badge, a card, an inline layout part — there's nothing to adapt, so skip this rule. The signal is a `fixed`/`absolute` overlay or a portal in the source, not the word "dialog" in the name.
+
 ## File layout (reference — follow `dialog.tsx`)
 
 1. `'use client'` (if needed)
@@ -245,6 +291,7 @@ Non-Radix layout parts (e.g. `DialogHeader`) use `ComponentProps<'div'>` and a p
 - [ ] Followed **dialog / tooltip / conversation only** — did not copy `button.tsx` legacy idioms
 - [ ] Radix from unified `radix-ui` (no `@radix-ui/react-*`); aliased to `<Component>Primitive`
 - [ ] `data-slot` on every primitive and layout node
+- [ ] Overlay/portal content parts expose `portal?: <Name>PortalProps`, destructure `const { container, ...portalProps } = portal ?? {}`, portal to `container ?? <band>Layer.container`, and set `zIndex` from `useLayer` on overlay + content (no hardcoded `z-50`)
 - [ ] No `import * as React`; `ComponentProps` imported with `import type` and used unqualified
 - [ ] `cn` / `composeCompoundComponent` from `@/lib/utils/components`
 - [ ] All parts are `function` declarations; part functions not exported
