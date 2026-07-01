@@ -1,6 +1,6 @@
 'use client';
 
-import { v7 as uuidv7 } from 'uuid';
+import { v7 as uuidV7 } from 'uuid';
 import { useChat } from '@ai-sdk/react';
 import { getToolName, isToolUIPart, type ChatStatus } from 'ai';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
@@ -10,9 +10,10 @@ import { Message } from '@/components/ai-elements/message';
 import { Button } from '@/components/ui/button';
 import { createChatTransport } from '@/lib/ai-sdk/transport';
 import type { UiMessagePayload } from '@/lib/ai-sdk/types';
-import { PromptComposer } from '@/app/(protected)/workspaces/[workspaceId]/chats/_components/prompt-composer';
-import { useChatContext } from '@/app/(protected)/workspaces/[workspaceId]/_components/chat-context-provider';
+import { PromptComposer } from '@/app/(main)/workspaces/[workspaceId]/chats/_components/prompt-composer';
+import { useChatContext } from '@/app/(main)/workspaces/[workspaceId]/_components/chat-context-provider';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { PromptInputMessage } from '@/components/ai-elements/prompt-input';
 
 export type ChatThreadProps = {
   workspaceId: string;
@@ -32,7 +33,7 @@ export function ChatThread(props: ChatThreadProps) {
     id: chatId,
     transport,
     messages: initialMessages,
-    generateId: uuidv7,
+    generateId: uuidV7,
   });
 
   // Send the initial prompt immediately after mounting if it exists
@@ -47,13 +48,14 @@ export function ChatThread(props: ChatThreadProps) {
   const isBusy = status === 'submitted' || status === 'streaming';
 
   const handleSubmit = useCallback(
-    async (message: string) => {
+    async (message: PromptInputMessage) => {
       try {
-        const text = message.trim();
-        if (!text || isBusy) {
+        const text = message.text.trim();
+        const files = message.files;
+        if (!text || !files.length || isBusy) {
           return;
         }
-        await sendMessage({ text });
+        await sendMessage(message);
       } catch (cause) {
         // `useChat` already surfaces this through `error`; we just want to
         // make sure local state stays sane.
@@ -76,7 +78,7 @@ export function ChatThread(props: ChatThreadProps) {
         </div>
       )}
 
-      <PromptComposer onSubmit={handleSubmit} onStop={stop} isBusy={isBusy} />
+      <PromptComposer onSubmit={handleSubmit} onStop={stop} />
     </div>
   );
 }

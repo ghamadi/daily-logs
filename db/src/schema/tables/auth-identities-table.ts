@@ -14,8 +14,8 @@ export const AuthIdentitiesTable = pgTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => UsersTable.id, { onDelete: 'cascade' }),
-    provider: varchar('provider', { length: 64 }).notNull(),
-    providerUserId: varchar('provider_user_id', { length: 255 }).notNull(),
+    provider: varchar('provider').notNull(),
+    providerUserId: varchar('provider_user_id').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

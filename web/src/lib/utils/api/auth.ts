@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleUsersRepository } from '@infrastructure/repositories/users/drizzle-users-repository';
 import { createServerClient } from '@/lib/supabase/server';
