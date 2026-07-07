@@ -1,4 +1,7 @@
+'use client';
+
 import { ApiError } from '@/lib/errors/api-error';
+import { ApiResponse } from '@/lib/utils/api/response';
 
 export type ApiFetchInit = Omit<RequestInit, 'body'> & {
   /** Plain object — `apiFetch` JSON-encodes it for you. Pass a string/FormData via `rawBody` instead. */
@@ -27,7 +30,7 @@ export type ApiFetchInit = Omit<RequestInit, 'body'> & {
 export async function apiFetch<TData = unknown>(
   input: RequestInfo | URL,
   init: ApiFetchInit = {},
-): Promise<TData> {
+): Promise<ApiResponse<TData>> {
   const { body, rawBody, headers, ...rest } = init;
 
   if (body !== undefined && rawBody !== undefined) {
@@ -51,7 +54,7 @@ export async function apiFetch<TData = unknown>(
     // No body to parse; callers that ask for a typed payload here are
     // misusing the helper, but `void`/`undefined` returns are valid for
     // DELETE-style operations.
-    return undefined as TData;
+    return { data: undefined as TData };
   }
 
   const payload = await readJson(response);
@@ -66,14 +69,12 @@ export async function apiFetch<TData = unknown>(
   // `{ data, ...optionalParams }`. We only return `data` to keep call sites
   // tidy; if a route later needs to surface params, expose a sibling helper.
   if (isEnvelope(payload)) {
-    return payload.data as TData;
+    return payload as ApiResponse<TData>;
   }
 
-  // Defensive fallback: a 2xx response that doesn't follow the envelope
-  // convention (e.g. a streaming endpoint we accidentally fetch as JSON).
-  // Returning the raw payload is more useful than throwing, and TypeScript
-  // already forces the caller to declare the shape.
-  return payload as TData;
+  // Defensive fallback: In case of a 2xx response that doesn't follow the envelope
+  // convention, we wrap the payload in an envelope.
+  return { data: payload as TData };
 }
 
 async function readJson(response: Response): Promise<unknown> {

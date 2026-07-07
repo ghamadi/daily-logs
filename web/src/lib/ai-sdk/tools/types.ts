@@ -1,5 +1,5 @@
-import { ToolsRuntime } from '@/lib/ai-sdk/tools/tools-runtime';
-import { Tool } from 'ai';
+import type { ToolsRuntime } from '@/lib/ai-sdk/tools/tools-runtime';
+import type { Tool } from 'ai';
 
 export type ToolsContext = {
   chatId: string;

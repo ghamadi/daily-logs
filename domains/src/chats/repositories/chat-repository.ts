@@ -20,7 +20,7 @@ export type AppendMessagesParams = {
 
 export type SetMessagesParams = {
   chatId: string;
-  newMessages: ChatMessage[];
+  messages: ChatMessage[];
   discardedMessageIds?: string[];
 };
 

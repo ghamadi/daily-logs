@@ -6,9 +6,13 @@
     "plugins": [{ "name": "next" }],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*", "../db/src/*", "../utils/src/*"],
+      "@/*": ["src/*"],
+      "@infrastructure/*": ["src/lib/infrastructure/*"],
+      // Resolution-only mappings: workspace deps export raw .ts source, so tsc
+      // compiles their files under this tsconfig and must resolve their internal
+      // aliases. Do not import via these aliases here — use @daily-logs/* deps.
       "@domains/*": ["../domains/src/*"],
-      "@infrastructure/*": ["src/lib/infrastructure/*"]
+      "@db/*": ["../db/src/*"]
     }
   },
   "include": [

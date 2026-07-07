@@ -30,8 +30,20 @@ const eslintConfig = defineConfig([
         {
           patterns: [
             {
-              group: ['@mobile/*', '**/mobile/src/*'],
+              group: ['@mobile/**', '**/mobile/src/**'],
               message: 'The web package must not import from mobile.',
+            },
+            {
+              group: [
+                '@domains/**',
+                '@db/**',
+                '@utils/**',
+                '**/domains/src/**',
+                '**/db/src/**',
+                '**/utils/src/**',
+              ],
+              message:
+                'Import workspace packages via their @daily-logs/* exports. The @domains/* and @db/* mappings in web/tsconfig.json are resolution-only for transitively compiled source.',
             },
           ],
         },

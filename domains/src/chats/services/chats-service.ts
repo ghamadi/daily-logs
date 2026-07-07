@@ -93,7 +93,7 @@ export class ChatsService {
       chatId,
       workspaceId,
       principalId,
-      newMessages,
+      messages,
       discardedMessageIds: deletedMessageIds,
     } = params;
 
@@ -101,7 +101,7 @@ export class ChatsService {
 
     await this.chatsRepo.setChatMessages({
       chatId,
-      newMessages,
+      messages,
       discardedMessageIds: deletedMessageIds,
     });
   }

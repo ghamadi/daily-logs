@@ -2,7 +2,11 @@ import { pgTable, uuid, jsonb, timestamp, index, pgEnum } from 'drizzle-orm/pg-c
 import type { UIMessage } from 'ai';
 import { ChatsTable } from './chat-sessions-table';
 
-export const CHAT_MESSAGE_ROLES = ['user', 'assistant', 'system'] as const satisfies UIMessage['role'][];
+export const CHAT_MESSAGE_ROLES = [
+  'user',
+  'assistant',
+  'system',
+] as const satisfies UIMessage['role'][];
 
 export const chatMessageRoleEnum = pgEnum('chat_message_role', CHAT_MESSAGE_ROLES);
 

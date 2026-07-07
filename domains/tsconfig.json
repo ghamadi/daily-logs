@@ -3,7 +3,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@domains/*": ["src/*"]
+      "@domains/*": ["src/*"],
+      // Resolution-only mapping for @daily-logs/db source compiled under this
+      // tsconfig. Do not import via this alias here — use @daily-logs/db.
+      "@db/*": ["../db/src/*"]
     }
   },
   "include": ["src/**/*.ts"]

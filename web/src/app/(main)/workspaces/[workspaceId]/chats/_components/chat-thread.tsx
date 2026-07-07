@@ -9,7 +9,7 @@ import { Conversation } from '@/components/ai-elements/conversation';
 import { Message } from '@/components/ai-elements/message';
 import { Button } from '@/components/ui/button';
 import { createChatTransport } from '@/lib/ai-sdk/transport';
-import type { UiMessagePayload } from '@/lib/ai-sdk/types';
+import type { ChronicleMessagePayload } from '@/lib/ai-sdk/chronicle/types';
 import { PromptComposer } from '@/app/(main)/workspaces/[workspaceId]/chats/_components/prompt-composer';
 import { useChatContext } from '@/app/(main)/workspaces/[workspaceId]/_components/chat-context-provider';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -18,7 +18,7 @@ import { PromptInputMessage } from '@/components/ai-elements/prompt-input';
 export type ChatThreadProps = {
   workspaceId: string;
   chatId: string;
-  initialMessages: UiMessagePayload[];
+  initialMessages: ChronicleMessagePayload[];
 };
 
 export function ChatThread(props: ChatThreadProps) {
@@ -29,7 +29,7 @@ export function ChatThread(props: ChatThreadProps) {
   const { initialPrompt, setInitialPrompt } = useChatContext();
   const initialPromptRef = useRef(initialPrompt);
 
-  const { messages, sendMessage, status, error, stop, clearError } = useChat<UiMessagePayload>({
+  const { messages, sendMessage, status, error, stop, clearError } = useChat<ChronicleMessagePayload>({
     id: chatId,
     transport,
     messages: initialMessages,
@@ -52,7 +52,7 @@ export function ChatThread(props: ChatThreadProps) {
       try {
         const text = message.text.trim();
         const files = message.files;
-        if (!text || !files.length || isBusy) {
+        if ((!text && !files.length) || isBusy) {
           return;
         }
         await sendMessage(message);
@@ -88,7 +88,7 @@ export function ChatThread(props: ChatThreadProps) {
 // ------------------------------------------------------------
 
 type MessageListProps = {
-  messages: UiMessagePayload[];
+  messages: ChronicleMessagePayload[];
   status: ChatStatus;
 };
 
@@ -97,7 +97,7 @@ function MessageList(props: MessageListProps) {
 
   const messagesToRender = useMemo(() => {
     const renderableMessages = messages.filter(messageHasRenderableContent);
-    const loadingMessage: UiMessagePayload = {
+    const loadingMessage: ChronicleMessagePayload = {
       id: 'loading',
       role: 'assistant',
       parts: [{ type: 'text', text: 'Thinking...' }],
@@ -152,7 +152,7 @@ function MessageList(props: MessageListProps) {
   );
 }
 
-function isAwaitingFirstAssistantPart(messages: UiMessagePayload[], status: ChatStatus): boolean {
+function isAwaitingFirstAssistantPart(messages: ChronicleMessagePayload[], status: ChatStatus): boolean {
   if (status !== 'streaming') {
     return false;
   }
@@ -161,7 +161,7 @@ function isAwaitingFirstAssistantPart(messages: UiMessagePayload[], status: Chat
   return lastMessage?.role === 'assistant' && !messageHasRenderableContent(lastMessage);
 }
 
-function messageHasRenderableContent(message: UiMessagePayload): boolean {
+function messageHasRenderableContent(message: ChronicleMessagePayload): boolean {
   return message.parts.some((part) => {
     if (part.type === 'text' || part.type === 'reasoning') {
       return part.text.trim().length > 0;
@@ -176,7 +176,7 @@ function messageHasRenderableContent(message: UiMessagePayload): boolean {
 // ------------------------------------------------------------
 
 type MessagePartProps = {
-  part: UiMessagePayload['parts'][number];
+  part: ChronicleMessagePayload['parts'][number];
 };
 
 function MessagePart({ part }: MessagePartProps) {
@@ -207,7 +207,7 @@ function MessagePart({ part }: MessagePartProps) {
 
 type ToolInvocationProps = {
   part: Extract<
-    UiMessagePayload['parts'][number],
+    ChronicleMessagePayload['parts'][number],
     { type: `tool-${string}` } | { type: 'dynamic-tool' }
   >;
 };

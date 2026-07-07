@@ -1,5 +1,5 @@
 import { DefaultChatTransport } from 'ai';
-import type { UiMessagePayload } from '@/lib/ai-sdk/types';
+import type { ChronicleMessagePayload } from '@/lib/ai-sdk/chronicle/types';
 import { SendChatMessageRequestBody } from '@/app/api/workspaces/[workspaceId]/chats/[chatId]/messages/route';
 
 export type CreateChatTransportInput = {
@@ -13,10 +13,10 @@ export type CreateChatTransportInput = {
  */
 export function createChatTransport(
   input: CreateChatTransportInput,
-): DefaultChatTransport<UiMessagePayload> {
+): DefaultChatTransport<ChronicleMessagePayload> {
   const { workspaceId, chatId } = input;
 
-  return new DefaultChatTransport<UiMessagePayload>({
+  return new DefaultChatTransport<ChronicleMessagePayload>({
     // By default, useChat sends the entire history of messages to the server,
     // so we override the default prepareSendMessagesRequest to send only the latest message instead.
     prepareSendMessagesRequest: ({ messages }) => ({

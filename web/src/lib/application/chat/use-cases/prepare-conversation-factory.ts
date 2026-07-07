@@ -1,8 +1,8 @@
 import { ChronicleMessagePayload } from '@/lib/ai-sdk/chronicle/types';
 import { parseModelMessages, parseUiMessages } from '@/lib/ai-sdk/helpers';
 import { ChronicleToolSet } from '@/lib/ai-sdk/tools/chronicle-tools';
-import { ChatMessage, ChatsService } from '@domains/chats';
-import { DomainErrors } from '@domains/lib/errors';
+import { ChatMessage, ChatsService } from '@daily-logs/domains/chats';
+import { DomainErrors } from '@daily-logs/domains/errors';
 
 export type PrepareConversationUseCaseParams = {
   workspaceId: string;

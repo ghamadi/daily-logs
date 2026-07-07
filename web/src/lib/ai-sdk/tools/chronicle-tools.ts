@@ -1,4 +1,4 @@
-import { getObjectKeys } from '@/ts-utils';
+import { getObjectKeys } from '@daily-logs/utils/ts-utils';
 import { getWorkspaceContextToolFactory } from './factories/get-workspace-context-tool-factory';
 import { ToolsContext, ToolsFactory } from '@/lib/ai-sdk/tools/types';
 import { InferUITools } from 'ai';

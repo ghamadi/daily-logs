@@ -5,6 +5,10 @@ export type ChatMessageRole = DbChatMessage['role'];
 
 export type ChatMessagePayload = DbChatMessage['payload'];
 
+type ToUiMessageResult<T> = [T] extends [never]
+  ? 'Provide the payload type explicitly, e.g. ChatMessage.toUiMessage<ChronicleMessagePayload>(msg)'
+  : T;
+
 export type ChatMessageParams = Omit<DbChatMessage, 'createdAt' | 'updatedAt'> & {
   createdAt?: Date;
   updatedAt?: Date;
@@ -43,8 +47,15 @@ export class ChatMessage {
     return Array.isArray(this.payload.parts) && this.payload.parts.length > 0;
   }
 
-  static toUiMessage<T extends ChatMessagePayload>(msg: ChatMessage): T {
-    return msg.payload as T;
+  /**
+   * Casts the stored payload to a concrete UI-message type.
+   *
+   * `T` is required: callers must name the exact payload type (e.g.
+   * `toUiMessage<ChronicleMessagePayload>`), because omitting it
+   * would silently widen to the base `ChatMessagePayload`.
+   */
+  static toUiMessage<T extends ChatMessagePayload = never>(msg: ChatMessage): ToUiMessageResult<T> {
+    return msg.payload as unknown as ToUiMessageResult<T>;
   }
 
   static fromPayload(params: ChatMessagePayload & { chatId: string }): ChatMessage {

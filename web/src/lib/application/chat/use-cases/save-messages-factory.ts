@@ -1,5 +1,5 @@
 import { ChronicleMessagePayload } from '@/lib/ai-sdk/chronicle/types';
-import { ChatMessage, ChatsService } from '@domains/chats';
+import { ChatMessage, ChatsService } from '@daily-logs/domains/chats';
 
 export type SaveMessagesUseCaseParams = {
   chatId: string;
@@ -27,7 +27,7 @@ export function buildSaveMessagesUseCase(chatsService: ChatsService) {
       chatId,
       workspaceId,
       principalId,
-      newMessages: chatMessages,
+      messages: chatMessages,
       discardedMessageIds,
     });
   };

@@ -95,6 +95,7 @@ export const POST = withApiErrorHandler(
     context: RouteContext<'/api/workspaces/[workspaceId]/chats/[chatId]/messages'>,
   ) => {
     const { workspaceId, chatId } = POSTParamsSchema.parse(await context.params);
+
     const chatsService = createChatService();
 
     const [principal, { message }] = await Promise.all([

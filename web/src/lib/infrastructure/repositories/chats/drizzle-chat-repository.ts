@@ -128,26 +128,27 @@ export class DrizzleChatRepository implements IChatRepository {
   }
 
   async setChatMessages(params: SetMessagesParams): Promise<void> {
-    const { chatId, newMessages, discardedMessageIds: deletedMessageIds } = params;
+    const { chatId, messages, discardedMessageIds: deletedMessageIds } = params;
 
     await this.db.transaction(async (tx) => {
-      const insertPromise = tx.insert(ChatMessagesTable).values(
-        newMessages.map((message) => ({
-          id: message.id,
-          chatId,
-          role: message.role,
-          payload: message.payload,
-        })),
-      );
+      const insertPromise = tx
+        .insert(ChatMessagesTable)
+        .values(
+          messages.map((message) => ({
+            id: message.id,
+            chatId,
+            role: message.role,
+            payload: message.payload,
+          })),
+        )
+        .onConflictDoNothing({ target: ChatMessagesTable.id });
 
-      const deletePromise = (() => {
-        if (deletedMessageIds && deletedMessageIds.length > 0) {
-          return tx
-            .delete(ChatMessagesTable)
-            .where(or(...deletedMessageIds.map((id) => eq(ChatMessagesTable.id, id))));
-        }
-        return Promise.resolve();
-      })();
+      const deletePromise =
+        !deletedMessageIds || !deletedMessageIds.length
+          ? Promise.resolve()
+          : tx
+              .delete(ChatMessagesTable)
+              .where(or(...deletedMessageIds.map((id) => eq(ChatMessagesTable.id, id))));
 
       await Promise.all([deletePromise, insertPromise]);
     });
