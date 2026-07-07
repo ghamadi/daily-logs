@@ -1,11 +1,11 @@
-import { ApiError } from './api-error';
-import { ForbiddenAccessError, UnauthorizedError } from './auth-error';
-import { BadRequestError } from './bad-request-error';
-import { ConflictError } from './conflict-error';
-import { InternalError } from './internal-error';
-import { InvalidInputError } from './invalid-input-error';
-import { NotFoundError } from './not-found-error';
-import { TooManyRequestsError } from './too-many-requests-error';
+import { ApiError } from '@/lib/errors/api-error';
+import { ForbiddenAccessError, UnauthorizedError } from '@/lib/errors/auth-error';
+import { BadRequestError } from '@/lib/errors/bad-request-error';
+import { ConflictError } from '@/lib/errors/conflict-error';
+import { InternalError } from '@/lib/errors/internal-error';
+import { InvalidInputError } from '@/lib/errors/invalid-input-error';
+import { NotFoundError } from '@/lib/errors/not-found-error';
+import { TooManyRequestsError } from '@/lib/errors/too-many-requests-error';
 
 export { ApiError };
 

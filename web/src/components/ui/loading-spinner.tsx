@@ -1,5 +1,5 @@
-import { Label } from '@web/components/ui/label';
-import { cn } from '@web/lib/utils/components';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils/components';
 import { ComponentPropsWithRef } from 'react';
 
 type LoadingSpinnerProps = ComponentPropsWithRef<'svg'> & {

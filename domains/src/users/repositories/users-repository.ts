@@ -1,6 +1,6 @@
-import type { DbUser } from '@db/schema';
-import type { AuthProvider } from '../value-objects/auth-provider';
-import { User } from '../entities/user';
+import type { DbUser } from '@daily-logs/db/schema';
+import type { AuthProvider } from '@domains/users/value-objects/auth-provider';
+import { User } from '@domains/users/entities/user';
 
 type UserInput = Omit<DbUser, 'id' | 'createdAt' | 'updatedAt'>;
 

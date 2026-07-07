@@ -3,8 +3,8 @@ import {
   CreateWorkspaceRepoInput,
   UpdateWorkspaceRepoInput,
   IWorkspacesRepository,
-} from '../repositories/workspaces-repository';
-import { hasAdminAccess, isOwner, WorkspaceRole } from '../value-objects/workspace-role';
+} from '@domains/workspaces/repositories/workspaces-repository';
+import { hasAdminAccess, isOwner, WorkspaceRole } from '@domains/workspaces/value-objects/workspace-role';
 import { DomainErrors } from '@domains/lib/errors';
 
 export type CreateWorkspaceInput = Omit<CreateWorkspaceRepoInput, 'createdAt' | 'updatedAt' | 'id'> & {

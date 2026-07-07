@@ -1,4 +1,4 @@
-import { ApiError, type ApiErrorOptions } from './api-error';
+import { ApiError, type ApiErrorOptions } from '@/lib/errors/api-error';
 
 export class ForbiddenAccessError extends ApiError {
   constructor(message: string, options?: ApiErrorOptions) {

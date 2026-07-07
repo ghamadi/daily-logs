@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import './globals.css';
 import { Suspense } from 'react';
-import { LoadingSpinner } from '@web/components/ui/loading-spinner';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { RootProviders } from '@/components/root-providers';
+import './globals.css';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -25,9 +26,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Suspense fallback={<LoadingSpinner fullPage />}>{children}</Suspense>
+        <Suspense fallback={<LoadingSpinner fullPage />}>
+          <RootProviders>{children}</RootProviders>
+        </Suspense>
+
+        <div id="interactive-layer-root" />
+        <div id="notification-layer-root" />
       </body>
     </html>
   );

@@ -1,4 +1,4 @@
-import type { DbUser } from '@db/schema';
+import type { DbUser } from '@daily-logs/db/schema';
 
 export type UserProps = DbUser;
 

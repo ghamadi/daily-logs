@@ -1,10 +1,10 @@
 import { DomainErrors } from '@domains/lib/errors';
-import { User } from '../entities/user';
+import { User } from '@domains/users/entities/user';
 import {
   UpsertUserRepoInput,
   UpdateUserRepoInput,
   IUsersRepository,
-} from '../repositories/users-repository';
+} from '@domains/users/repositories/users-repository';
 
 export type CreateUserInput = UpsertUserRepoInput;
 export type UpdateUserInput = UpdateUserRepoInput;
@@ -43,7 +43,7 @@ export class UsersService {
       throw new DomainErrors.InvalidInputError('Email is already in use', { email: input.email });
     }
 
-    return this.usersRepo.create(input);
+    return this.usersRepo.getOrCreateUser(input);
   }
 
   async updateUser(id: string, input: UpdateUserInput): Promise<User> {

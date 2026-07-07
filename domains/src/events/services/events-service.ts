@@ -1,13 +1,13 @@
 import { randomUUID } from 'crypto';
-import { Event } from '../entities/event';
-import { EventStatus } from '../value-objects/event-status';
-import { IWorkspacesRepository } from '../../workspaces/repositories/workspaces-repository';
+import { Event } from '@domains/events/entities/event';
+import { EventStatus } from '@domains/events/value-objects/event-status';
+import { IWorkspacesRepository } from '@domains/workspaces/repositories/workspaces-repository';
 import {
   CreateEventRepoInput,
   FindEventsOptions,
   UpdateEventRepoInput,
   IEventsRepository,
-} from '../repositories/events-repository';
+} from '@domains/events/repositories/events-repository';
 import { DomainErrors } from '@domains/lib/errors';
 
 export type CreateEventInput = Omit<

@@ -1,12 +1,24 @@
 {
-  "name": "@daily-logs/domain",
+  "name": "@daily-logs/domains",
   "version": "0.0.1",
   "private": true,
   "description": "Domain layer: entities, repository interfaces, and services",
+  "exports": {
+    "./users": "./src/users/index.ts",
+    "./users/client": "./src/users/client.ts",
+    "./workspaces": "./src/workspaces/index.ts",
+    "./workspaces/client": "./src/workspaces/client.ts",
+    "./events": "./src/events/index.ts",
+    "./events/client": "./src/events/client.ts",
+    "./chats": "./src/chats/index.ts",
+    "./chats/client": "./src/chats/client.ts",
+    "./errors": "./src/lib/errors/index.ts"
+  },
   "scripts": {
     "lint:js": "eslint ./src --ext .ts",
     "lint:ts": "tsc --noEmit",
-    "lint": "pnpm run lint:js && pnpm run lint:ts"
+    "lint": "pnpm run lint:js && pnpm run lint:ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@daily-logs/db": "workspace:*",
@@ -14,6 +26,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "ai": "^6.0.177",
     "typescript": "^5.9.3"
   }
 }

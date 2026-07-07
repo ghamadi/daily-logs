@@ -1,5 +1,5 @@
-import { type DbEventStatus } from '@db/schema';
-import { Enum } from '@utils/ts-utils';
+import { type DbEventStatus } from '@daily-logs/db/schema';
+import { Enum } from '@daily-logs/utils/ts-utils';
 
 export const EventStatus = {
   PROPOSED: 'proposed',

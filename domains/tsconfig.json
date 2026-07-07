@@ -1,13 +1,13 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "baseUrl": ".",
+    "paths": {
+      "@domains/*": ["src/*"],
+      // Resolution-only mapping for @daily-logs/db source compiled under this
+      // tsconfig. Do not import via this alias here — use @daily-logs/db.
+      "@db/*": ["../db/src/*"]
+    }
   },
   "include": ["src/**/*.ts"]
 }

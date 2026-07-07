@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { WorkspacesService } from '@domains/workspaces/services/workspaces-service';
+import { Workspace, WorkspacesService } from '@daily-logs/domains/workspaces';
 import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
-import { getAuthenticatedPrincipal } from '@web/lib/utils/api/auth';
-import { translateAccessDeniedToNotFoundAndThrow, withApiErrorHandler } from '@web/lib/utils/api/errors';
-import { parseJsonBody } from '@web/lib/utils/api/request';
-import { ApiResponse, toApiResponse } from '@web/lib/utils/api/response';
-import { Workspace } from '@domains/workspaces/entities/workspace';
+import { getAuthenticatedPrincipal } from '@/lib/utils/api/auth';
+import { translateAccessDeniedToNotFoundAndThrow, withApiErrorHandler } from '@/lib/utils/api/errors';
+import { parseJsonBody } from '@/lib/utils/api/request';
+import { ApiResponse, toApiResponse } from '@/lib/utils/api/response';
 
 // ========================================================
 // GET /api/workspaces/[workspaceId]

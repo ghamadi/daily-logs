@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { ChatSession } from '@domains/chats/entities/chat-session';
-import { ChatsService } from '@domains/chats/services/chats-service';
+import { Chat, ChatsService } from '@daily-logs/domains/chats';
 import { getDb } from '@infrastructure/db/get-db';
 import { DrizzleChatRepository } from '@infrastructure/repositories/chats/drizzle-chat-repository';
 import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
-import { getAuthenticatedPrincipal } from '@web/lib/utils/api/auth';
-import { translateAccessDeniedToNotFoundAndThrow, withApiErrorHandler } from '@web/lib/utils/api/errors';
-import { parseJsonBody } from '@web/lib/utils/api/request';
-import { ApiResponse, toApiResponse } from '@web/lib/utils/api/response';
+import { getAuthenticatedPrincipal } from '@/lib/utils/api/auth';
+import { translateAccessDeniedToNotFoundAndThrow, withApiErrorHandler } from '@/lib/utils/api/errors';
+import { parseJsonBody } from '@/lib/utils/api/request';
+import { ApiResponse, toApiResponse } from '@/lib/utils/api/response';
 
 // ========================================================
 // GET /api/workspaces/[workspaceId]/chats/[chatId]
@@ -22,7 +21,7 @@ const GETParamsSchema = z.object({
 
 export type GetChatByIdRequestParams = z.infer<typeof GETParamsSchema>;
 
-export type GetChatByIdResponseBody = ApiResponse<ChatSession>;
+export type GetChatByIdResponseBody = ApiResponse<Chat>;
 
 export const GET = withApiErrorHandler(
   async (
@@ -70,7 +69,7 @@ export type UpdateChatRequestParams = z.infer<typeof PATCHParamsSchema>;
 
 export type UpdateChatRequestBody = z.infer<typeof PATCHBodySchema>;
 
-export type UpdateChatResponseBody = ApiResponse<ChatSession>;
+export type UpdateChatResponseBody = ApiResponse<Chat>;
 
 export const PATCH = withApiErrorHandler(
   async (

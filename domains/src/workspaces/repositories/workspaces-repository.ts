@@ -1,6 +1,6 @@
 import { User } from '@domains/users/entities/user';
 import { WorkspaceRole } from '@domains/workspaces/value-objects/workspace-role';
-import { Workspace, WorkspaceProps } from '../entities/workspace';
+import { Workspace, WorkspaceProps } from '@domains/workspaces/entities/workspace';
 
 export type CreateWorkspaceRepoInput = WorkspaceProps;
 export type UpdateWorkspaceRepoInput = Partial<

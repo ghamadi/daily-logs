@@ -7,8 +7,8 @@ import { WorkspacesTable } from './workspaces-table';
  * - Each session belongs to a workspace and is private to its owner until sharing exists.
  * - `archived_at` enables soft-archive; archived sessions are excluded from default listings.
  */
-export const ChatSessionsTable = pgTable(
-  'chat_sessions',
+export const ChatsTable = pgTable(
+  'chats',
   {
     id: uuid('id').defaultRandom().primaryKey(),
     workspaceId: uuid('workspace_id')
@@ -31,4 +31,4 @@ export const ChatSessionsTable = pgTable(
   ],
 );
 
-export type DbChatSession = typeof ChatSessionsTable.$inferSelect;
+export type DbChatSession = typeof ChatsTable.$inferSelect;

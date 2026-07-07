@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { ApiError, ApiErrors } from '@web/lib/errors';
-import { DomainErrors, DomainError } from '@domains/lib/errors';
+import { ApiError, ApiErrors } from '@/lib/errors';
+import { DomainErrors, DomainError } from '@daily-logs/domains/errors';
 
 /**
  * Useful for defining the input and output of the `withErrorResponse` HOF.

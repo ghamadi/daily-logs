@@ -1,4 +1,4 @@
-import type { DbEvent } from '@db/schema';
+import type { DbEvent } from '@daily-logs/db/schema';
 import { EventStatus } from '@domains/events/value-objects/event-status';
 import { EventSource } from '@domains/events/value-objects/event-source';
 

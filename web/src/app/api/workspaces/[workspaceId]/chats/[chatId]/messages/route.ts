@@ -1,25 +1,37 @@
-import { NextRequest } from 'next/server';
-import { convertToModelMessages, createIdGenerator, streamText, validateUIMessages } from 'ai';
-import { z } from 'zod';
-import { AppendMessageInput, ChatMessage } from '@domains/chats/repositories/chat-repository';
-import { ChatsService } from '@domains/chats/services/chats-service';
-import { getDb } from '@infrastructure/db/get-db';
-import { DrizzleChatRepository } from '@infrastructure/repositories/chats/drizzle-chat-repository';
-import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
-import { ApiErrors } from '@web/lib/errors';
-import { getChatModel } from '@web/lib/chat/model';
-import { getSystemPrompt } from '@web/lib/chat/system-prompt';
-import { buildChatTools, ChatToolSet } from '@web/lib/chat/tools';
-import type { UiMessagePayload } from '@web/lib/chat/types';
-import { getAuthenticatedPrincipal } from '@web/lib/utils/api/auth';
+import { after, NextRequest } from 'next/server';
 import {
-  logError,
+  consumeStream,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  smoothStream,
+  stepCountIs,
+  streamText,
+} from 'ai';
+import { z } from 'zod';
+
+import { ChatMessage, ChatsService } from '@daily-logs/domains/chats';
+import { DrizzleChatRepository } from '@infrastructure/repositories/chats/drizzle-chat-repository';
+
+import { getDb } from '@infrastructure/db/get-db';
+import { DrizzleWorkspacesRepository } from '@infrastructure/repositories/workspaces/drizzle-workspaces-repository';
+import { getChatModel } from '@/lib/ai-sdk/model';
+import { getSystemPrompt } from '@/lib/ai-sdk/system-prompt';
+import type { UIMessage } from 'ai';
+import { getAuthenticatedPrincipal } from '@/lib/utils/api/auth';
+import {
   translateAccessDeniedToNotFoundAndThrow as mapAccessDeniedToNotFoundAndThrow,
   withApiErrorHandler,
-} from '@web/lib/utils/api/errors';
-import { parseJsonBody } from '@web/lib/utils/api/request';
-import { ApiResponse, toApiResponse } from '@web/lib/utils/api/response';
-import { WorkspacesService } from '@domains/workspaces/services/workspaces-service';
+} from '@/lib/utils/api/errors';
+import { parseJsonBody } from '@/lib/utils/api/request';
+import { ApiResponse, toApiResponse } from '@/lib/utils/api/response';
+import { buildPrepareConversationUseCase } from '@/lib/application/chat/use-cases/prepare-conversation-factory';
+import { buildChronicleTools } from '@/lib/ai-sdk/tools/chronicle-tools';
+import { ToolsRuntime } from '@/lib/ai-sdk/tools/tools-runtime';
+import { ChronicleMessagePayload } from '@/lib/ai-sdk/chronicle/types';
+import { generateMessageId, logAndExtractAiGenerationErrorMessage } from '@/lib/ai-sdk/helpers';
+import { buildSaveMessagesUseCase } from '@/lib/application/chat/use-cases/save-messages-factory';
+
+export const maxDuration = 60;
 
 // ========================================================
 // GET /api/workspaces/[workspaceId]/chats/[chatId]/messages
@@ -42,7 +54,7 @@ export const GET = withApiErrorHandler(
     const { workspaceId, chatId } = GETParamsSchema.parse(await context.params);
     const principal = await getAuthenticatedPrincipal();
 
-    const { chatsService } = createServices();
+    const chatsService = createChatService();
 
     const messages = await chatsService
       .loadChatMessages({ chatId, workspaceId, principalId: principal.id })
@@ -77,80 +89,100 @@ const POSTBodySchema = z.object({
 
 export type SendChatMessageRequestBody = z.infer<typeof POSTBodySchema>;
 
-const messageIdGenerator = createIdGenerator({ prefix: 'msg', size: 16 });
-
 export const POST = withApiErrorHandler(
   async (
     request: NextRequest,
     context: RouteContext<'/api/workspaces/[workspaceId]/chats/[chatId]/messages'>,
   ) => {
     const { workspaceId, chatId } = POSTParamsSchema.parse(await context.params);
-    const principal = await getAuthenticatedPrincipal();
-    const { message } = await parseJsonBody(request, POSTBodySchema);
 
-    const { chatsService, workspacesService } = createServices();
+    const chatsService = createChatService();
 
-    const history = await chatsService
-      .loadChatMessages({ chatId, workspaceId, principalId: principal.id })
-      .catch((error) =>
-        mapAccessDeniedToNotFoundAndThrow(error, `Could not find chat with id "${chatId}".`),
-      );
+    const [principal, { message }] = await Promise.all([
+      getAuthenticatedPrincipal(),
+      parseJsonBody(request, POSTBodySchema),
+    ]);
 
-    // The workspaces repo is threaded into tools so `getWorkspaceContext` can
-    // load workspace details lazily — only when the model actually asks. We
-    // deliberately do not eager-load the workspace here; that would charge
-    // every request for context most turns don't need.
-    const tools = buildChatTools({ workspaceId, workspacesService });
+    // Keep the route handler alive until the DB write settles, in case the client disconnects early.
+    const dataPersistence = Promise.withResolvers<void>();
+    after(dataPersistence.promise);
 
-    const { uiMessages, modelMessages } = await parseMessages(
-      [...history.filter(messageHasContent).map((entry) => entry.payload), message],
-      tools,
-    );
+    // ------------------------------------------------------------
+    // Prepare dependencies and construct use cases
+    // ------------------------------------------------------------
+    const toolsRuntime = new ToolsRuntime();
+    const chronicleTools = buildChronicleTools({
+      chatId,
+      workspaceId,
+      principalId: principal.id,
+      runtime: toolsRuntime,
+    });
+    const saveMessagesUseCase = buildSaveMessagesUseCase(chatsService);
+    const prepareConversationUseCase = buildPrepareConversationUseCase(chatsService, chronicleTools);
 
-    const result = streamText({
-      model: getChatModel(),
-      system: getSystemPrompt(),
-      messages: modelMessages,
-      tools,
+    // --------------------------------------------------------------------------
+    // Prepare the conversation
+    // (throws if the chat is not found or the user does not have access to it)
+    // --------------------------------------------------------------------------
+    const conversation = await prepareConversationUseCase({
+      workspaceId,
+      chatId,
+      principalId: principal.id,
+      message,
     });
 
-    // Force the stream to finish even if the client disconnects, so `onFinish`
-    // still runs and we persist the final exchange. Intentionally not awaited.
-    void result.consumeStream();
-
-    return result.toUIMessageStreamResponse<UiMessagePayload>({
-      originalMessages: uiMessages,
-      generateMessageId: messageIdGenerator,
-      onError: extractStreamErrorMessage,
+    // --------------------------------------------------------------------------
+    // Create the stream
+    // --------------------------------------------------------------------------
+    const stream = createUIMessageStream<ChronicleMessagePayload>({
+      originalMessages: conversation.uiMessages,
+      generateId: generateMessageId,
       onFinish: async ({ messages }) => {
-        try {
-          // When the stream errors before the assistant emits any parts
-          // (e.g., AI Gateway rejects the request outright), the
-          // SDK still hands us an empty assistant placeholder here. Writing
-          // it would brick the chat: every subsequent send would fail
-          // `validateUIMessages` because UIMessage parts must be non-empty.
-          // So, we filter out empty messages here to avoid persisting them.
-          const inputs = messages.filter(uiMessageHasContent).map(toAppendMessageInput);
-
-          if (inputs.length > 0) {
-            // Persist everything on every finish.
-            // Idempotency is handled by `DrizzleChatRepository.appendMessages` via `onConflictDoNothing` on
-            // the AI-SDK-stable message id, so re-running with the full message
-            // list (history + new) is safe.
-            await chatsService.appendMessages({
-              chatId,
-              workspaceId,
-              principalId: principal.id,
-              messages: inputs,
-            });
-          }
-        } catch (error) {
-          // Persistence failures are logged but not surfaced — the user has
-          // already received the streamed response and re-throwing here would
-          // close the SSE stream with an opaque error.
-          logError(error);
-        }
+        await saveMessagesUseCase({
+          chatId,
+          workspaceId,
+          principalId: principal.id,
+          messages,
+          discardedMessageIds: conversation.discardedMessageIds,
+        });
+        dataPersistence.resolve();
       },
+      onError: (error) => {
+        dataPersistence.resolve();
+        return logAndExtractAiGenerationErrorMessage(error);
+      },
+      execute: async ({ writer }) => {
+        // Register the stream's writer so that tools can write to it at runtime
+        toolsRuntime.registerWriter(writer);
+
+        // Configure LLM generation (streamText is lazy — no streaming until consumed)
+        const streamTextResult = streamText({
+          model: getChatModel(),
+          system: getSystemPrompt(),
+          messages: conversation.modelMessages,
+          tools: chronicleTools,
+          stopWhen: stepCountIs(5),
+          experimental_transform: smoothStream({
+            chunking: 'word',
+            delayInMs: 30,
+          }),
+        });
+
+        // Translate model output to UI events and pipe into the outer stream
+        writer.merge(
+          streamTextResult.toUIMessageStream({
+            sendReasoning: true,
+            onError: logAndExtractAiGenerationErrorMessage,
+          }),
+        );
+      },
+    });
+
+    // Return an SSE response to the client and drain a tee'd copy of the stream using `consumeStream`
+    // so generation and onFinish persistence complete even if the client disconnects.
+    return createUIMessageStreamResponse({
+      stream,
+      consumeSseStream: consumeStream,
     });
   },
 );
@@ -159,40 +191,9 @@ export const POST = withApiErrorHandler(
 // Helper functions
 // ------------------------------------------------------------
 
-function toAppendMessageInput(message: UiMessagePayload): AppendMessageInput {
-  return {
-    id: message.id,
-    role: message.role,
-    payload: message,
-  };
-}
-
-function createServices(db = getDb()) {
+function createChatService(db = getDb()) {
   const workspacesRepo = new DrizzleWorkspacesRepository(db);
-
-  return {
-    chatsService: new ChatsService(new DrizzleChatRepository(db), workspacesRepo),
-    workspacesService: new WorkspacesService(workspacesRepo),
-  };
-}
-
-async function parseMessages(messages: unknown[], tools: ChatToolSet) {
-  let uiMessages: UiMessagePayload[];
-  try {
-    uiMessages = await validateUIMessages<UiMessagePayload>({
-      messages,
-      tools,
-    });
-  } catch (cause) {
-    throw new ApiErrors.BadRequestError('Invalid chat message payload.', {
-      info: { cause: cause instanceof Error ? cause.message : String(cause) },
-    });
-  }
-
-  return {
-    uiMessages,
-    modelMessages: await convertToModelMessages(uiMessages, { tools }),
-  };
+  return new ChatsService(new DrizzleChatRepository(db), workspacesRepo);
 }
 
 // A persisted `ChatMessage` whose UIMessage payload has at least one part.
@@ -203,21 +204,6 @@ function messageHasContent(entry: ChatMessage): boolean {
   return uiMessageHasContent(entry.payload);
 }
 
-function uiMessageHasContent(message: UiMessagePayload): boolean {
+function uiMessageHasContent(message: UIMessage): boolean {
   return Array.isArray(message.parts) && message.parts.length > 0;
-}
-
-// Pulls the most informative string out of an unknown stream error so the
-// client sees something actionable (e.g. "AI Gateway requires a valid credit
-// card on file...") instead of the SDK's default "An error occurred.".
-function extractStreamErrorMessage(error: unknown): string {
-  logError(error);
-
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-  if (typeof error === 'string' && error.length > 0) {
-    return error;
-  }
-  return 'An error occurred while generating the response.';
 }
