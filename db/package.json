@@ -5,16 +5,19 @@
   "description": "Database schemas and migration scripts for the project",
   "exports": {
     "./schema": "./src/schema/index.ts",
-    "./client": "./src/client/create-db.ts"
+    "./client": "./src/client/index.ts"
   },
   "scripts": {
     "lint:js": "eslint ./src --ext .ts",
     "lint:ts": "tsc --noEmit",
     "lint": "pnpm run lint:js && pnpm run lint:ts",
+    "typecheck": "tsc --noEmit",
     "test-connection": "node --env-file=.env --import tsx src/scripts/test-connection.ts",
     "generate": "drizzle-kit generate --config drizzle.config.ts",
     "migrate": "drizzle-kit migrate --config drizzle.config.ts",
-    "studio": "drizzle-kit studio --config drizzle.config.ts"
+    "migrate:test": "NODE_ENV=test pnpm migrate",
+    "studio": "drizzle-kit studio --config drizzle.config.ts",
+    "studio:test": "NODE_ENV=test pnpm studio"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.1",

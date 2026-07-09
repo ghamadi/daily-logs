@@ -1,17 +1,11 @@
 import { setTimeout as sleep } from 'node:timers/promises';
 import { sql } from 'drizzle-orm';
-import { createDb } from '@daily-logs/db/client';
-
-const DEFAULT_TEST_DATABASE_URL = 'postgresql://postgres:postgres@localhost:5443/test_db';
+import { createDb, getDatabaseUrl } from '@daily-logs/db/client';
 
 let dbContext: ReturnType<typeof createDb> | undefined;
 
-export function getTestDatabaseUrl(): string {
-  return process.env.TEST_DATABASE_URL?.trim() || DEFAULT_TEST_DATABASE_URL;
-}
-
 export function getTestDatabase(): ReturnType<typeof createDb> {
-  dbContext ??= createDb(getTestDatabaseUrl());
+  dbContext ??= createDb(getDatabaseUrl());
   return dbContext;
 }
 
@@ -39,7 +33,7 @@ export async function waitForTestDatabase(props?: {
     }
   }
 
-  throw new Error(`Unable to connect to the test database at ${getTestDatabaseUrl()}.`, {
+  throw new Error(`Unable to connect to the test database at ${getDatabaseUrl()}.`, {
     cause: lastError,
   });
 }

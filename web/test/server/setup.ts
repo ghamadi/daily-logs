@@ -1,6 +1,10 @@
 import { afterAll, beforeAll, beforeEach } from 'vitest';
 
-import { closeTestDatabase, resetTestDatabase, waitForTestDatabase } from './helpers/test-database';
+import {
+  closeTestDatabase,
+  resetTestDatabase,
+  waitForTestDatabase,
+} from './helpers/test-database';
 
 beforeAll(async () => {
   // `pnpm test` runs `db:test:prepare` first, so by the time the suite boots the

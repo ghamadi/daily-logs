@@ -1,4 +1,4 @@
-import { createDb, Database } from '@daily-logs/db/client';
+import { createDb, getDatabaseUrl, Database } from '@daily-logs/db/client';
 
 let dbSingleton: Database | undefined;
 
@@ -10,11 +10,7 @@ let dbSingleton: Database | undefined;
  * and keeping the connection open during warm starts in a serverless environment like Vercel is preferred.
  */
 export function getDb(): Database {
-  const connectionString = process.env.DATABASE_URL;
-
-  if (!connectionString) {
-    throw new Error('DATABASE_URL is not set.');
-  }
+  const connectionString = getDatabaseUrl();
 
   dbSingleton ??= createDb(connectionString).db;
   return dbSingleton;

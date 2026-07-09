@@ -8,6 +8,7 @@
     "paths": {
       "@/*": ["src/*"],
       "@infrastructure/*": ["src/lib/infrastructure/*"],
+      "@test/*": ["test/*"],
       // Resolution-only mappings: workspace deps export raw .ts source, so tsc
       // compiles their files under this tsconfig and must resolve their internal
       // aliases. Do not import via these aliases here — use @daily-logs/* deps.
@@ -23,5 +24,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "test/**", "vitest.config.ts", ".next"]
+  "exclude": ["node_modules", ".next"]
 }

@@ -110,6 +110,25 @@ export async function insertWorkspaceMember(overrides: Partial<NewWorkspaceMembe
   return member;
 }
 
+/**
+ * Insert a workspace together with its owner membership, mirroring what
+ * `WorkspacesService.createWorkspaceWithOwner` persists — handy for setting up
+ * authorization scenarios without going through the API.
+ */
+export async function insertWorkspaceWithOwner(
+  overrides: Partial<NewWorkspace> & { ownerUserId: string },
+) {
+  const workspace = await insertWorkspace(overrides);
+
+  await insertWorkspaceMember({
+    workspaceId: workspace.id,
+    userId: workspace.ownerUserId,
+    role: WorkspaceRole.OWNER,
+  });
+
+  return workspace;
+}
+
 export async function insertEvent(overrides: Partial<NewEvent> = {}) {
   const { db } = getTestDatabase();
   const now = new Date();
