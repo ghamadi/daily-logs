@@ -49,7 +49,7 @@ export async function resetTestDatabase(): Promise<void> {
 
   await db.execute(
     sql.raw(
-      'TRUNCATE TABLE "auth_identities", "chat_messages", "chat_sessions", "events", "workspace_users", "workspaces", "users" RESTART IDENTITY CASCADE;',
+      'TRUNCATE TABLE "auth_identities", "chat_messages", "chats", "events", "workspace_users", "workspaces", "users" RESTART IDENTITY CASCADE;',
     ),
   );
 }

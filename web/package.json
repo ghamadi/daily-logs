@@ -8,6 +8,11 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "db:test:wait": "tsx test/server/scripts/wait-for-db.ts",
+    "db:test:migrate": "DATABASE_URL=${TEST_DATABASE_URL:-postgresql://postgres:postgres@localhost:5443/test_db} pnpm -C .. db migrate",
+    "db:test:prepare": "pnpm -C .. db:test:up && pnpm db:test:wait && pnpm db:test:migrate",
+    "db:test:reset": "pnpm -C .. db:test:down && pnpm db:test:prepare",
+    "test": "pnpm db:test:prepare && pnpm test:server",
     "test:server": "vitest run --config vitest.config.ts",
     "test:server:watch": "vitest --config vitest.config.ts"
   },
