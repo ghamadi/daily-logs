@@ -18,6 +18,7 @@
     "lint": "pnpm -r lint",
     "clean-install": "rm -rf node_modules db/node_modules web/node_modules && pnpm install",
     "test": "pnpm -r test",
+    "test:e2e": "pnpm -C web test:e2e",
     "typecheck": "pnpm -r typecheck"
   },
   "devDependencies": {

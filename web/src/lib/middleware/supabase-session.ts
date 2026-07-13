@@ -1,43 +1,55 @@
 import { createServerClient } from '@supabase/ssr';
 import { ProxyResult } from '@/proxy';
 import { NextResponse, type NextRequest } from 'next/server';
+import {
+  E2E_SESSION_COOKIE_NAME,
+  isE2eAuthBypassEnabled,
+  parseE2eSessionCookieValue,
+} from '@/lib/testing/e2e-auth';
 
 export async function updateSession(request: NextRequest): Promise<ProxyResult> {
   let supabaseResponse = NextResponse.next({
     request,
   });
 
-  // With Fluid compute, don't put this client in a global environment
-  // variable. Always create a new one on each request.
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          supabaseResponse = NextResponse.next({
-            request,
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options),
-          );
+  const user = await (async () => {
+    // E2E bypass: when the test flag is on, authenticate from the injected test cookie and skip Supabase entirely.
+    if (isE2eAuthBypassEnabled()) {
+      return parseE2eSessionCookieValue(request.cookies.get(E2E_SESSION_COOKIE_NAME)?.value);
+    }
+
+    // With Fluid compute, don't put this client in a global environment
+    // variable. Always create a new one on each request.
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+            supabaseResponse = NextResponse.next({
+              request,
+            });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              supabaseResponse.cookies.set(name, value, options),
+            );
+          },
         },
       },
-    },
-  );
+    );
 
-  // Do not run code between createServerClient and
-  // supabase.auth.getClaims(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
+    // Do not run code between createServerClient and
+    // supabase.auth.getClaims(). A simple mistake could make it very hard to debug
+    // issues with users being randomly logged out.
 
-  // IMPORTANT: If you remove getClaims() and you use server-side rendering
-  // with the Supabase client, your users may be randomly logged out.
-  const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
+    // IMPORTANT: If you remove getClaims() and you use server-side rendering
+    // with the Supabase client, your users may be randomly logged out.
+    const { data } = await supabase.auth.getClaims();
+    return data?.claims ?? null;
+  })();
 
   const requestPathname = request.nextUrl.pathname;
   const isPublicRoute = requestPathname.startsWith('/auth/');

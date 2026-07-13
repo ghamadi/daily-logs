@@ -14,7 +14,9 @@
     "db:test:reset": "pnpm root-scripts db:test:down && pnpm db:test:prepare",
     "test": "pnpm db:test:prepare && pnpm test:server",
     "test:server": "vitest run --config vitest.config.ts",
-    "test:server:watch": "vitest --config vitest.config.ts"
+    "test:server:watch": "vitest --config vitest.config.ts",
+    "test:e2e": "pnpm db:test:prepare && playwright test",
+    "test:e2e:headed": "pnpm db:test:prepare && playwright test --headed"
   },
   "dependencies": {
     "@ai-sdk/react": "^3.0.179",
@@ -55,6 +57,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^20",
     "@types/react": "^19",
